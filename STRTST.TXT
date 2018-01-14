@@ -1,0 +1,177 @@
+       DEF  RUNTST
+       REF  VMBW
+       REF  STRALC,STRGET,STRSET
+SPACE  BSS  >3000
+ 
+* Run all tests
+RUNTST BL   @WRTST
+       BL   @BADDTA
+       BL   @TALC1
+       BL   @BADDTA
+       BL   @TALC2
+       BL   @BADDTA
+       BL   @TALC3
+       BL   @WREND
+LOOP   JMP  LOOP
+ 
+* Write something
+WRTST  LI   R0,0
+       LI   R1,STARTM
+       LI   R2,7
+       BLWP @VMBW
+       RT
+STARTM TEXT 'Testing'
+ENDM   DATA >4
+       TEXT 'Done'
+       EVEN
+ 
+* Finished testing
+WREND  MOV  @RPTLN,R0
+       LI   R1,ENDM
+       MOV  *R1+,R2
+       BLWP @VMBW
+       RT
+ 
+*
+* Place nonsense data in SPACE
+*
+BADDTA LI   R0,SPACE
+       LI   R1,SPACE+>3000
+       LI   R2,>E6C7
+BADDT2 MOV  R2,*R0+
+       C    R0,R1
+       JNE  BADDT2
+       RT
+ 
+*
+* Allocate >1000 bytes of space
+* with >20 byte blocks.
+* Expect root node size list to start at
+* SPACE+>1000.
+* The first entry should contain >07
+* which implies an empty chunk whose
+* length is 2^7 times the size of a
+* block.
+* 8 bytes later we expect a clump that
+* is not split and not full.
+TALC1  LI   R0,SPACE
+       LI   R1,>1000
+       LI   R2,>20
+       BLWP @STRALC
+       A    R0,R1
+       LI   R0,>0700
+       CB   R0,*R1
+       JNE  FALC1
+* Check root node
+       CLR  R0
+       AI   R1,>8
+       CB   *R1,R0
+       JNE  FALC1
+       RT
+FALC1  LI   R1,FALC1M
+       LI   R2,FALC1N-FALC1M
+       B    @REPORT
+FALC1M TEXT 'TALC1 failed. '
+       TEXT 'Incorrect description '
+       TEXT 'of free space.'
+FALC1N EVEN
+ 
+*
+* Allocate >1000 bytes of space
+* with >40 byte blocks.
+* Expect root node size list to start at
+* SPACE+>1000.
+* The first entry should contain >06.
+* 8 bytes later we expect a clump that
+* is not split and not full.
+TALC2  LI   R0,SPACE
+       LI   R1,>1000
+       LI   R2,>40
+       BLWP @STRALC
+       A    R0,R1
+       LI   R0,>0600
+       CB   R0,*R1
+       JNE  FALC2
+* Check root node
+       AI   R1,>8
+       MOVB *R1,*R1
+       JNE  FALC2
+       RT
+FALC2  LI   R1,FALC2M
+       LI   R2,FALC2N-FALC2M
+       B    @REPORT
+FALC2M TEXT 'TALC2 failed. '
+       TEXT 'Incorrect description '
+       TEXT 'of free space.'
+FALC2N EVEN
+ 
+*
+* Allocate >2000 bytes of space
+* with >30 byte blocks.
+* Expect root node size list to start at
+* SPACE+>2000.
+* Entry at index 0 should contain >07
+* Entry at index 1 should contain >05
+* Entry at index 2 should contain >03
+* Entry at index 3 should contain >01
+* 8 bytes later we expect a clump that
+* is not split and not full.
+TALC3  LI   R0,SPACE
+       LI   R1,>2000
+       LI   R2,>30
+       BLWP @STRALC
+* Entry at index 0
+       LI   R1,SPACE+>2000
+       LI   R0,>0700
+       CB   R0,*R1
+       JNE  FALC3
+* Entry at index 1
+       INC  R1
+       LI   R0,>0500
+       CB   R0,*R1
+       JNE  FALC3
+* Entry at index 2
+       INC  R1
+       LI   R0,>0300
+       CB   R0,*R1
+       JNE  FALC3
+* Entry at index 3
+       INC  R1
+       LI   R0,>0100
+       CB   R0,*R1
+       JNE  FALC3
+* Check first root node
+       LI   R1,SPACE+>2008
+       MOVB *R1,*R1
+       JNE  FALC3
+* Check second root node
+       AI   R1,>41
+       MOVB *R1,*R1
+       JNE  FALC3
+* Check third root node
+       AI   R1,>11
+       MOVB *R1,*R1
+       JNE  FALC3
+* Check fourth root node
+       AI   R1,>05
+       MOVB *R1,*R1
+       JNE  FALC3
+       RT
+FALC3  LI   R1,FALC3M
+       LI   R2,FALC3N-FALC3M
+       B    @REPORT
+FALC3M TEXT 'TALC3 failed. '
+       TEXT 'Free space should have '
+       TEXT 'three entries.'
+FALC3N EVEN
+ 
+*
+* Report an error
+*
+RPTLN  DATA >20
+REPORT MOV  @RPTLN,R0
+       BLWP @VMBW
+       AI   R0,>20
+       MOV  R0,@RPTLN
+       RT
+       END

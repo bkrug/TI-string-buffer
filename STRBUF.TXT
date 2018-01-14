@@ -1,0 +1,164 @@
+       DEF  STRALC,STRGET,STRSET
+       DEF  STREDT,STRDLT
+*
+*
+* R8 holds block size
+* R9 holds address of block list
+* R10 holds address of buffer
+STRWS  BSS  >20
+ 
+* Block list:
+* Has one byte for each minimum size
+*    block.
+* First bit is on if block is used.
+* Other seven bits represent size of the
+*    block (minnimum size * 2 ^ n)
+ 
+*
+* Reserve Space for string buffer
+*
+* R0 - buffer memory address
+* R1 - buffer size
+* R2 - block size
+*
+* R1 only specifies the amount of memory
+*   used to store the strings themselves
+* Additional memory is used to track
+*   free space.
+* Total memory use will be:
+*   buffer size +
+*   8 +
+*   (buffer size / block size / 2 + 8)
+*
+STRALC DATA STRWS,STRALC+4
+* Get routine parameters
+       MOV  @0(13),R10
+       MOV  @2(13),R2
+       MOV  @4(13),R8
+* Calc location of free space storeage
+       MOV  R2,R9
+       A    R10,R9
+*
+* * Build the Root Node Size List *
+*
+* Calculate number of blocks in buffer
+       CLR  R1
+       DIV  R8,R1
+* R1 now contains the number of blocks
+* in the buffer.
+* R2 will store the blocks not yet
+* marked as free.
+       MOV  R1,R2
+       MOV  R1,R4
+* Fill the first size list with -1
+       MOV  R9,R3
+       SETO *R3+
+       SETO *R3+
+       SETO *R3+
+       SETO *R3+
+* R3 will store the current position in
+* root node list.
+       MOV  R9,R3
+* Find power of 2 for R1's value.
+STRA0  CLR  R0
+STRA1  SRL  R1,1
+       MOV  R1,R1
+       JEQ  STRA2
+       INC  R0
+       JMP  STRA1
+* R0 now contains the power of 2
+* representing the number of blocks in
+* the first clump of free blocks.
+* Raise 2 to the power of value in R0,
+* and place it in R1.
+STRA2  LI   R1,1
+       SLA  R1,0
+* Store size of the clump in the first
+* byte of the free list.
+       SLA  R0,8
+       MOVB R0,*R3
+* Subtract the number of blocks from
+* the list of blocks that we have yet
+* to record.
+       S    R1,R2
+* Move to the next byte of free space
+* list.
+       INC  R3
+* If there are blocks not yet recorded
+* as free, then do the process over.
+       MOV  R2,R1
+       JNE  STRA0
+*
+* * Build root nodes *
+*
+* R3 will store the current position in
+* node list
+       MOV  R9,R3
+       AI   R3,>8
+* R4 still contains the number of blocks
+* in the buffer.
+* Divide by 2 and add >8 to determine
+* number of bytes in node list
+       SRL  R4,1
+       AI   R4,>8
+* Find end of node list
+       A    R3,R4
+* Mark every node not full, not split.
+STRA3  CLR  *R3+
+       C    R3,R4
+       JL   STRA3
+       RTWP
+ 
+*
+* Copy a string from the buffer to
+* another location where it can be
+* manipulated.
+*
+* R0 - string address within buffer.
+* R1 - address presumably outside the
+*      buffer
+*
+* The calling code is responsile for
+* ensuring that there is sufficient
+* space for the copy.
+*
+* The first byte in the destination
+* will be the string length.
+STRGET DATA STRWS,STRSET+4
+       RTWP
+ 
+*
+* Put a new string in the buffer
+*
+* Input:
+* R0 - string address outside of buffer
+* Output:
+* R0 - contains the new string address
+STRSET DATA STRWS,STRSET+4
+       RTWP
+ 
+*
+* Replace an existing string in the
+* buffer. This will involve an algorithm
+* that reserves more space if the new
+* string is larger than the old. It will
+* move the string to a new location if
+* necessary to create enough room.
+*
+* Input:
+* R0 - string address outside of buffer
+* R1 - current address inside of buffer
+* Output:
+* R0 - contains the new string address
+STREDT DATA STRWS,STREDT+4
+       RTWP
+ 
+*
+* Remove an existing string from the
+* buffer and mark the space as free.
+*
+* Input:
+* R0 - string address inside of buffer
+STRDLT DATA STRWS,STRDLT+4
+       RTWP
+       END
