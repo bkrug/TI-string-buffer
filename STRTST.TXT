@@ -70,9 +70,10 @@ TALC1  LI   R0,SPACE
        CB   *R1,R0
        JNE  FALC1
        RT
-FALC1  LI   R1,FALC1M
-       LI   R2,FALC1N-FALC1M
-       B    @REPORT
+FALC1  LI   R0,FALC1M
+       LI   R1,FALC1N-FALC1M
+       BLWP @PRINTL
+	   RT
 FALC1M TEXT 'TALC1 failed. '
        TEXT 'Incorrect description '
        TEXT 'of free space.'
@@ -99,9 +100,10 @@ TALC2  LI   R0,SPACE
        MOVB *R1,*R1
        JNE  FALC2
        RT
-FALC2  LI   R1,FALC2M
-       LI   R2,FALC2N-FALC2M
-       B    @REPORT
+FALC2  LI   R0,FALC2M
+       LI   R1,FALC2N-FALC2M
+       BLWP @PRINTL
+	   RT
 FALC2M TEXT 'TALC2 failed. '
        TEXT 'Incorrect description '
        TEXT 'of free space.'
@@ -159,19 +161,13 @@ TALC3  LI   R0,SPACE
        MOVB *R1,*R1
        JNE  FALC3
        RT
-FALC3  LI   R1,FALC3M
-       LI   R2,FALC3N-FALC3M
-       B    @REPORT
+FALC3  LI   R0,FALC3M
+       LI   R1,FALC3N-FALC3M
+       BLWP @PRINTL
+	   RT
 FALC3M TEXT 'TALC3 failed. '
        TEXT 'Free space should have '
        TEXT 'three entries.'
 FALC3N EVEN
- 
-*
-* Report an error
-*
-REPORT MOV  R1,R0
-       MOV  R2,R1
-       BLWP @PRINTL
-       RT
+
        END
