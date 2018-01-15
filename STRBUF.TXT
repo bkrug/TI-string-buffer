@@ -8,11 +8,9 @@
 STRWS  BSS  >20
  
 * Block list:
-* Has one byte for each minimum size
-*    block.
-* First bit is on if block is used.
-* Other seven bits represent size of the
-*    block (minnimum size * 2 ^ n)
+* First 8 bytes are the root node size
+* list.
+* The rest represent the nodes.
  
 *
 * Reserve Space for string buffer
@@ -89,7 +87,7 @@ STRA2  LI   R1,1
        MOV  R2,R1
        JNE  STRA0
 *
-* * Build root nodes *
+* * Build Node List *
 *
 * R3 will store the current position in
 * node list

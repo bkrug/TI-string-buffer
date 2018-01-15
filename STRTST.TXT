@@ -1,8 +1,8 @@
        DEF  RUNTST
        REF  VMBW
        REF  STRALC,STRGET,STRSET
-	   REF  MAKETX,PRINTL,OPENF,CLOSEF
-	   
+       REF  MAKETX,PRINTL,OPENF,CLOSEF
+       
 SPACE  BSS  >3000
  
 * Run all tests
@@ -14,8 +14,10 @@ RUNTST BLWP @OPENF
        BL   @TALC2
        BL   @BADDTA
        BL   @TALC3
+       BL   @BADDTA
+       BL   @TSET1
        BL   @WREND
-	   BLWP @CLOSEF
+       BLWP @CLOSEF
 LOOP   JMP  LOOP
  
 * Write something
@@ -33,7 +35,7 @@ WREND  LI   R0,ENDM
 STARTM TEXT 'Testing'
 ENDM   TEXT 'Done'
 ENDME  EVEN
-	   
+       
 *
 * Place nonsense data in SPACE
 *
@@ -73,7 +75,7 @@ TALC1  LI   R0,SPACE
 FALC1  LI   R0,FALC1M
        LI   R1,FALC1N-FALC1M
        BLWP @PRINTL
-	   RT
+       RT
 FALC1M TEXT 'TALC1 failed. '
        TEXT 'Incorrect description '
        TEXT 'of free space.'
@@ -103,7 +105,7 @@ TALC2  LI   R0,SPACE
 FALC2  LI   R0,FALC2M
        LI   R1,FALC2N-FALC2M
        BLWP @PRINTL
-	   RT
+       RT
 FALC2M TEXT 'TALC2 failed. '
        TEXT 'Incorrect description '
        TEXT 'of free space.'
@@ -164,10 +166,86 @@ TALC3  LI   R0,SPACE
 FALC3  LI   R0,FALC3M
        LI   R1,FALC3N-FALC3M
        BLWP @PRINTL
-	   RT
+       RT
 FALC3M TEXT 'TALC3 failed. '
        TEXT 'Free space should have '
        TEXT 'three entries.'
 FALC3N EVEN
 
+*
+* Put a string at a new location in the
+* buffer.
+* Should take up the last two memory
+* blocks.
+* Root node should be split, not full.
+* Node A1 not split, not full.
+* Node A2 split, not full.
+* Node B3 not split, not full.
+* Node B4 split, not full.
+* Node C7 not split, not full.
+* Node C8 not split, full.
+TSET1  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>10
+       BLWP @STRALC
+       LI   R0,TSETA
+       BLWP @STRSET
+* Confirm string address.
+       LI   R1,SPACE+>E0
+       C    R0,R1
+       JNE  FSET0
+* Confirm string values
+       LI   R0,TSETA
+       LI   R1,SPACE+>E0
+TSET1B CB   R0,R1
+       JNE  FSET1
+       INC  R0
+       INC  R1
+       CI   R0,TSETAE
+       JL   TSET1B
+* Confirm node values 
+* Root node
+       LI   R0,SPACE+>108
+       LI   R1,>8000
+       CB   *R0,R1
+       JNE  FSET2
+* A-level nodes
+       INC  R0
+       LI   R1,>2000
+       CB   *R0,R1
+       JNE  FSET2
+* B-level nodes
+       INC  R0
+       LI   R1,>0200
+       CB   *R0,R1
+       JNE  FSET2
+* C-level nodes
+       INC  R0
+	   CLR  R1
+       CB   *R0,R1
+       JNE  FSET2
+       INC  R0
+       LI   R1,>0100
+       CB   *R0,R1
+       JNE  FSET2
+       RT
+FSET0  LI   R0,TERR1
+       LI   R1,TERR2-TERR1
+	   BLWP @PRINTL
+	   RT
+FSET1  LI   R0,TERR2
+       LI   R1,TERR3-TERR2
+       BLWP @PRINTL
+       RT
+FSET2  LI   R0,TERR3
+       LI   R1,TERR4-TERR3
+       BLWP @PRINTL
+       RT
+TERR1  TEXT 'TSET1 string is at wrong address.'
+TERR2  TEXT 'TSET1 string value is incorrect.'
+TERR3  TEXT 'TSET1 node value is wrong.'
+TERR4
+TSETA  BYTE >1A
+       TEXT 'Some string over 16 bytes.'
+TSETAE EVEN
        END
