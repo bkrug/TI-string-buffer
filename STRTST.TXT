@@ -1,10 +1,13 @@
        DEF  RUNTST
        REF  VMBW
        REF  STRALC,STRGET,STRSET
+	   REF  MAKETX,PRINTL,OPENF,CLOSEF
+	   
 SPACE  BSS  >3000
  
 * Run all tests
-RUNTST BL   @WRTST
+RUNTST BLWP @OPENF
+       BL   @WRTST
        BL   @BADDTA
        BL   @TALC1
        BL   @BADDTA
@@ -12,26 +15,25 @@ RUNTST BL   @WRTST
        BL   @BADDTA
        BL   @TALC3
        BL   @WREND
+	   BLWP @CLOSEF
 LOOP   JMP  LOOP
  
 * Write something
-WRTST  LI   R0,0
-       LI   R1,STARTM
-       LI   R2,7
-       BLWP @VMBW
+WRTST  LI   R0,STARTM
+       LI   R1,ENDM-STARTM
+       BLWP @PRINTL
        RT
-STARTM TEXT 'Testing'
-ENDM   DATA >4
-       TEXT 'Done'
-       EVEN
  
 * Finished testing
-WREND  MOV  @RPTLN,R0
-       LI   R1,ENDM
-       MOV  *R1+,R2
-       BLWP @VMBW
+WREND  LI   R0,ENDM
+       LI   R1,ENDME-ENDM
+       BLWP @PRINTL
        RT
- 
+
+STARTM TEXT 'Testing'
+ENDM   TEXT 'Done'
+ENDME  EVEN
+	   
 *
 * Place nonsense data in SPACE
 *
@@ -168,10 +170,8 @@ FALC3N EVEN
 *
 * Report an error
 *
-RPTLN  DATA >20
-REPORT MOV  @RPTLN,R0
-       BLWP @VMBW
-       AI   R0,>20
-       MOV  R0,@RPTLN
+REPORT MOV  R1,R0
+       MOV  R2,R1
+       BLWP @PRINTL
        RT
        END
