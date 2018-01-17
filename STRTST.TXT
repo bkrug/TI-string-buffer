@@ -16,6 +16,8 @@ RUNTST BLWP @OPENF
        BL   @TALC3
        BL   @BADDTA
        BL   @TSET1
+       BL   @BADDTA
+       BL   @TSET2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -193,12 +195,12 @@ TSET1  LI   R0,SPACE
 * Confirm string address.
        LI   R1,SPACE+>E0
        C    R0,R1
-       JNE  FSET0
+       JNE  FSET1A
 * Confirm string values
        LI   R0,TSETA
        LI   R1,SPACE+>E0
 TSET1B CB   R0,R1
-       JNE  FSET1
+       JNE  FSET1B
        INC  R0
        INC  R1
        CI   R0,TSETAE
@@ -208,44 +210,126 @@ TSET1B CB   R0,R1
        LI   R0,SPACE+>108
        LI   R1,>8000
        CB   *R0,R1
-       JNE  FSET2
+       JNE  FSET1C
 * A-level nodes
        INC  R0
        LI   R1,>2000
        CB   *R0,R1
-       JNE  FSET2
+       JNE  FSET1C
 * B-level nodes
        INC  R0
        LI   R1,>0200
        CB   *R0,R1
-       JNE  FSET2
+       JNE  FSET1C
 * C-level nodes
        INC  R0
 	   CLR  R1
        CB   *R0,R1
-       JNE  FSET2
+       JNE  FSET1C
        INC  R0
        LI   R1,>0100
        CB   *R0,R1
-       JNE  FSET2
+       JNE  FSET1C
        RT
-FSET0  LI   R0,TERR1
-       LI   R1,TERR2-TERR1
+FSET1A LI   R0,TERR1A
+       LI   R1,TERR1B-TERR1A
 	   BLWP @PRINTL
 	   RT
-FSET1  LI   R0,TERR2
-       LI   R1,TERR3-TERR2
+FSET1B LI   R0,TERR1B
+       LI   R1,TERR1C-TERR1B
        BLWP @PRINTL
        RT
-FSET2  LI   R0,TERR3
-       LI   R1,TERR4-TERR3
+FSET1C LI   R0,TERR1C
+       LI   R1,TERR1D-TERR1C
        BLWP @PRINTL
        RT
-TERR1  TEXT 'TSET1 string is at wrong address.'
-TERR2  TEXT 'TSET1 string value is incorrect.'
-TERR3  TEXT 'TSET1 node value is wrong.'
-TERR4
+TERR1A TEXT 'TSET1 string is at wrong address.'
+TERR1B TEXT 'TSET1 string value is incorrect.'
+TERR1C TEXT 'TSET1 node value is wrong.'
+TERR1D
 TSETA  BYTE >1A
        TEXT 'Some string over 16 bytes.'
 TSETAE EVEN
+
+*
+* Put three strings of different sizes in
+* new locations in the buffer.
+* Should take up the last two memory
+* blocks.
+* Root node should be split, not full.
+* Node A0 not split, not full.
+* Node A1 split, not full.
+* Node B2 not split, not full.
+* Node B3 split, not full.
+* Node C6 not split, full.
+* Node C7 split, full.
+* Node D14 not split, full.
+* Node D15 not split, full.
+TSET2  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>10
+       BLWP @STRALC
+       LI   R0,MSET2A
+       BLWP @STRSET
+* Confirm string address 1.
+       LI   R1,SPACE+>F0
+       C    R0,R1
+       JNE  FSET2A
+       LI   R0,MSET2B
+       BLWP @STRSET
+* Confirm string address 2.
+       LI   R1,SPACE+>C0
+       C    R0,R1
+       JNE  FSET2A
+       LI   R0,MSET2C
+       BLWP @STRSET
+* Confirm string address 3.
+       LI   R1,SPACE+>E0
+       C    R0,R1
+       JNE  FSET2B
+* Confirm node values 
+* Root node
+       LI   R0,SPACE+>108
+       LI   R1,>8000
+       CB   *R0,R1
+       JNE  FSET2B
+* A-level nodes
+       INC  R0
+       LI   R1,>2000
+       CB   *R0,R1
+       JNE  FSET2B
+* B-level nodes
+       INC  R0
+       LI   R1,>0200
+       CB   *R0,R1
+       JNE  FSET2B
+* C-level nodes
+       INCT R0          * skip first byte of level C
+       LI   R1,>0700
+       CB   *R0,R1
+       JNE  FSET2B
+* D-level nodes
+       AI   R0,4        * skip first three bytes of level D
+	   LI   R1,>0500
+	   CB   *R0,R1
+       JNE  FSET2B
+       RT
+FSET2A LI   R0,TERR2A
+       LI   R1,TERR2B-TERR2A
+	   BLWP @PRINTL
+	   RT
+FSET2B LI   R0,TERR2B
+       LI   R1,TERR2C-TERR2B
+       BLWP @PRINTL
+       RT
+TERR2A TEXT 'TSET2 string is at wrong address.'
+TERR2B TEXT 'TSET2 node value is wrong.'
+TERR2C
+MSET2A BYTE 9
+       TEXT 'Message 1'
+MSET2B BYTE 29
+       TEXT 'This should cover two blocks.'
+MSET2C BYTE 6
+       TEXT 'Mesg 2'
+MSET2E EVEN 
        END

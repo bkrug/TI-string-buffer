@@ -58,18 +58,13 @@ STRALC DATA STRWS,STRALC+4
 * root node list.
        MOV  R9,R3
 * Find power of 2 for R1's value.
-STRA0  CLR  R0
-STRA1  SRL  R1,1
-       MOV  R1,R1
-       JEQ  STRA2
-       INC  R0
-       JMP  STRA1
+STRA0  BL   @PWR2DW
 * R0 now contains the power of 2
 * representing the number of blocks in
 * the first clump of free blocks.
 * Raise 2 to the power of value in R0,
 * and place it in R1.
-STRA2  LI   R1,1
+       LI   R1,1
        SLA  R1,0
 * Store size of the clump in the first
 * byte of the free list.
@@ -133,6 +128,34 @@ STRGET DATA STRWS,STRSET+4
 * Output:
 * R0 - contains the new string address
 STRSET DATA STRWS,STRSET+4
+* Store original string address in R2
+        MOV  @0(13),R2
+* First determine the power of 2 for 
+*    the required space.
+* Use the number of characters in the
+*    string plus one.
+        MOVB *R2,R1
+		INC  R1
+		BL   @PWR2UP
+* R0 now contains the exponent for the
+*    needed space as a power of two.
+        
+* When arriving at a node:
+*    If the node is full, go up a level.
+*    If the node is the desired size,
+*       use the node and mark it full.
+*    If the node is not split, split it
+*       and go down to the right-hand
+*       sub-node.
+*    If the node is split and we have
+*       not been down the right-hand
+*       side, go to the right-hand sub-
+*       node.
+*    If the node is split and we have
+*       been down the right-hand side,
+*       go to the left-hand sub-node.
+*    Don't go to a lower node than exists.
+*    Don't go above the root node.
        RTWP
  
 *
@@ -159,4 +182,106 @@ STREDT DATA STRWS,STREDT+4
 * R0 - string address inside of buffer
 STRDLT DATA STRWS,STRDLT+4
        RTWP
+
+*
+* Get status of a node
+* Input:
+* R0 index of tree
+* R1 node depth - root is 0 (must be 0-15)
+* R2 represents how far right node is
+* Output:
+* R3 all bits on if node is split.
+* R4 all bits on if node is full.
+NDSTS  
+* As Proof of concept assume that there 
+* is only one tree. (ignore R0)
+       MOV  R9,R5
+	   AI   R5,8
+* If node depth is zero, nodes of proper
+* depth start at R9+8 
+	   MOV  R1,R1
+	   JEQ  NDSTS1
+* If node depth is one, nodes of proper
+* depth start at R9+9
+	   INC  R5
+	   CI   R1,1
+	   JEQ  NDSTS1
+* Otherwise nodes of this depth start at
+* address R9 + 8 + 1 + 2^(R1-2).
+* R9 holds the address of the block list.
+* and the first 8 bytes are the tree
+* size.
+       DECT R1
+	   MOV  R1,R0
+       LI   R1,1
+	   SLA  R1,0
+       A    R1,R5
+* R5 now contains the address where the
+* nodes of the correct depth first start
+NDSTS1 MOV  R2,R1
+       SRL  R1,2
+	   A    R1,R5
+* R5 now contains the address in which
+* we can find data for four nodes,
+* one of them being our target node.
+       SLA  R1,2
+       S    R1,R2
+	   SLA  R2,1
+* R2 now contains either 0,2,4, or 8
+* depending on whether our target node 
+* is the 1st, 2nd, 3rd, or 4th bit pair
+* at address in R5.
+*
+* Next move those four bit pairs to R5.
+	   MOVB *R5,R5
+* Find out if node is split.
+       CLR  R3
+       LI   R0,SPTMSK
+       A    R2,R0
+	   COC  *R0,R5
+	   JNE  NDSTS2
+	   SETO R3
+* Find out if node is full.
+NDSTS2 CLR  R4
+	   LI   R0,FLLMSK
+       A    R2,R0
+	   COC  *R0,R5
+	   JNE  NDSTS3
+	   SETO R4
+NDSTS3
+       RT
+
+* Ones masks for detecting split nodes.
+SPTMSK DATA >8000,>2000,>0800,>0200
+* Ones masks for detecting full nodes.
+FLLMSK DATA >4000,>1000,>0400,>0100
+	   
+*
+* Find the power of 2 rounded down
+* Input R1: contains value to find 
+*           power for.
+* Output R0: contains power
+*
+PWR2DW CLR  R0
+PWRA   SRL  R1,1
+       MOV  R1,R1
+       JEQ  PWRB
+       INC  R0
+       JMP  PWRA 
+PWRB   RT
+
+*
+* Find the power of 2 rounded up
+* Input R1: contains value to find 
+*           power for.
+* Output R0: contains power
+PWR2UP CLR  R0
+       MOV  R1,R1
+	   JEQ  PWRD
+       DEC  R1
+PWRC   SRL  R1,1
+       INC  R0
+       MOV  R1,R1	   
+       JNE  PWRC
+PWRD   RT
        END
