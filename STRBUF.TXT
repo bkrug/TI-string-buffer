@@ -1,16 +1,114 @@
        DEF  STRALC,STRGET,STRSET
        DEF  STREDT,STRDLT
+* This was an attempt to implement a
+* way to store strings of text in a 
+* buffer using a buddy memory algorithm.
+* It was an okay idea, but that
+* algorithm is really meant for 
+* operating systems, not individual
+* programs. An implementation of C's
+* malloc() and free() may be better
+* advised.
 *
+* https://en.wikipedia.org/wiki/Buddy_memory_allocation
+* The wikipedia article explains the
+* idea of the algorithm.
 *
-* R8 holds block size
+* Had I completed this code, the idea
+* would have been to have an area of
+* memory containing space for strings
+* followed by an area containing inform-
+* ation about which areas are still open
+* or filled.
+*
+* Example:
+* Below is an example of a buffer and
+* how memory would be used in that
+* example.
+*
+* A very small buffer would only be >300
+* bytes with block sizes of >10 bytes.
+* One or more block is a chunk of 
+* memory. Pairs of chunks can be 
+* combined into a larger chunk if done
+* so in accord with the Buddy Memory 
+* Algorithm. The largest possible chunk
+* is the root trunk in a tree.
+*
+* In this example a >300 byte space
+* could would hold two trees. The 
+* leftmost tree (or the tree at lower
+* memory addresses) would be >200 bytes
+* long. The rightmost tree would be >100
+* bytes long. It is not possible to have
+* one tree because >10*2^x cannot result
+* in the number >300 regardless of the
+* value of x.
+*
+* In this example the memory structure 
+* would be:
+* BYTES  DESCRIPTION
+* >0300  String buffer
+* >0008  Contains Depth of each tree.
+* >0011  Split/Full data for first tree
+* >0009  Split/Full data for second tree
+*
+* The string buffer is divided into 
+* various subsections containing strings
+* and each subsection has a length that
+* could be described >10*2^x where x is
+* an integer.
+*
+* The area containing the depth of each
+* tree would contain >05, >04, and the
+* other six bytes would each contain 
+* >FF. The first tree has a root chunk
+* of >10*2^5 which equals >200. The
+* second tree has a root chunk of 
+* >10*2^4 which equals >100 bytes. Two
+* trees are sufficient to cover all of
+* the >300 bytes space, so all of the
+* other six bytes contain >FF.
+*
+* The data on the first tree tells the
+* system which chunks in the tree are
+* split and which are full. Each chunk
+* requres two bits to represent this
+* data. The first byte in this area of
+* memory contains a bit that is set if
+* the root chunk is split. The second
+* bit is set if the roo chunk is full.
+* The other six bits in that byte are
+* ignored. The second byte represents
+* the two chunks that are half the size
+* of the root (>100 bytes each). Four
+* bits tell us if they are split and/or
+* full. Four are ignored. The third
+* byte represents chunks one level 
+* deeper and all eight bits represent
+* four chunks (>80 bytes). The forth
+* and fifth byte represent chunks that
+* are >40 bytes each). 6th to 9th bytes
+* are the next level deeper, and the 
+* last eight bytes represent the
+* smallest possible chunks of memory.
+* The split-bit is always reset, but
+* the full bit might be set or reset.
+*
+* The data on the second tree tells
+* the system the same information, but
+* represents a smaller tree.
+
+*
+* The >20 bytes would have been used
+* as the workspace for all STRBUF
+* routines.
 * R9 holds address of block list
-* R10 holds address of buffer
 STRWS  BSS  >20
- 
-* Block list:
-* First 8 bytes are the root node size
-* list.
-* The rest represent the nodes.
+* holds block size
+BLOCKZ BSS  >2
+* holds address of buffer
+BUFADR BSS  >2
  
 *
 * Reserve Space for string buffer
@@ -30,18 +128,18 @@ STRWS  BSS  >20
 *
 STRALC DATA STRWS,STRALC+4
 * Get routine parameters
-       MOV  @0(13),R10
+       MOV  @0(13),@BUFADR
        MOV  @2(13),R2
-       MOV  @4(13),R8
+       MOV  @4(13),@BLOCKZ
 * Calc location of free space storeage
        MOV  R2,R9
-       A    R10,R9
+       A    @BUFADR,R9
 *
 * * Build the Root Node Size List *
 *
 * Calculate number of blocks in buffer
        CLR  R1
-       DIV  R8,R1
+       DIV  @BLOCKZ,R1
 * R1 now contains the number of blocks
 * in the buffer.
 * R2 will store the blocks not yet
@@ -131,15 +229,36 @@ STRSET DATA STRWS,STRSET+4
 * Store original string address in R2
         MOV  @0(13),R2
 * First determine the power of 2 for 
-*    the required space.
+*    the required number of blocks.
 * Use the number of characters in the
 *    string plus one.
+* Divide that number by the block size
+*    rounding up.
+        CLR  R0
         MOVB *R2,R1
+		SRL  R1,8
 		INC  R1
+		DIV  @BLOCKZ,R0
+		MOV  R1,R1
+		JEQ  SSET1
+		INC  R0
+SSET1   MOV  R0,R1
 		BL   @PWR2UP
 * R0 now contains the exponent for the
 *    needed space as a power of two.
-        
+* Store it in R3.
+		MOV  R0,R3
+* Convert it to the tree depth
+        MOV  R9,R12
+		AI   R12,8
+		MOVB R12,*R12
+		SRL  R12,8
+		S    R3,R12
+* R12 now contains the target depth
+*    for the string.
+* Initialize tree search
+        CLR  R1
+		CLR  R2
 * When arriving at a node:
 *    If the node is full, go up a level.
 *    If the node is the desired size,
@@ -156,6 +275,18 @@ STRSET DATA STRWS,STRSET+4
 *       go to the left-hand sub-node.
 *    Don't go to a lower node than exists.
 *    Don't go above the root node.
+SSETS  BL   @NDSTS
+*    If the node is full, go up a level.
+	   MOV  R4,R4
+	   JNE  SSETUP
+*    If the node is the desired size,
+*       use the node and mark it full.
+       MOV  R3,R3
+	   JNE  SSETS2
+       	   
+SSETS2
+* Move up a level	  
+SSETUP
        RTWP
  
 *
@@ -185,6 +316,7 @@ STRDLT DATA STRWS,STRDLT+4
 
 *
 * Get status of a node
+*
 * Input:
 * R0 index of tree
 * R1 node depth - root is 0 (must be 0-15)
@@ -211,23 +343,24 @@ NDSTS
 * R9 holds the address of the block list.
 * and the first 8 bytes are the tree
 * size.
-       DECT R1
-	   MOV  R1,R0
-       LI   R1,1
-	   SLA  R1,0
-       A    R1,R5
+       MOV  R1,R0
+       DECT R0
+       LI   R6,1
+	   SLA  R6,0
+       A    R6,R5
 * R5 now contains the address where the
 * nodes of the correct depth first start
-NDSTS1 MOV  R2,R1
-       SRL  R1,2
-	   A    R1,R5
+NDSTS1 MOV  R2,R6
+       SRL  R6,2
+	   A    R6,R5
 * R5 now contains the address in which
 * we can find data for four nodes,
 * one of them being our target node.
-       SLA  R1,2
-       S    R1,R2
-	   SLA  R2,1
-* R2 now contains either 0,2,4, or 8
+       SLA  R6,2
+       NEG  R6
+       A    R2,R6
+	   SLA  R6,1
+* R6 now contains either 0,2,4, or 8
 * depending on whether our target node 
 * is the 1st, 2nd, 3rd, or 4th bit pair
 * at address in R5.
@@ -237,14 +370,14 @@ NDSTS1 MOV  R2,R1
 * Find out if node is split.
        CLR  R3
        LI   R0,SPTMSK
-       A    R2,R0
+       A    R6,R0
 	   COC  *R0,R5
 	   JNE  NDSTS2
 	   SETO R3
 * Find out if node is full.
 NDSTS2 CLR  R4
 	   LI   R0,FLLMSK
-       A    R2,R0
+       A    R6,R0
 	   COC  *R0,R5
 	   JNE  NDSTS3
 	   SETO R4
