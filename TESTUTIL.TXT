@@ -19,8 +19,8 @@ FAILT  INC  @FAILED
 * R1: Address of output text (4 bytes)
 MAKETX DATA WORKSP,MAKEP
 MAKEP  LI   R12,STACK
-       MOV  @2(R13),R1
        MOV  @0(R13),R0
+       MOV  @2(R13),R1
        BL   @MAKEHX
        RTWP
 MAKEHX MOV  R11,*R12+
@@ -35,13 +35,13 @@ MAKEHX MOV  R11,*R12+
  
 MAKEP1 MOV  R11,*R12+
        MOV  R4,*R12+
-* High Byte
+* High Nibble
        MOVB R0,R4
        SRL  R4,4
        BL   @CONVB
        MOVB R4,*R1
        INC  R1
-* Low Byte
+* Low Nibble
        MOVB R0,R4
        SLA  R4,4
        SRL  R4,4
@@ -55,7 +55,7 @@ MAKEP1 MOV  R11,*R12+
        MOV  *R12,R11
        RT
 * Convert Byte to ASCII code
-CONVB  CI   R4,>0A00
+CONVB  CI   R4,>0900
        JH   CNVB2
        AI   R4,>3000
        RT

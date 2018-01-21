@@ -50,207 +50,225 @@ BADDT2 MOV  R2,*R0+
        RT
  
 *
-* Allocate >1000 bytes of space
-* with >20 byte blocks.
-* Expect root node size list to start at
-* SPACE+>1000.
-* The first entry should contain >07
-* which implies an empty chunk whose
-* length is 2^7 times the size of a
-* block.
-* 8 bytes later we expect a clump that
-* is not split and not full.
+* Allocate >1000 bytes of space with >20
+* byte blocks.
+* Expect the first two blocks to contain
+* the address SPACE+>1000.
+* The second and third byte represent an
+* empty chunk covering >FFE bytes.
 TALC1  LI   R0,SPACE
        LI   R1,>1000
        LI   R2,>20
        BLWP @STRALC
+* Test success flag
+	   MOV  R0,R0
+	   JNE  FALC1A
+* Test end of space address
+	   LI   R0,SPACE
        A    R0,R1
-       LI   R0,>0700
-       CB   R0,*R1
-       JNE  FALC1
-* Check root node
-       CLR  R0
-       AI   R1,>8
-       CB   *R1,R0
-       JNE  FALC1
+       C    *R0,R1
+       JNE  FALC1B
+* Test first chunk
+       INCT R0
+       LI   R1,>FFE
+	   C    *R0,R1
+	   JNE  FALC1C
        RT
-FALC1  LI   R0,FALC1M
+FALC1A LI   R0,FALC1P
+       LI   R1,FALC1Q-FALC1P
+	   BLWP @PRINTL
+	   RT
+FALC1B LI   R1,FALC1O
+	   BLWP @MAKETX
+	   LI   R0,SPACE+>1000
+	   LI   R1,FALC1R
+	   BLWP @MAKETX
+       LI   R0,FALC1M
        LI   R1,FALC1N-FALC1M
        BLWP @PRINTL
        RT
+FALC1C MOV  *R0,R0
+       LI   R1,FALC1S
+	   BLWP @MAKETX
+	   LI   R0,FALC1Q
+	   LI   R1,FALC1T-FALC1Q
+	   BLWP @PRINTL
+	   RT
 FALC1M TEXT 'TALC1 failed. '
-       TEXT 'Incorrect description '
-       TEXT 'of free space.'
-FALC1N EVEN
+       TEXT 'Incorrect address of end '
+       TEXT 'of the free space. '
+	   TEXT 'Expected '
+FALC1R BSS  >4
+	   TEXT ' but saw '
+FALC1O BSS  >4
+FALC1N 
+FALC1P TEXT 'TALC1 failed. '
+       TEXT 'STRALC reports failure.'
+FALC1Q TEXT 'TALC1 expected a free chunck '
+       TEXT 'with 0FFE bytes but found '
+FALC1S TEXT '.... instead'
+FALC1T EVEN
  
 *
-* Allocate >1000 bytes of space
-* with >40 byte blocks.
-* Expect root node size list to start at
-* SPACE+>1000.
-* The first entry should contain >06.
-* 8 bytes later we expect a clump that
-* is not split and not full.
+* Allocate >8000 bytes of space with
+* >40 byte blocks.
+* Expect the allocation to fail because
+* >8000 is too big.
 TALC2  LI   R0,SPACE
-       LI   R1,>1000
+       LI   R1,>8000
        LI   R2,>40
        BLWP @STRALC
-       A    R0,R1
-       LI   R0,>0600
-       CB   R0,*R1
-       JNE  FALC2
-* Check root node
-       AI   R1,>8
-       MOVB *R1,*R1
-       JNE  FALC2
+* Test success flag
+	   MOV  R0,R0
+	   JEQ  FALC2
        RT
 FALC2  LI   R0,FALC2M
        LI   R1,FALC2N-FALC2M
-       BLWP @PRINTL
-       RT
+	   BLWP @PRINTL
+	   RT
 FALC2M TEXT 'TALC2 failed. '
-       TEXT 'Incorrect description '
-       TEXT 'of free space.'
+       TEXT 'Expected allocation to fail '
+       TEXT 'because space too big.'
 FALC2N EVEN
- 
+
 *
-* Allocate >2000 bytes of space
-* with >30 byte blocks.
-* Expect root node size list to start at
-* SPACE+>2000.
-* Entry at index 0 should contain >07
-* Entry at index 1 should contain >05
-* Entry at index 2 should contain >03
-* Entry at index 3 should contain >01
-* 8 bytes later we expect a clump that
-* is not split and not full.
+* Allocate >0003 bytes of space with
+* >40 byte blocks.
+* Expect the allocation to fail because
+* >0003 is too small.
 TALC3  LI   R0,SPACE
-       LI   R1,>2000
-       LI   R2,>30
+       LI   R1,>3
+       LI   R2,>40
        BLWP @STRALC
-* Entry at index 0
-       LI   R1,SPACE+>2000
-       LI   R0,>0700
-       CB   R0,*R1
-       JNE  FALC3
-* Entry at index 1
-       INC  R1
-       LI   R0,>0500
-       CB   R0,*R1
-       JNE  FALC3
-* Entry at index 2
-       INC  R1
-       LI   R0,>0300
-       CB   R0,*R1
-       JNE  FALC3
-* Entry at index 3
-       INC  R1
-       LI   R0,>0100
-       CB   R0,*R1
-       JNE  FALC3
-* Check first root node
-       LI   R1,SPACE+>2008
-       MOVB *R1,*R1
-       JNE  FALC3
-* Check second root node
-       AI   R1,>41
-       MOVB *R1,*R1
-       JNE  FALC3
-* Check third root node
-       AI   R1,>11
-       MOVB *R1,*R1
-       JNE  FALC3
-* Check fourth root node
-       AI   R1,>05
-       MOVB *R1,*R1
-       JNE  FALC3
+* Test success flag
+	   MOV  R0,R0
+	   JEQ  FALC3
        RT
 FALC3  LI   R0,FALC3M
        LI   R1,FALC3N-FALC3M
-       BLWP @PRINTL
-       RT
-FALC3M TEXT 'TALC3 failed. '
-       TEXT 'Free space should have '
-       TEXT 'three entries.'
-FALC3N EVEN
-
-*
-* Put a string at a new location in the
-* buffer.
-* Should take up the last two memory
-* blocks.
-* Root node should be split, not full.
-* Node A1 not split, not full.
-* Node A2 split, not full.
-* Node B3 not split, not full.
-* Node B4 split, not full.
-* Node C7 not split, not full.
-* Node C8 not split, full.
-TSET1  LI   R0,SPACE
-       LI   R1,>100
-       LI   R2,>10
-       BLWP @STRALC
-       LI   R0,TSETA
-       BLWP @STRSET
-* Confirm string address.
-       LI   R1,SPACE+>E0
-       C    R0,R1
-       JNE  FSET1A
-* Confirm string values
-       LI   R0,TSETA
-       LI   R1,SPACE+>E0
-TSET1B CB   R0,R1
-       JNE  FSET1B
-       INC  R0
-       INC  R1
-       CI   R0,TSETAE
-       JL   TSET1B
-* Confirm node values 
-* Root node
-       LI   R0,SPACE+>108
-       LI   R1,>8000
-       CB   *R0,R1
-       JNE  FSET1C
-* A-level nodes
-       INC  R0
-       LI   R1,>2000
-       CB   *R0,R1
-       JNE  FSET1C
-* B-level nodes
-       INC  R0
-       LI   R1,>0200
-       CB   *R0,R1
-       JNE  FSET1C
-* C-level nodes
-       INC  R0
-	   CLR  R1
-       CB   *R0,R1
-       JNE  FSET1C
-       INC  R0
-       LI   R1,>0100
-       CB   *R0,R1
-       JNE  FSET1C
-       RT
-FSET1A LI   R0,TERR1A
-       LI   R1,TERR1B-TERR1A
 	   BLWP @PRINTL
 	   RT
-FSET1B LI   R0,TERR1B
-       LI   R1,TERR1C-TERR1B
-       BLWP @PRINTL
+FALC3M TEXT 'TALC3 failed. '
+       TEXT 'Expected allocation to fail '
+       TEXT 'because space too s.'
+FALC3N EVEN
+ 
+*
+* Put strings at a new location in the
+* buffer.
+* Using a block size of 16 (>10) bytes.
+* First string of 13 bytes should take
+* up one memory block.
+* Second string of 14 bytes should take
+* up two memory blocks.
+* Expect a new free chunk at the end of
+* the full chunks.
+TSET1  LI   R0,SPACE
+       LI   R1,>1000
+       LI   R2,>10
+       BLWP @STRALC
+	   LI   R0,SET1MA
+       BLWP @STRSET
+	   MOV  R0,R1
+	   LI   R0,SET1MB
+	   BLWP @STRSET
+* Test first string address
+       LI   R2,SPACE+4
+	   C    R2,R1
+	   JNE  FSET1A
+* Test second string address
+       LI   R2,SPACE+>14
+	   C    R2,R0
+	   JNE  FSET1B
+* Test first chunk
+       LI   R2,>8010
+	   C    R2,*R1
+	   JNE  FSET1C
+* Test second chunk
+       LI   R2,>8020
+	   C    R2,*R0
+	   JNE  FSET1D
+* Test free chunk
+* >1000 - >2 - >10 - >30 = >FCE
+       AI   R0,>20
+	   LI   R2,>0FCE
+	   C    *R0,R2
+	   JNE  FSET1E
        RT
-FSET1C LI   R0,TERR1C
-       LI   R1,TERR1D-TERR1C
-       BLWP @PRINTL
+FSET1A MOV  R1,R0
+       LI   R1,TERR1D
+	   BLWP @MAKETX
+	   MOV  R2,R0
+	   LI   R1,TERR1C
+	   BLWP @MAKETX
+       LI   R0,TERR1A
+       LI   R1,TERR1E-TERR1A
+	   BLWP @PRINTL
        RT
-TERR1A TEXT 'TSET1 string is at wrong address.'
-TERR1B TEXT 'TSET1 string value is incorrect.'
-TERR1C TEXT 'TSET1 node value is wrong.'
-TERR1D
-TSETA  BYTE >1A
-       TEXT 'Some string over 16 bytes.'
-TSETAE EVEN
-
+FSET1B MOV  R0,R0
+       LI   R1,TERR1D
+	   BLWP @MAKETX
+	   MOV  R2,R0
+	   LI   R1,TERR1C
+	   BLWP @MAKETX
+	   MOV  @TERR1I,@TERR1B
+       LI   R0,TERR1A
+       LI   R1,TERR1E-TERR1A
+	   BLWP @PRINTL
+       RT
+FSET1C MOV  *R0,R0
+       LI   R1,TERR1H
+	   BLWP @MAKETX
+	   MOV  R2,R0
+	   LI   R1,TERR1G
+	   BLWP @MAKETX
+       LI   R0,TERR1E
+       LI   R1,TERR1I-TERR1E
+	   BLWP @PRINTL
+       RT
+FSET1D MOV  *R1,R0
+       LI   R1,TERR1H
+	   BLWP @MAKETX
+	   MOV  R2,R0
+	   LI   R1,TERR1G
+	   BLWP @MAKETX
+	   MOV  @TERR1I,@TERR1F
+       LI   R0,TERR1E
+       LI   R1,TERR1I-TERR1E
+	   BLWP @PRINTL
+       RT	   
+FSET1E MOV  *R0,R0
+       LI   R1,TERR1H
+	   BLWP @MAKETX
+	   MOV  R2,R0
+	   LI   R1,TERR1G
+	   BLWP @MAKETX
+	   MOV  @TERR1J,@TERR1F
+       LI   R0,TERR1E
+       LI   R1,TERR1I-TERR1E
+	   BLWP @PRINTL
+       RT	   
+SET1MA BYTE 13
+       TEXT '13 byte strng'
+SET1MB BYTE 14
+       TEXT '14 byte string'
+TERR1A TEXT 'TSET1 failed. '
+TERR1B TEXT '1st chunk. '
+       TEXT 'Expected string to be assigned '
+       TEXT 'at address '
+TERR1C TEXT '.... but found address '
+TERR1D TEXT '....'
+*
+TERR1E TEXT 'TSET1 failed. '
+TERR1F TEXT '1st chunk. '
+       TEXT 'Expected chunk header '
+TERR1G TEXT '.... but found '
+TERR1H TEXT '....'
+*
+TERR1I TEXT '2nd'
+TERR1J TEXT '3rd'
+       EVEN
+	   
 *
 * Put three strings of different sizes in
 * new locations in the buffer.
