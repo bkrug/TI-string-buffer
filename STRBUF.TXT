@@ -73,21 +73,21 @@ STRALC DATA STRWS,STRALC+4
        MOV  @0(13),R0
        MOV  @2(13),R1
        MOV  @4(13),@BLOCKZ
-	   MOV  R0,@BUFADR
+       MOV  R0,@BUFADR
 * Return error if buffer size is less
 * than or equal to 4
        CI   R1,4
-	   JLE  ALC0
+       JLE  ALC0
 * Return error if buffer size is greater
 * than or equal to >8000
        CI   R1,>8000
-	   JL   ALC1
+       JL   ALC1
 ALC0   SETO @0(13)
-	   RTWP
+       RTWP
 * Record address of end of buffer.
 ALC1   MOV  R0,R2
        A    R1,R2
-	   MOV  R2,*R0+
+       MOV  R2,*R0+
 * Record empty chunk covering whole
 * space.
        DECT R1
@@ -133,20 +133,20 @@ STRSET DATA STRWS,STRSET+4
 * greater.
        MOV  @BUFADR,R3
 * Store the end of the buffer.
-	   MOV  *R3,R1
-* Store the address of first chunk.	   
-	   INCT R3
+       MOV  *R3,R1
+* Store the address of first chunk.       
+       INCT R3
 SET1   MOV  *R3,R4
-	   CZC  @FMASK,R4
-	   JEQ  SET2
+       CZC  @FMASK,R4
+       JEQ  SET2
        SZC  @FMASK,R4
 SET3   A    R4,R3
        C    R3,R1   
-	   JL   SET1
+       JL   SET1
 * We passed out of the buffer.
 * Report an error in caller's R0.
-	   SETO *R13
-	   RTWP
+       SETO *R13
+       RTWP
 * Chunk is free, but is it large enough?
 * First try to merge other free chunks.
 SET2   BL   @TRYMRG
@@ -159,14 +159,14 @@ SET2   BL   @TRYMRG
 * Save a copy of its address.
        MOV  R3,R1
 * Mark the chunk as used
-	   MOV  R2,*R3
+       MOV  R2,*R3
        SOC  @FMASK,*R3
 * If the chunk is large enough to split,
-* do so.	   
-	   S    R2,R4
-	   JEQ  SET4
-	   A    R2,R3
-	   MOV  R4,*R3
+* do so.       
+       S    R2,R4
+       JEQ  SET4
+       A    R2,R3
+       MOV  R4,*R3
 * Copy string
 * R1 contains the address of the 
 * chunk, but don't overcopy the header.
@@ -175,17 +175,17 @@ SET4   INCT R1
 * Copy the number of characters in the
 * string plus the length byte.
        MOVB *R0,R2
-	   SRA  R2,8
+       SRA  R2,8
        INC  R2
-* Copy	   
+* Copy       
 SET5   MOVB *R0,*R3
-	   INC  R0
-	   INC  R3
-	   DEC  R2
-	   JNE  SET5
+       INC  R0
+       INC  R3
+       DEC  R2
+       JNE  SET5
 * R1 now contains the address of the 
 * string. Put address in caller's R0.
-	   MOV  R1,*R13
+       MOV  R1,*R13
        RTWP
  
 *
@@ -221,7 +221,7 @@ STRDLT DATA STRWS,STRDLT+4
 * Merge this newly freed chunk with 
 * the following chunk if it is free.
        MOV  R0,R3
-	   BL   @TRYMRG
+       BL   @TRYMRG
        RTWP
 
 *
@@ -236,7 +236,7 @@ STRDLT DATA STRWS,STRDLT+4
 * R1 - zero
 * R2 - The required number of bytes
 CALCSP MOVB *R0,R2
-	   SRL  R2,8
+       SRL  R2,8
 * R2 now contains the number of 
 * characters in string.
 *
@@ -248,8 +248,8 @@ CALCSP MOVB *R0,R2
        INCT R2
 * Divide by the block size
        CLR  R1
-	   DIV  @BLOCKZ,R1
-	   INC  R1
+       DIV  @BLOCKZ,R1
+       INC  R1
 * R1 now contains the required number
 * of blocks in the chunk.
 * Multiply by the block size
@@ -258,7 +258,7 @@ CALCSP MOVB *R0,R2
 * R2 now contains the required number of
 * blocks
        RT
-	   
+       
 *
 * Try Merge Free Space
 *
@@ -272,10 +272,10 @@ CALCSP MOVB *R0,R2
 * R5 - next full chunk
 TRYMRG
 * Store the address of first chunk.
-	   MOV  R3,R5
+       MOV  R3,R5
 * Get end of buffer
        MOV  @BUFADR,R1
-       MOV  *R1,R1	   
+       MOV  *R1,R1       
 * Initially add 0 to R5's contents so we
 * can ensure that the first chunk is
 * really free.
@@ -285,16 +285,16 @@ TRYMRG
 * offsets of consecutive free blocks.
 TMRG1  A    R4,R5
        C    R5,R1
-	   JHE  TMGR2
+       JHE  TMGR2
        MOV  *R5,R4
        CZC  @FMASK,R4
-	   JEQ  TMRG1
+       JEQ  TMRG1
 * Calculate new offset
 TMGR2  MOV  R5,R4
-	   S    R3,R4
-	   JEQ  TMRG3
+       S    R3,R4
+       JEQ  TMRG3
 * If new offset is greater than 0, but 
 * it in header of first chunk.
        MOV  R4,*R3
 TMRG3  RT
-	   END
+       END

@@ -79,7 +79,7 @@ PRINTP LI   R12,STACK
        BL   @WRITEF
        BL   @SCRLP
        RTWP
-	   
+       
 SCRLP  MOV  R11,*R12+
        MOV  R8,*R12+
        MOV  R9,*R12+

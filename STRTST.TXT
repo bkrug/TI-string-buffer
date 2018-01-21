@@ -63,45 +63,45 @@ TALC1  LI   R0,SPACE
        LI   R2,>20
        BLWP @STRALC
 * Test success flag
-	   MOV  R0,R0
-	   JNE  FALC1A
+       MOV  R0,R0
+       JNE  FALC1A
 * Test end of space address
-	   LI   R0,SPACE
+       LI   R0,SPACE
        A    R0,R1
        C    *R0,R1
        JNE  FALC1B
 * Test first chunk
        INCT R0
        LI   R1,>FFE
-	   C    *R0,R1
-	   JNE  FALC1C
+       C    *R0,R1
+       JNE  FALC1C
        RT
 FALC1A LI   R0,FALC1P
        LI   R1,FALC1Q-FALC1P
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC1B LI   R1,FALC1O
-	   BLWP @MAKETX
-	   LI   R0,SPACE+>1000
-	   LI   R1,FALC1R
-	   BLWP @MAKETX
+       BLWP @MAKETX
+       LI   R0,SPACE+>1000
+       LI   R1,FALC1R
+       BLWP @MAKETX
        LI   R0,FALC1M
        LI   R1,FALC1N-FALC1M
        BLWP @PRINTL
        RT
 FALC1C MOV  *R0,R0
        LI   R1,FALC1S
-	   BLWP @MAKETX
-	   LI   R0,FALC1Q
-	   LI   R1,FALC1T-FALC1Q
-	   BLWP @PRINTL
-	   RT
+       BLWP @MAKETX
+       LI   R0,FALC1Q
+       LI   R1,FALC1T-FALC1Q
+       BLWP @PRINTL
+       RT
 FALC1M TEXT 'TALC1 failed. '
        TEXT 'Incorrect address of end '
        TEXT 'of the free space. '
-	   TEXT 'Expected '
+       TEXT 'Expected '
 FALC1R BSS  >4
-	   TEXT ' but saw '
+       TEXT ' but saw '
 FALC1O BSS  >4
 FALC1N 
 FALC1P TEXT 'TALC1 failed. '
@@ -121,13 +121,13 @@ TALC2  LI   R0,SPACE
        LI   R2,>40
        BLWP @STRALC
 * Test success flag
-	   MOV  R0,R0
-	   JEQ  FALC2
+       MOV  R0,R0
+       JEQ  FALC2
        RT
 FALC2  LI   R0,FALC2M
        LI   R1,FALC2N-FALC2M
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC2M TEXT 'TALC2 failed. '
        TEXT 'Expected allocation to fail '
        TEXT 'because space too big.'
@@ -143,13 +143,13 @@ TALC3  LI   R0,SPACE
        LI   R2,>40
        BLWP @STRALC
 * Test success flag
-	   MOV  R0,R0
-	   JEQ  FALC3
+       MOV  R0,R0
+       JEQ  FALC3
        RT
 FALC3  LI   R0,FALC3M
        LI   R1,FALC3N-FALC3M
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC3M TEXT 'TALC3 failed. '
        TEXT 'Expected allocation to fail '
        TEXT 'because space too s.'
@@ -169,89 +169,89 @@ TSET1  LI   R0,SPACE
        LI   R1,>1000
        LI   R2,>10
        BLWP @STRALC
-	   LI   R0,SET1MA
+       LI   R0,SET1MA
        BLWP @STRSET
-	   MOV  R0,R1
-	   LI   R0,SET1MB
-	   BLWP @STRSET
+       MOV  R0,R1
+       LI   R0,SET1MB
+       BLWP @STRSET
 * Test first string address
        LI   R2,SPACE+4
-	   C    R2,R1
-	   JNE  FSET1A
+       C    R2,R1
+       JNE  FSET1A
 * Test second string address
        LI   R2,SPACE+>14
-	   C    R2,R0
-	   JNE  FSET1B
+       C    R2,R0
+       JNE  FSET1B
 * Test first chunk
        LI   R2,>8010
-	   DECT R1
-	   C    R2,*R1
-	   JNE  FSET1C
+       DECT R1
+       C    R2,*R1
+       JNE  FSET1C
 * Test second chunk
        LI   R2,>8020
-	   DECT R0
-	   C    R2,*R0
-	   JNE  FSET1D
+       DECT R0
+       C    R2,*R0
+       JNE  FSET1D
 * Test free chunk
 * >1000 - >2 - >10 - >30 = >FCE
        AI   R0,>20
-	   LI   R2,>0FCE
-	   C    *R0,R2
-	   JNE  FSET1E
+       LI   R2,>0FCE
+       C    *R0,R2
+       JNE  FSET1E
        RT
 FSET1A MOV  R1,R0
        LI   R1,TERR1D
-	   BLWP @MAKETX
-	   MOV  R2,R0
-	   LI   R1,TERR1C
-	   BLWP @MAKETX
+       BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,TERR1C
+       BLWP @MAKETX
        LI   R0,TERR1A
        LI   R1,TERR1E-TERR1A
-	   BLWP @PRINTL
+       BLWP @PRINTL
        RT
 FSET1B MOV  R0,R0
        LI   R1,TERR1D
-	   BLWP @MAKETX
-	   MOV  R2,R0
-	   LI   R1,TERR1C
-	   BLWP @MAKETX
-	   MOV  @TERR1I,@TERR1B
+       BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,TERR1C
+       BLWP @MAKETX
+       MOV  @TERR1I,@TERR1B
        LI   R0,TERR1A
        LI   R1,TERR1E-TERR1A
-	   BLWP @PRINTL
+       BLWP @PRINTL
        RT
 FSET1C MOV  *R0,R0
        LI   R1,TERR1H
-	   BLWP @MAKETX
-	   MOV  R2,R0
-	   LI   R1,TERR1G
-	   BLWP @MAKETX
+       BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,TERR1G
+       BLWP @MAKETX
        LI   R0,TERR1E
        LI   R1,TERR1I-TERR1E
-	   BLWP @PRINTL
+       BLWP @PRINTL
        RT
 FSET1D MOV  *R1,R0
        LI   R1,TERR1H
-	   BLWP @MAKETX
-	   MOV  R2,R0
-	   LI   R1,TERR1G
-	   BLWP @MAKETX
-	   MOV  @TERR1I,@TERR1F
+       BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,TERR1G
+       BLWP @MAKETX
+       MOV  @TERR1I,@TERR1F
        LI   R0,TERR1E
        LI   R1,TERR1I-TERR1E
-	   BLWP @PRINTL
-       RT	   
+       BLWP @PRINTL
+       RT       
 FSET1E MOV  *R0,R0
        LI   R1,TERR1H
-	   BLWP @MAKETX
-	   MOV  R2,R0
-	   LI   R1,TERR1G
-	   BLWP @MAKETX
-	   MOV  @TERR1J,@TERR1F
+       BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,TERR1G
+       BLWP @MAKETX
+       MOV  @TERR1J,@TERR1F
        LI   R0,TERR1E
        LI   R1,TERR1I-TERR1E
-	   BLWP @PRINTL
-       RT	   
+       BLWP @PRINTL
+       RT       
 SET1MA BYTE 13
        TEXT '13 byte strng'
 SET1MB BYTE 14
@@ -272,7 +272,7 @@ TERR1H TEXT '....'
 TERR1I TEXT '2nd'
 TERR1J TEXT '3rd'
        EVEN
-	   
+       
 *
 * Put four strings of that require one
 * block of memory in the buffer. Then
@@ -287,42 +287,42 @@ TDLT1  LI   R0,SPACE
        BLWP @STRALC
 * Store short strings.
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR
+       BLWP @STRSET
+       MOV  R0,@DLTADR
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR+2
+       BLWP @STRSET
+       MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR+4
+       BLWP @STRSET
+       MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR+6
+       BLWP @STRSET
+       MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
 * order.
        MOV  @DLTADR+4,R0
-	   BLWP @STRDLT
+       BLWP @STRDLT
        MOV  @DLTADR+2,R0
-	   BLWP @STRDLT
+       BLWP @STRDLT
        MOV  @DLTADR,R0
-	   BLWP @STRDLT	   
+       BLWP @STRDLT       
 * Store long string
        LI   R0,DLT1MB
-	   BLWP @STRSET
-	   LI   R2,SPACE+4
-	   C    R0,R2
-	   JNE  FDLT1
-	   RT
+       BLWP @STRSET
+       LI   R2,SPACE+4
+       C    R0,R2
+       JNE  FDLT1
+       RT
 FDLT1  MOV  R0,R0
        LI   R1,DERR1C
-	   BLWP @MAKETX
+       BLWP @MAKETX
        MOV  R2,R0
        LI   R1,DERR1B
        BLWP @MAKETX
-	   LI   R0,DERR1A
-	   LI   R1,DERR1D-DERR1A
+       LI   R0,DERR1A
+       LI   R1,DERR1D-DERR1A
        BLWP @PRINTL
-       RT	   
+       RT       
 DLTADR BSS  >8
 DLT1MA BYTE 12
        TEXT 'short string'
@@ -343,42 +343,42 @@ TDLT2  LI   R0,SPACE
        BLWP @STRALC
 * Store short strings.
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR
+       BLWP @STRSET
+       MOV  R0,@DLTADR
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR+2
+       BLWP @STRSET
+       MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR+4
+       BLWP @STRSET
+       MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
-	   BLWP @STRSET
-	   MOV  R0,@DLTADR+6
+       BLWP @STRSET
+       MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
 * order.
        MOV  @DLTADR,R0
-	   BLWP @STRDLT	   
+       BLWP @STRDLT       
        MOV  @DLTADR+2,R0
-	   BLWP @STRDLT
+       BLWP @STRDLT
        MOV  @DLTADR+4,R0
-	   BLWP @STRDLT
+       BLWP @STRDLT
 * Store long string
        LI   R0,DLT1MB
-	   BLWP @STRSET
-	   LI   R2,SPACE+4
-	   C    R0,R2
-	   JNE  FDLT2
-	   RT
+       BLWP @STRSET
+       LI   R2,SPACE+4
+       C    R0,R2
+       JNE  FDLT2
+       RT
 FDLT2  MOV  R0,R0
        LI   R1,DERR2C
-	   BLWP @MAKETX
+       BLWP @MAKETX
        MOV  R2,R0
        LI   R1,DERR2B
        BLWP @MAKETX
-	   LI   R0,DERR2A
-	   LI   R1,DERR2D-DERR2A
+       LI   R0,DERR2A
+       LI   R1,DERR2D-DERR2A
        BLWP @PRINTL
-       RT	   
+       RT       
 DERR2A TEXT 'TDLT2 failed. Expected long string at '
 DERR2B TEXT '.... but it was at '
 DERR2C TEXT '....'
