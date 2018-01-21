@@ -18,6 +18,8 @@ RUNTST BLWP @OPENF
        BL   @TSET1
        BL   @BADDTA
        BL   @TDLT1
+       BL   @BADDTA
+       BL   @TDLT2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -330,5 +332,56 @@ DERR1A TEXT 'TDLT1 failed. Expected long string at '
 DERR1B TEXT '.... but it was at '
 DERR1C TEXT '....'
 DERR1D 
+
+*
+* Just like TDLT1 except that we delete
+* the strings in the opposite order.
+* That shouldn't change the results.
+TDLT2  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>10
+       BLWP @STRALC
+* Store short strings.
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR+2
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR+4
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR+6
+* Delete first three strings in reverse
+* order.
+       MOV  @DLTADR,R0
+	   BLWP @STRDLT	   
+       MOV  @DLTADR+2,R0
+	   BLWP @STRDLT
+       MOV  @DLTADR+4,R0
+	   BLWP @STRDLT
+* Store long string
+       LI   R0,DLT1MB
+	   BLWP @STRSET
+	   LI   R2,SPACE+4
+	   C    R0,R2
+	   JNE  FDLT2
+	   RT
+FDLT2  MOV  R0,R0
+       LI   R1,DERR2C
+	   BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,DERR2B
+       BLWP @MAKETX
+	   LI   R0,DERR2A
+	   LI   R1,DERR2D-DERR2A
+       BLWP @PRINTL
+       RT	   
+DERR2A TEXT 'TDLT2 failed. Expected long string at '
+DERR2B TEXT '.... but it was at '
+DERR2C TEXT '....'
+DERR2D 
        EVEN
        END

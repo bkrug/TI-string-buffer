@@ -147,8 +147,13 @@ SET3   A    R4,R3
 * Report an error in caller's R0.
 	   SETO *R13
 	   RTWP
-* Chunk is free, but is it large enough.	   
-SET2   C    R2,R4
+* Chunk is free, but is it large enough?
+* First try to merge other free chunks.
+SET2   BL   @TRYMRG
+* If required space is still larger than
+* the size of merged chunk, continue
+* loop.
+       C    R2,R4
        JH   SET3
 * This chunk at R3 is large enough.
 * Save a copy of its address.
@@ -227,6 +232,8 @@ STRDLT DATA STRWS,STRDLT+4
 *      length
 *
 * Output:
+* R0 - (unchanged)
+* R1 - zero
 * R2 - The required number of bytes
 CALCSP MOVB *R0,R2
 	   SRL  R2,8
@@ -256,32 +263,38 @@ CALCSP MOVB *R0,R2
 * Try Merge Free Space
 *
 * Input:
-* R3 - Address of a free block
+* R3 - Address of a free chunk
+*
+* Output:
+* R1 - address of end of buffer
+* R3 - (unchanged)
+* R4 - new size of chunk
+* R5 - next full chunk
 TRYMRG
 * Store the address of first chunk.
 	   MOV  R3,R5
 * Get end of buffer
        MOV  @BUFADR,R1
        MOV  *R1,R1	   
-* Initially add 0 to R3's contents so we
+* Initially add 0 to R5's contents so we
 * can ensure that the first chunk is
 * really free.
        CLR  R4
 * Each header contains an offset to the
 * next block. Find the some of the
 * offsets of consecutive free blocks.
-TMRG1  A    R4,R3
-       C    R3,R1
+TMRG1  A    R4,R5
+       C    R5,R1
 	   JHE  TMGR2
-       MOV  *R3,R4
+       MOV  *R5,R4
        CZC  @FMASK,R4
 	   JEQ  TMRG1
 * Calculate new offset
-TMGR2  MOV  R3,R4
-	   S    R5,R4
+TMGR2  MOV  R5,R4
+	   S    R3,R4
 	   JEQ  TMRG3
 * If new offset is greater than 0, but 
 * it in header of first chunk.
-       MOV  R4,*R5
+       MOV  R4,*R3
 TMRG3  RT
 	   END
