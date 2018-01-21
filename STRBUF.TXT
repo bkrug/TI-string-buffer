@@ -124,8 +124,6 @@ STRSET DATA STRWS,STRSET+4
        MOV  *R13,R0
 * Find space requirement
        BL   @CALCSP
-*	   MOV  R2,*R13
-*	   RTWP
 * R2 now contains the required number
 * of bytes.
 * Find a free chunk of that size or 
@@ -164,8 +162,8 @@ SET2   C    R2,R4
 * Copy string
 * R1 contains the address of the 
 * chunk, but don't overcopy the header.
-SET4   MOV  R1,R3
-       INCT R3
+SET4   INCT R1
+       MOV  R1,R3
 * Copy the number of characters in the
 * string plus the length byte.
        MOVB *R0,R2
@@ -177,7 +175,8 @@ SET5   MOVB *R0,*R3
 	   INC  R3
 	   DEC  R2
 	   JNE  SET5
-* Tell the caller where the string went.
+* R1 now contains the address of the 
+* string. Put address in caller's R0.
 	   MOV  R1,*R13
        RTWP
 * Mask to set or reset the "used" bit.

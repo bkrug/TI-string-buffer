@@ -1,6 +1,6 @@
        DEF  RUNTST
        REF  VMBW
-       REF  STRALC,STRGET,STRSET
+       REF  STRALC,STRGET,STRSET,STRDLT,STREDT
        REF  MAKETX,PRINTL,OPENF,CLOSEF
        
 SPACE  BSS  >3000
@@ -17,7 +17,7 @@ RUNTST BLWP @OPENF
        BL   @BADDTA
        BL   @TSET1
        BL   @BADDTA
-       BL   @TSET2
+       BL   @TDLT1
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -182,10 +182,12 @@ TSET1  LI   R0,SPACE
 	   JNE  FSET1B
 * Test first chunk
        LI   R2,>8010
+	   DECT R1
 	   C    R2,*R1
 	   JNE  FSET1C
 * Test second chunk
        LI   R2,>8020
+	   DECT R0
 	   C    R2,*R0
 	   JNE  FSET1D
 * Test free chunk
@@ -270,84 +272,63 @@ TERR1J TEXT '3rd'
        EVEN
 	   
 *
-* Put three strings of different sizes in
-* new locations in the buffer.
-* Should take up the last two memory
+* Put four strings of that require one
+* block of memory in the buffer. Then
+* delete the first three. Then add a 
+* new string that should require three
 * blocks.
-* Root node should be split, not full.
-* Node A0 not split, not full.
-* Node A1 split, not full.
-* Node B2 not split, not full.
-* Node B3 split, not full.
-* Node C6 not split, full.
-* Node C7 split, full.
-* Node D14 not split, full.
-* Node D15 not split, full.
-TSET2  LI   R0,SPACE
+* Expect this new string to be inserted
+* at the begining of the buffer.
+TDLT1  LI   R0,SPACE
        LI   R1,>100
        LI   R2,>10
        BLWP @STRALC
-       LI   R0,MSET2A
-       BLWP @STRSET
-* Confirm string address 1.
-       LI   R1,SPACE+>F0
-       C    R0,R1
-       JNE  FSET2A
-       LI   R0,MSET2B
-       BLWP @STRSET
-* Confirm string address 2.
-       LI   R1,SPACE+>C0
-       C    R0,R1
-       JNE  FSET2A
-       LI   R0,MSET2C
-       BLWP @STRSET
-* Confirm string address 3.
-       LI   R1,SPACE+>E0
-       C    R0,R1
-       JNE  FSET2B
-* Confirm node values 
-* Root node
-       LI   R0,SPACE+>108
-       LI   R1,>8000
-       CB   *R0,R1
-       JNE  FSET2B
-* A-level nodes
-       INC  R0
-       LI   R1,>2000
-       CB   *R0,R1
-       JNE  FSET2B
-* B-level nodes
-       INC  R0
-       LI   R1,>0200
-       CB   *R0,R1
-       JNE  FSET2B
-* C-level nodes
-       INCT R0          * skip first byte of level C
-       LI   R1,>0700
-       CB   *R0,R1
-       JNE  FSET2B
-* D-level nodes
-       AI   R0,4        * skip first three bytes of level D
-	   LI   R1,>0500
-	   CB   *R0,R1
-       JNE  FSET2B
-       RT
-FSET2A LI   R0,TERR2A
-       LI   R1,TERR2B-TERR2A
-	   BLWP @PRINTL
+* Store short strings.
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR+2
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR+4
+       LI   R0,DLT1MA
+	   BLWP @STRSET
+	   MOV  R0,@DLTADR+6
+* Delete first three strings in reverse
+* order.
+       MOV  @DLTADR+4,R0
+	   BLWP @STRDLT
+       MOV  @DLTADR+2,R0
+	   BLWP @STRDLT
+       MOV  @DLTADR,R0
+	   BLWP @STRDLT	   
+* Store long string
+       LI   R0,DLT1MB
+	   BLWP @STRSET
+	   LI   R2,SPACE+4
+	   C    R0,R2
+	   JNE  FDLT1
 	   RT
-FSET2B LI   R0,TERR2B
-       LI   R1,TERR2C-TERR2B
+FDLT1  MOV  R0,R0
+       LI   R1,DERR1C
+	   BLWP @MAKETX
+       MOV  R2,R0
+       LI   R1,DERR1B
+       BLWP @MAKETX
+	   LI   R0,DERR1A
+	   LI   R1,DERR1D-DERR1A
        BLWP @PRINTL
-       RT
-TERR2A TEXT 'TSET2 string is at wrong address.'
-TERR2B TEXT 'TSET2 node value is wrong.'
-TERR2C
-MSET2A BYTE 9
-       TEXT 'Message 1'
-MSET2B BYTE 29
-       TEXT 'This should cover two blocks.'
-MSET2C BYTE 6
-       TEXT 'Mesg 2'
-MSET2E EVEN 
+       RT	   
+DLTADR BSS  >8
+DLT1MA BYTE 12
+       TEXT 'short string'
+DLT1MB BYTE 43
+       TEXT 'a longer string that requires three blocks.'
+DERR1A TEXT 'TDLT1 failed. Expected long string at '
+DERR1B TEXT '.... but it was at '
+DERR1C TEXT '....'
+DERR1D 
+       EVEN
        END
