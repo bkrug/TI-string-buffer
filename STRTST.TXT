@@ -24,6 +24,10 @@ RUNTST BLWP @OPENF
        BL   @TEDT1
        BL   @BADDTA
        BL   @TEDT2
+       BL   @BADDTA
+       BL   @TEDT3
+       BL   @BADDTA
+       BL   @TEDT4
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -474,8 +478,164 @@ TEDT2M BYTE 12
 TEDT2N BYTE 22
        TEXT 'longer string a little'
 TEDT2O
-EERR2A TEXT 'TEDT1 failed. Location in buffer changed.'
-EERR2B TEXT 'TEDT1 failed. Chunk header changed.'
+EERR2A TEXT 'TEDT2 failed. Location in buffer changed.'
+EERR2B TEXT 'TEDT2 failed. Chunk header changed.'
 EERR2C
 
+* 
+* Create three small strings.
+* Delete the middle string.
+* Edit the first string to fill the
+* space used by the middle string.
+TEDT3  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>10
+       BLWP @STRALC
+*
+       LI   R0,TEDT3M
+       BLWP @STRSET
+       MOV  R0,@ADRLST
+       LI   R0,TEDT3M
+       BLWP @STRSET
+       MOV  R0,@ADRLST+2
+       LI   R0,TEDT3M
+       BLWP @STRSET
+       MOV  R0,@ADRLST+6
+*
+       MOV  @ADRLST+2,R0
+       BLWP @STRDLT
+*
+       MOV  @ADRLST,R0
+       LI   R1,TEDT3N
+       BLWP @STREDT
+* Location should not have changed
+       C    R0,@ADRLST
+       JNE  FEDT3A
+* Chunk should use 2 blocks
+       DECT R0
+       MOV  *R0,R1
+       CI   R1,>8020
+       JNE  FEDT3B
+* Next chunk should still be used
+* and should still be 1 block
+       AI   R0,>20
+	   MOV  *R0,R1
+	   CI   R1,>8010
+	   JNE  FEDT3C
+       RT
+FEDT3A LI   R0,EERR3A
+       LI   R1,EERR3B-EERR3A
+       BLWP @PRINTL
+       RT
+FEDT3B LI   R0,EERR3B
+       LI   R1,EERR3C-EERR3B
+       BLWP @PRINTL
+	   RT
+FEDT3C LI   R0,EERR3C
+       LI   R1,EERR3D-EERR3C
+	   BLWP @PRINTL
+       RT
+ADRLST BSS  >6
+TEDT3M BYTE 12
+       TEXT 'short string'
+TEDT3N BYTE 22
+       TEXT 'longer string a little'
+TEDT3O
+EERR3A TEXT 'TEDT3 failed. Location in buffer changed.'
+EERR3B TEXT 'TEDT3 failed. Chunk header has wrong offset.'
+EERR3C TEXT 'TEDT3 failed. Chunk header for the following'
+       TEXT ' chunk should not have changed.'
+EERR3D
+	   
+* 
+* Create four small strings.
+* Delete the third string.
+* Edit the first string in a way that
+* fources the string to be moved to
+* after the fourth string.
+TEDT4  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>10
+       BLWP @STRALC
+*
+       LI   R0,TEDT4M
+       BLWP @STRSET
+       MOV  R0,@ADRLS4
+       LI   R0,TEDT4M
+       BLWP @STRSET
+       MOV  R0,@ADRLS4+2
+       LI   R0,TEDT4M
+       BLWP @STRSET
+       MOV  R0,@ADRLS4+4
+       LI   R0,TEDT4M
+       BLWP @STRSET
+       MOV  R0,@ADRLS4+6
+*
+       MOV  @ADRLS4+4,R0
+	   BLWP @STRDLT
+*
+       MOV  @ADRLS4,R0
+	   LI   R1,TEDT4N
+	   BLWP @STREDT
+* New address should be in the fifth block.
+       CI   R0,SPACE+>54
+	   JNE  FEDT4A
+* First block should now be free
+       LI   R0,SPACE+>2
+	   MOV  *R0,R0
+       CI   R0,>0010
+	   JNE  FEDT4B
+* Fifth block should be start of two
+* block chunk.
+       LI   R0,SPACE+>52
+       MOV  *R0,R0
+       CI   R0,>8020
+	   JNE  FEDT4C
+* Seventh block should be start of 
+* remaining free space
+       LI   R0,SPACE+>72
+	   MOV  *R0,R0
+	   CI   R0,>009E
+	   JNE  FEDT4D
+	   RT
+FEDT4A LI   R0,EERR4A
+       LI   R1,EERR4B-EERR4A
+	   BLWP @PRINTL
+	   RT
+FEDT4B LI   R1,EERR4C
+       BLWP @MAKETX
+	   LI   R0,EERR4B
+	   LI   R1,EERR4D-EERR4B
+	   BLWP @PRINTL
+	   RT
+FEDT4C LI   R1,EERR4E
+       BLWP @MAKETX
+	   LI   R0,EERR4D
+	   LI   R1,EERR4F-EERR4D
+	   BLWP @PRINTL
+	   RT
+FEDT4D LI   R1,EERR4G
+       BLWP @MAKETX
+	   LI   R0,EERR4F
+	   LI   R1,EERR4H-EERR4F
+	   BLWP @PRINTL
+	   RT
+ADRLS4 BSS  >6
+TEDT4M BYTE 12
+       TEXT 'short string'
+TEDT4N BYTE 22
+       TEXT 'longer string a little'
+TEDT4O
+EERR4A TEXT 'TEDT4 failed. The string is in the '
+       TEXT 'wrong address.'
+EERR4B TEXT 'TEDT4 failed. The first block '
+       TEXT 'should now contain 0010 but contains '
+EERR4C TEXT '....'
+EERR4D TEXT 'TEDT4 failed. The fifth block '
+       TEXT 'should now contain 8020 but contains '
+EERR4E TEXT '....'
+EERR4F TEXT 'TEDT4 failed. The seventh block '
+       TEXT 'should now contain 009E but contains '
+EERR4G TEXT '....'
+EERR4H
        END
