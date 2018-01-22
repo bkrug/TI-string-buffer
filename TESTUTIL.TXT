@@ -19,7 +19,7 @@ FAILT  INC  @FAILED
 * R1: Address of output text (4 bytes)
 MAKETX DATA WORKSP,MAKEP
 MAKEP  LI   R12,STACK
-       MOV  @0(R13),R0
+       MOV  *R13,R0
        MOV  @2(R13),R1
        BL   @MAKEHX
        RTWP
@@ -74,7 +74,7 @@ LINLNG DATA 32
 SCRN   BSS  >300
 CLRTXT TEXT '                                '
 PRINTP LI   R12,STACK
-       MOV  @0(R13),R0
+       MOV  *R13,R0
        MOV  @2(R13),R1
        BL   @WRITEF
        BL   @SCRLP

@@ -197,8 +197,8 @@ SET5   MOVB *R0,*R3
 * necessary to create enough room.
 *
 * Input:
-* R0 - string address outside of buffer
-* R1 - current address inside of buffer
+* R0 - current address inside of buffer
+* R1 - string address outside of buffer
 * Output:
 * R0 - contains the new string address
 STREDT DATA STRWS,STREDT+4

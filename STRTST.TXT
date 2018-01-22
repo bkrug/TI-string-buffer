@@ -20,6 +20,8 @@ RUNTST BLWP @OPENF
        BL   @TDLT1
        BL   @BADDTA
        BL   @TDLT2
+       BL   @BADDTA
+       BL   @TEDT1
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -384,4 +386,52 @@ DERR2B TEXT '.... but it was at '
 DERR2C TEXT '....'
 DERR2D 
        EVEN
+	   
+* 
+* Create a small string, and edit it
+* into something larger. This string is
+* the last string in the buffer.
+TEDT1  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>10
+       BLWP @STRALC
+       LI   R0,TEDT1M
+       BLWP @STRSET
+	   MOV  R0,R2
+	   LI   R1,TEDT1N
+	   BLWP @STREDT
+	   C    R0,R2
+	   JNE  FEDT1A
+	   DECT R0
+	   MOV  *R0,R1
+	   CI   R1,>8040
+	   JNE  FEDT1B
+	   AI   R0,>40
+	   MOV  *R0,R1
+	   CI   R1,>00BE
+	   JNE  FEDT1C
+	   RT
+FEDT1A LI   R0,EERR1A
+       LI   R1,EERR1B-EERR1A
+	   BLWP @PRINTL
+	   RT
+FEDT1B LI   R0,EERR1B
+       LI   R1,EERR1C-EERR1B
+	   BLWP @PRINTL
+	   RT
+FEDT1C LI   R0,EERR1C
+       LI   R1,EERR1D-EERR1C
+	   BLWP @PRINTL
+	   RT
+TEDT1M BYTE 12
+       TEXT 'short string'
+TEDT1N BYTE 57
+       TEXT 'longer string requiring more '
+	   TEXT 'blocks than the previous one'
+TEDT1O
+EERR1A TEXT 'TEDT1 failed. Location in buffer changed.'
+EERR1B TEXT 'TEDT1 failed. Chunk header was wrong.'
+EERR1C TEXT 'TEDT1 failed. Following chunk header was '
+       TEXT 'wrong.'
+EERR1D
        END
