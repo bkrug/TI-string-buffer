@@ -22,6 +22,8 @@ RUNTST BLWP @OPENF
        BL   @TDLT2
        BL   @BADDTA
        BL   @TEDT1
+       BL   @BADDTA
+       BL   @TEDT2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -386,7 +388,7 @@ DERR2B TEXT '.... but it was at '
 DERR2C TEXT '....'
 DERR2D 
        EVEN
-	   
+       
 * 
 * Create a small string, and edit it
 * into something larger. This string is
@@ -397,41 +399,83 @@ TEDT1  LI   R0,SPACE
        BLWP @STRALC
        LI   R0,TEDT1M
        BLWP @STRSET
-	   MOV  R0,R2
-	   LI   R1,TEDT1N
-	   BLWP @STREDT
-	   C    R0,R2
-	   JNE  FEDT1A
-	   DECT R0
-	   MOV  *R0,R1
-	   CI   R1,>8040
-	   JNE  FEDT1B
-	   AI   R0,>40
-	   MOV  *R0,R1
-	   CI   R1,>00BE
-	   JNE  FEDT1C
-	   RT
+       MOV  R0,R2
+       LI   R1,TEDT1N
+       BLWP @STREDT
+       C    R0,R2
+       JNE  FEDT1A
+       DECT R0
+       MOV  *R0,R1
+       CI   R1,>8040
+       JNE  FEDT1B
+       AI   R0,>40
+       MOV  *R0,R1
+       CI   R1,>00BE
+       JNE  FEDT1C
+       RT
 FEDT1A LI   R0,EERR1A
        LI   R1,EERR1B-EERR1A
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FEDT1B LI   R0,EERR1B
        LI   R1,EERR1C-EERR1B
-	   BLWP @PRINTL
-	   RT
-FEDT1C LI   R0,EERR1C
-       LI   R1,EERR1D-EERR1C
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
+FEDT1C MOV  R1,R0
+       LI   R1,EERR1D
+       BLWP @MAKETX
+       LI   R0,EERR1C
+       LI   R1,EERR1E-EERR1C
+       BLWP @PRINTL
+       RT
 TEDT1M BYTE 12
        TEXT 'short string'
 TEDT1N BYTE 57
        TEXT 'longer string requiring more '
-	   TEXT 'blocks than the previous one'
+       TEXT 'blocks than the previous one'
 TEDT1O
 EERR1A TEXT 'TEDT1 failed. Location in buffer changed.'
 EERR1B TEXT 'TEDT1 failed. Chunk header was wrong.'
-EERR1C TEXT 'TEDT1 failed. Following chunk header was '
-       TEXT 'wrong.'
-EERR1D
+EERR1C TEXT 'TEDT1 failed. Header of the next chunk '
+       TEXT 'was wrong: '
+EERR1D BSS  >4
+EERR1E
+
+* 
+* Create a small string, and edit it
+* into something larger but requiring
+* the same number of blocks.
+TEDT2  LI   R0,SPACE
+       LI   R1,>100
+       LI   R2,>20
+       BLWP @STRALC
+       LI   R0,TEDT2M
+       BLWP @STRSET
+       MOV  R0,R2
+       LI   R1,TEDT2N
+       BLWP @STREDT
+       C    R0,R2
+       JNE  FEDT2A
+       DECT R0
+       MOV  *R0,R1
+       CI   R1,>8020
+       JNE  FEDT2B
+       RT
+FEDT2A LI   R0,EERR2A
+       LI   R1,EERR2B-EERR2A
+       BLWP @PRINTL
+       RT
+FEDT2B LI   R0,EERR2B
+       LI   R1,EERR2C-EERR2B
+       BLWP @PRINTL
+       RT
+TEDT2M BYTE 12
+       TEXT 'short string'
+TEDT2N BYTE 22
+       TEXT 'longer string a little'
+TEDT2O
+EERR2A TEXT 'TEDT1 failed. Location in buffer changed.'
+EERR2B TEXT 'TEDT1 failed. Chunk header changed.'
+EERR2C
+
        END

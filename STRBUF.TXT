@@ -56,8 +56,9 @@ BUFADR BSS  >2
 
 * Mask to set or reset the "used" bit.
 FMASK  DATA >8000
- 
-*
+
+* 
+* **** STRALC ****
 * Reserve Space for string buffer
 *
 * R0 - buffer memory address
@@ -96,7 +97,8 @@ ALC1   MOV  R0,R2
        CLR  @0(13)   
        RTWP
  
-*
+* 
+* **** STRGET ****
 * Copy a string from the buffer to
 * another location where it can be
 * manipulated.
@@ -114,7 +116,8 @@ ALC1   MOV  R0,R2
 STRGET DATA STRWS,STRSET+4
        RTWP
  
-*
+* 
+* **** STRSET ****
 * Put a new string in the buffer
 *
 * Input:
@@ -167,28 +170,21 @@ SET2   BL   @TRYMRG
        JEQ  SET4
        A    R2,R3
        MOV  R4,*R3
-* Copy string
+* Copy string.
+* R0 already contains the address of the
+* source string.
 * R1 contains the address of the 
 * chunk, but don't overcopy the header.
 SET4   INCT R1
        MOV  R1,R3
-* Copy the number of characters in the
-* string plus the length byte.
-       MOVB *R0,R2
-       SRA  R2,8
-       INC  R2
-* Copy       
-SET5   MOVB *R0,*R3
-       INC  R0
-       INC  R3
-       DEC  R2
-       JNE  SET5
+       BL   @CPYSTR
 * R1 now contains the address of the 
 * string. Put address in caller's R0.
        MOV  R1,*R13
        RTWP
  
-*
+* 
+* **** STREDT ****
 * Replace an existing string in the
 * buffer. This will involve an algorithm
 * that reserves more space if the new
@@ -202,9 +198,54 @@ SET5   MOVB *R0,*R3
 * Output:
 * R0 - contains the new string address
 STREDT DATA STRWS,STREDT+4
-       RTWP
+* Get routine parameters
+       MOV  *R13,R6
+       MOV  @2(13),R0
+* Find space requirement
+       BL   @CALCSP
+* R2 now contains the required space
+* Get size of existing block into R7
+       DECT R6
+       MOV  *R6,R7
+       SZC  @FMASK,R7
+       C    R2,R7
+* If existing block is big enough, 
+* do the copy operation.
+       JLE  EDT1
+* Is the following chunk free?
+       MOV  R6,R3
+       A    R7,R3
+	   MOV  *R3,R1
+       COC  @FMASK,R1
+* No, so leave routine.   
+       JEQ  EDTEND
+* Yes, Merge any following empty space
+       BL   @TRYMRG
+* R2 contains required free space.
+* Change it to the difference between
+* space in chunk and required space.
+       S    R7,R2
+* Increase current chunck by R2
+       A    R2,*R6
+* Decrease next chunk by R2
+       S    R2,*R3
+	   A    R3,R2
+	   MOV  *R3,*R2
+* Copy string.
+* R0 already has the address of the 
+* source string.
+* Move address of current chunk to R3
+* and then skip the header.
+EDT1   INCT R6
+       MOV  R6,R3
+       BL   @CPYSTR
+* R6 now contains the address of the 
+* string. Put address in caller's R0.
+       MOV  R6,*R13       
+EDTEND RTWP
  
 *
+* **** STRDLT ****
 * Remove an existing string from the
 * buffer and mark the space as free.
 *
@@ -297,4 +338,30 @@ TMGR2  MOV  R5,R4
 * it in header of first chunk.
        MOV  R4,*R3
 TMRG3  RT
+
+*
+* Copy string
+*
+* Input:
+* R0 - Address of source string
+* R3 - Address of destination string
+*
+* Output:
+* R0 - Address after string
+* R2 - (zero)
+* R3 - Address after string
+*
+CPYSTR
+* Copy the number of characters in the
+* string plus the length byte.
+       MOVB *R0,R2
+       SRA  R2,8
+       INC  R2
+* Copy       
+CPYS1  MOVB *R0,*R3
+       INC  R0
+       INC  R3
+       DEC  R2
+       JNE  CPYS1
+       RT
        END
