@@ -3,7 +3,7 @@
        REF  STRALC,STRGET,STRSET,STRDLT,STREDT
        REF  MAKETX,PRINTL,OPENF,CLOSEF
        
-SPACE  BSS  >3000
+SPACE  BSS  >1000
  
 * Run all tests
 RUNTST BLWP @OPENF
@@ -28,6 +28,8 @@ RUNTST BLWP @OPENF
        BL   @TEDT3
        BL   @BADDTA
        BL   @TEDT4
+       BL   @BADDTA
+       BL   @TEDT5
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -641,4 +643,75 @@ EERR4F TEXT 'TEDT4 failed. The seventh block '
        TEXT 'should now contain 009E but contains '
 EERR4G TEXT '....'
 EERR4H
+
+*
+* Create three strings, each using
+* two blocks.
+* Delete the middle string.
+* Edit the first string to use three
+* blocks.
+* There should be one block empty
+* between the remaining two strings.
+TEDT5  LI   R0,SPACE
+       LI   R1,>300
+       LI   R2,>08
+       BLWP @STRALC
+*
+       LI   R0,TEDT5M
+       BLWP @STRSET
+       LI   R0,TEDT5M
+       BLWP @STRSET
+       LI   R0,TEDT5M
+       BLWP @STRSET
+*
+       LI   R0,SPACE+>14
+	   BLWP @STRDLT
+*
+       LI   R0,SPACE+4
+       LI   R1,TEDT5N
+       BLWP @STREDT
+*
+       CI   R0,SPACE+4
+	   JNE  FEDT5
+*
+	   LI   R0,SPACE+2
+	   MOV  *R0,R0
+	   CI   R0,>8018
+	   JNE  FEDT5B
+*
+       LI   R0,SPACE+>1A
+	   MOV  *R0,R0
+	   CI   R0,>0008
+	   JNE  FEDT5C
+	   RT
+FEDT5  LI   R0,EERR5A
+       LI   R1,EERR5B-EERR5A
+       BLWP @PRINTL
+       RT
+FEDT5B LI   R1,EERR5C
+       BLWP @MAKETX
+	   LI   R0,EERR5B
+	   LI   R1,EERR5D-EERR5B
+	   BLWP @PRINTL
+	   RT
+FEDT5C LI   R1,EERR5E
+       BLWP @MAKETX
+	   LI   R0,EERR5D
+	   LI   R1,EERR5F-EERR5D
+	   BLWP @PRINTL
+	   RT
+TEDT5M BYTE 9
+       TEXT 'ABCDEFGHI'
+TEDT5N BYTE 19
+       TEXT '0123456789ABCDEF012'
+TEDT5O
+EERR5A TEXT 'FEDT5 failed. '
+       TEXT 'wrong address for string.'
+EERR5B TEXT 'FEDT5 failed. '
+       TEXT 'Expected header 8018 but saw '
+EERR5C TEXT '....'
+EERR5D TEXT 'FEDT5 failed. '
+       TEXT 'Expected header 0008 but saw '
+EERR5E TEXT '....'
+EERR5F
        END
