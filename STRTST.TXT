@@ -31,6 +31,8 @@ RUNTST BLWP @OPENF
        BL   @TEDT4
        BL   @BADDTA
        BL   @TEDT5
+       BL   @BADDTA
+       BL   @TGET1       
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -522,9 +524,9 @@ TEDT3  LI   R0,SPACE
 * Next chunk should still be used
 * and should still be 1 block
        AI   R0,>20
-	   MOV  *R0,R1
-	   CI   R1,>8010
-	   JNE  FEDT3C
+       MOV  *R0,R1
+       CI   R1,>8010
+       JNE  FEDT3C
        RT
 FEDT3A LI   R0,EERR3A
        LI   R1,EERR3B-EERR3A
@@ -533,10 +535,10 @@ FEDT3A LI   R0,EERR3A
 FEDT3B LI   R0,EERR3B
        LI   R1,EERR3C-EERR3B
        BLWP @PRINTL
-	   RT
+       RT
 FEDT3C LI   R0,EERR3C
        LI   R1,EERR3D-EERR3C
-	   BLWP @PRINTL
+       BLWP @PRINTL
        RT
 ADRLST BSS  >6
 TEDT3M BYTE 12
@@ -549,7 +551,7 @@ EERR3B TEXT 'TEDT3 failed. Chunk header has wrong offset.'
 EERR3C TEXT 'TEDT3 failed. Chunk header for the following'
        TEXT ' chunk should not have changed.'
 EERR3D
-	   
+       
 * 
 * Create four small strings.
 * Delete the third string.
@@ -575,56 +577,56 @@ TEDT4  LI   R0,SPACE
        MOV  R0,@ADRLS4+6
 *
        MOV  @ADRLS4+4,R0
-	   BLWP @STRDLT
+       BLWP @STRDLT
 *
        MOV  @ADRLS4,R0
-	   LI   R1,TEDT4N
-	   BLWP @STREDT
+       LI   R1,TEDT4N
+       BLWP @STREDT
 * New address should be in the fifth block.
        CI   R0,SPACE+>44
-	   JNE  FEDT4A
+       JNE  FEDT4A
 * First block should now be free
        LI   R0,SPACE+>2
-	   MOV  *R0,R0
+       MOV  *R0,R0
        CI   R0,>0010
-	   JNE  FEDT4B
+       JNE  FEDT4B
 * Fifth block should be start of two
 * block chunk.
        LI   R0,SPACE+>42
        MOV  *R0,R0
        CI   R0,>8020
-	   JNE  FEDT4C
+       JNE  FEDT4C
 * Seventh block should be start of 
 * remaining free space
        LI   R0,SPACE+>62
-	   MOV  *R0,R0
-	   CI   R0,>009E
-	   JNE  FEDT4D
-	   RT
+       MOV  *R0,R0
+       CI   R0,>009E
+       JNE  FEDT4D
+       RT
 FEDT4A LI   R1,EERR1I
        BLWP @MAKETX
        LI   R0,EERR4A
        LI   R1,EERR4B-EERR4A
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FEDT4B LI   R1,EERR4C
        BLWP @MAKETX
-	   LI   R0,EERR4B
-	   LI   R1,EERR4D-EERR4B
-	   BLWP @PRINTL
-	   RT
+       LI   R0,EERR4B
+       LI   R1,EERR4D-EERR4B
+       BLWP @PRINTL
+       RT
 FEDT4C LI   R1,EERR4E
        BLWP @MAKETX
-	   LI   R0,EERR4D
-	   LI   R1,EERR4F-EERR4D
-	   BLWP @PRINTL
-	   RT
+       LI   R0,EERR4D
+       LI   R1,EERR4F-EERR4D
+       BLWP @PRINTL
+       RT
 FEDT4D LI   R1,EERR4G
        BLWP @MAKETX
-	   LI   R0,EERR4F
-	   LI   R1,EERR4H-EERR4F
-	   BLWP @PRINTL
-	   RT
+       LI   R0,EERR4F
+       LI   R1,EERR4H-EERR4F
+       BLWP @PRINTL
+       RT
 ADRLS4 BSS  >6
 TEDT4M BYTE 12
        TEXT 'short string'
@@ -666,41 +668,41 @@ TEDT5  LI   R0,SPACE
        BLWP @STRSET
 *
        LI   R0,SPACE+>14
-	   BLWP @STRDLT
+       BLWP @STRDLT
 *
        LI   R0,SPACE+4
        LI   R1,TEDT5N
        BLWP @STREDT
 *
        CI   R0,SPACE+4
-	   JNE  FEDT5
+       JNE  FEDT5
 *
-	   LI   R0,SPACE+2
-	   MOV  *R0,R0
-	   CI   R0,>8018
-	   JNE  FEDT5B
+       LI   R0,SPACE+2
+       MOV  *R0,R0
+       CI   R0,>8018
+       JNE  FEDT5B
 *
        LI   R0,SPACE+>1A
-	   MOV  *R0,R0
-	   CI   R0,>0008
-	   JNE  FEDT5C
-	   RT
+       MOV  *R0,R0
+       CI   R0,>0008
+       JNE  FEDT5C
+       RT
 FEDT5  LI   R0,EERR5A
        LI   R1,EERR5B-EERR5A
        BLWP @PRINTL
        RT
 FEDT5B LI   R1,EERR5C
        BLWP @MAKETX
-	   LI   R0,EERR5B
-	   LI   R1,EERR5D-EERR5B
-	   BLWP @PRINTL
-	   RT
+       LI   R0,EERR5B
+       LI   R1,EERR5D-EERR5B
+       BLWP @PRINTL
+       RT
 FEDT5C LI   R1,EERR5E
        BLWP @MAKETX
-	   LI   R0,EERR5D
-	   LI   R1,EERR5F-EERR5D
-	   BLWP @PRINTL
-	   RT
+       LI   R0,EERR5D
+       LI   R1,EERR5F-EERR5D
+       BLWP @PRINTL
+       RT
 TEDT5M BYTE 9
        TEXT 'ABCDEFGHI'
 TEDT5N BYTE 19
@@ -714,5 +716,56 @@ EERR5C TEXT '....'
 EERR5D TEXT 'FEDT5 failed. '
        TEXT 'Expected header 0008 but saw '
 EERR5E TEXT '....'
-EERR5F
+EERR5F EVEN
+
+*
+* Create a string
+* Copy it to a new location
+TGET1  LI   R0,SPACE
+       LI   R1,>300
+       LI   R2,>08
+       BLWP @STRALC
+*
+       LI   R0,TGET1M
+       BLWP @STRSET
+* R0 now contains address of string in
+* buffer.
+       LI   R1,TGET1O
+       BLWP @STRGET
+* The data in TGET1O is expected to
+* match the pre-existing contents of
+* TGET1N.
+       LI   R0,TGET1N
+TGET1A C    *R0+,*R1+
+       JNE  FGET1
+       CI   R0,TGET1O
+       JL   TGET1A
+       RT
+FGET1  LI   R2,TGET1N
+       S    R2,R0
+       DECT R0
+       LI   R1,GERR2
+       BLWP @MAKETX
+       LI   R0,GERR1
+       LI   R1,GERR3-GERR1
+       BLWP @PRINTL
+       RT
+TGET1M BYTE >12
+       TEXT 'THIS IS SOME TEXT.'
+       BYTE 0
+       DATA 0,0
+TGET1N BYTE >12
+       TEXT 'THIS IS SOME TEXT.'
+       BYTE >7F
+       DATA >F805,>E986
+TGET1O DATA 0,0,0,0
+       DATA 0,0,0,0
+       DATA 0,>877F,>F805,>E986
+TGET1P
+GERR1  TEXT 'GERR1 failed. '
+       TEXT 'The strings stopped matching '
+       TEXT 'at '
+GERR2  TEXT '....'
+       TEXT ' bytes from the start.'
+GERR3  EVEN
        END
