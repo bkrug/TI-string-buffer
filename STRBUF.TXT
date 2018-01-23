@@ -197,52 +197,19 @@ SET4   INCT R1
 * R1 - string address outside of buffer
 * Output:
 * R0 - contains the new string address
-STREDT DATA STRWS,STREDT+4
-* Get routine parameters
-       MOV  *R13,R6
+STREDT DATA EDTWS,STREDT+>24
+EDTWS  BSS  >20
+* 
+* Delete the string from its old address
+       MOV  *R13,R0
+       BLWP @STRDLT
+* Put the string at some new address
        MOV  @2(13),R0
-* Find space requirement
-       BL   @CALCSP
-* R2 now contains the required space
-* Get size of existing block into R7
-       DECT R6
-       MOV  *R6,R7
-       SZC  @FMASK,R7
-       C    R2,R7
-* If existing block is big enough, 
-* do the copy operation.
-       JLE  EDT1
-* Is the following chunk free?
-       MOV  R6,R3
-       A    R7,R3
-	   MOV  *R3,R1
-       COC  @FMASK,R1
-* No, so leave routine.   
-       JEQ  EDTEND
-* Yes, Merge any following empty space
-       BL   @TRYMRG
-* R2 contains required free space.
-* Change it to the difference between
-* space in chunk and required space.
-       S    R7,R2
-* Increase current chunck by R2
-       A    R2,*R6
-* Decrease next chunk by R2
-       S    R2,*R3
-	   A    R3,R2
-	   MOV  *R3,*R2
-* Copy string.
-* R0 already has the address of the 
-* source string.
-* Move address of current chunk to R3
-* and then skip the header.
-EDT1   INCT R6
-       MOV  R6,R3
-       BL   @CPYSTR
-* R6 now contains the address of the 
-* string. Put address in caller's R0.
-       MOV  R6,*R13       
-EDTEND RTWP
+       BLWP @STRSET
+* Put the new string address in the
+* caller's R13.
+       MOV  R0,*R13
+       RTWP
  
 *
 * **** STRDLT ****
