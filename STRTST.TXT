@@ -578,7 +578,7 @@ TEDT4  LI   R0,SPACE
 	   LI   R1,TEDT4N
 	   BLWP @STREDT
 * New address should be in the fifth block.
-       CI   R0,SPACE+>54
+       CI   R0,SPACE+>44
 	   JNE  FEDT4A
 * First block should now be free
        LI   R0,SPACE+>2
@@ -587,18 +587,20 @@ TEDT4  LI   R0,SPACE
 	   JNE  FEDT4B
 * Fifth block should be start of two
 * block chunk.
-       LI   R0,SPACE+>52
+       LI   R0,SPACE+>42
        MOV  *R0,R0
        CI   R0,>8020
 	   JNE  FEDT4C
 * Seventh block should be start of 
 * remaining free space
-       LI   R0,SPACE+>72
+       LI   R0,SPACE+>62
 	   MOV  *R0,R0
 	   CI   R0,>009E
 	   JNE  FEDT4D
 	   RT
-FEDT4A LI   R0,EERR4A
+FEDT4A LI   R1,EERR1I
+       BLWP @MAKETX
+       LI   R0,EERR4A
        LI   R1,EERR4B-EERR4A
 	   BLWP @PRINTL
 	   RT
@@ -627,7 +629,8 @@ TEDT4N BYTE 22
        TEXT 'longer string a little'
 TEDT4O
 EERR4A TEXT 'TEDT4 failed. The string is in the '
-       TEXT 'wrong address.'
+       TEXT 'wrong address: '
+EERR1I TEXT '....'
 EERR4B TEXT 'TEDT4 failed. The first block '
        TEXT 'should now contain 0010 but contains '
 EERR4C TEXT '....'
