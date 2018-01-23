@@ -4,6 +4,7 @@
        REF  MAKETX,PRINTL,OPENF,CLOSEF
        
 SPACE  BSS  >1000
+SPEND
  
 * Run all tests
 RUNTST BLWP @OPENF
@@ -54,7 +55,7 @@ ENDME  EVEN
 * Place nonsense data in SPACE
 *
 BADDTA LI   R0,SPACE
-       LI   R1,SPACE+>3000
+       LI   R1,SPEND
        LI   R2,>E6C7
 BADDT2 MOV  R2,*R0+
        C    R0,R1
