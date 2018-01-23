@@ -113,9 +113,12 @@ ALC1   MOV  R0,R2
 *
 * The first byte in the destination
 * will be the string length.
-STRGET DATA STRWS,STRSET+4
+STRGET DATA STRWS,STRGET+4
+       MOV  *R13,R0
+       MOV  @2(13),R3
+       BL   @CPYSTR
        RTWP
- 
+
 * 
 * **** STRSET ****
 * Put a new string in the buffer
@@ -322,7 +325,7 @@ CPYSTR
 * Copy the number of characters in the
 * string plus the length byte.
        MOVB *R0,R2
-       SRA  R2,8
+       SRL  R2,8
        INC  R2
 * Copy       
 CPYS1  MOVB *R0,*R3
