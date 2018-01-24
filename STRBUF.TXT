@@ -53,6 +53,8 @@ STRWS  BSS  >20
 BLOCKZ BSS  >2
 * holds address of buffer
 BUFADR BSS  >2
+* holds first address after the buffer
+BUFEND BSS  >2
 
 * Mask to set or reset the "used" bit.
 FMASK  DATA >8000
@@ -85,14 +87,13 @@ STRALC DATA STRWS,STRALC+4
        JL   ALC1
 ALC0   SETO @0(13)
        RTWP
-* Record address of end of buffer.
-ALC1   MOV  R0,R2
-       A    R1,R2
-       MOV  R2,*R0+
+ALC1   
 * Record empty chunk covering whole
 * space.
-       DECT R1
        MOV  R1,*R0
+* Record address of end of buffer.
+	   A    R1,R0
+	   MOV  R0,@BUFEND
 * Report success.
        CLR  @0(13)   
        RTWP
@@ -138,16 +139,12 @@ STRSET DATA STRWS,STRSET+4
 * Find a free chunk of that size or 
 * greater.
        MOV  @BUFADR,R3
-* Store the end of the buffer.
-       MOV  *R3,R1
-* Store the address of first chunk.       
-       INCT R3
 SET1   MOV  *R3,R4
        CZC  @FMASK,R4
        JEQ  SET2
        SZC  @FMASK,R4
 SET3   A    R4,R3
-       C    R3,R1   
+       C    R3,@BUFEND
        JL   SET1
 * We passed out of the buffer.
 * Report an error in caller's R0.
@@ -285,8 +282,7 @@ TRYMRG
 * Store the address of first chunk.
        MOV  R3,R5
 * Get end of buffer
-       MOV  @BUFADR,R1
-       MOV  *R1,R1       
+       MOV  @BUFEND,R1
 * Initially add 0 to R5's contents so we
 * can ensure that the first chunk is
 * really free.

@@ -67,10 +67,9 @@ BADDT2 MOV  R2,*R0+
 *
 * Allocate >1000 bytes of space with >20
 * byte blocks.
-* Expect the first two blocks to contain
-* the address SPACE+>1000.
-* The second and third byte represent an
-* empty chunk covering >FFE bytes.
+* Expect the first word to contain the
+* header for one empty chunk covering
+* the entire buffer.
 TALC1  LI   R0,SPACE
        LI   R1,>1000
        LI   R2,>20
@@ -78,28 +77,17 @@ TALC1  LI   R0,SPACE
 * Test success flag
        MOV  R0,R0
        JNE  FALC1A
-* Test end of space address
+* Test first chunk shoul have highest
+* bit reset.
+* Remaining 15-bits will contain offset
+* of >1000.
        LI   R0,SPACE
-       A    R0,R1
-       C    *R0,R1
-       JNE  FALC1B
-* Test first chunk
-       INCT R0
-       LI   R1,>FFE
+       LI   R1,>1000
        C    *R0,R1
        JNE  FALC1C
        RT
 FALC1A LI   R0,FALC1P
        LI   R1,FALC1Q-FALC1P
-       BLWP @PRINTL
-       RT
-FALC1B LI   R1,FALC1O
-       BLWP @MAKETX
-       LI   R0,SPACE+>1000
-       LI   R1,FALC1R
-       BLWP @MAKETX
-       LI   R0,FALC1M
-       LI   R1,FALC1N-FALC1M
        BLWP @PRINTL
        RT
 FALC1C MOV  *R0,R0
@@ -109,18 +97,10 @@ FALC1C MOV  *R0,R0
        LI   R1,FALC1T-FALC1Q
        BLWP @PRINTL
        RT
-FALC1M TEXT 'TALC1 failed. '
-       TEXT 'Incorrect address of end '
-       TEXT 'of the free space. '
-       TEXT 'Expected '
-FALC1R BSS  >4
-       TEXT ' but saw '
-FALC1O BSS  >4
-FALC1N 
 FALC1P TEXT 'TALC1 failed. '
        TEXT 'STRALC reports failure.'
 FALC1Q TEXT 'TALC1 expected a free chunck '
-       TEXT 'with 0FFE bytes but found '
+       TEXT 'with 1000 bytes but found '
 FALC1S TEXT '.... instead'
 FALC1T EVEN
  
@@ -188,11 +168,11 @@ TSET1  LI   R0,SPACE
        LI   R0,SET1MB
        BLWP @STRSET
 * Test first string address
-       LI   R2,SPACE+4
+       LI   R2,SPACE+2
        C    R2,R1
        JNE  FSET1A
 * Test second string address
-       LI   R2,SPACE+>14
+       LI   R2,SPACE+>12
        C    R2,R0
        JNE  FSET1B
 * Test first chunk
@@ -206,9 +186,9 @@ TSET1  LI   R0,SPACE
        C    R2,*R0
        JNE  FSET1D
 * Test free chunk
-* >1000 - >2 - >10 - >30 = >FCE
+* >1000 - >10 - >30 = >FD0
        AI   R0,>20
-       LI   R2,>0FCE
+       LI   R2,>0FD0
        C    *R0,R2
        JNE  FSET1E
        RT
@@ -322,7 +302,7 @@ TDLT1  LI   R0,SPACE
 * Store long string
        LI   R0,DLT1MB
        BLWP @STRSET
-       LI   R2,SPACE+4
+       LI   R2,SPACE+2
        C    R0,R2
        JNE  FDLT1
        RT
@@ -378,7 +358,7 @@ TDLT2  LI   R0,SPACE
 * Store long string
        LI   R0,DLT1MB
        BLWP @STRSET
-       LI   R2,SPACE+4
+       LI   R2,SPACE+2
        C    R0,R2
        JNE  FDLT2
        RT
@@ -419,7 +399,7 @@ TEDT1  LI   R0,SPACE
        JNE  FEDT1B
        AI   R0,>40
        MOV  *R0,R1
-       CI   R1,>00BE
+       CI   R1,>00C0
        JNE  FEDT1C
        RT
 FEDT1A LI   R0,EERR1A
@@ -583,24 +563,24 @@ TEDT4  LI   R0,SPACE
        LI   R1,TEDT4N
        BLWP @STREDT
 * New address should be in the fifth block.
-       CI   R0,SPACE+>44
+       CI   R0,SPACE+>42
        JNE  FEDT4A
 * First block should now be free
-       LI   R0,SPACE+>2
+       LI   R0,SPACE
        MOV  *R0,R0
        CI   R0,>0010
        JNE  FEDT4B
 * Fifth block should be start of two
 * block chunk.
-       LI   R0,SPACE+>42
+       LI   R0,SPACE+>40
        MOV  *R0,R0
        CI   R0,>8020
        JNE  FEDT4C
 * Seventh block should be start of 
 * remaining free space
-       LI   R0,SPACE+>62
+       LI   R0,SPACE+>60
        MOV  *R0,R0
-       CI   R0,>009E
+       CI   R0,>00A0
        JNE  FEDT4D
        RT
 FEDT4A LI   R1,EERR1I
@@ -643,7 +623,7 @@ EERR4D TEXT 'TEDT4 failed. The fifth block '
        TEXT 'should now contain 8020 but contains '
 EERR4E TEXT '....'
 EERR4F TEXT 'TEDT4 failed. The seventh block '
-       TEXT 'should now contain 009E but contains '
+       TEXT 'should now contain 00A0 but contains '
 EERR4G TEXT '....'
 EERR4H
 
@@ -667,22 +647,22 @@ TEDT5  LI   R0,SPACE
        LI   R0,TEDT5M
        BLWP @STRSET
 *
-       LI   R0,SPACE+>14
+       LI   R0,SPACE+>12
        BLWP @STRDLT
 *
-       LI   R0,SPACE+4
+       LI   R0,SPACE+2
        LI   R1,TEDT5N
        BLWP @STREDT
 *
-       CI   R0,SPACE+4
+       CI   R0,SPACE+2
        JNE  FEDT5
 *
-       LI   R0,SPACE+2
+       LI   R0,SPACE
        MOV  *R0,R0
        CI   R0,>8018
        JNE  FEDT5B
 *
-       LI   R0,SPACE+>1A
+       LI   R0,SPACE+>18
        MOV  *R0,R0
        CI   R0,>0008
        JNE  FEDT5C
