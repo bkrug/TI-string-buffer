@@ -1,5 +1,5 @@
-       DEF  STRALC,STRGET,STRSET
-       DEF  STREDT,STRDLT
+       DEF  BUFALC,BUFSET,BUFGET
+       DEF  BUFEDT,BUFDLT
 * This library of routines stores
 * strings in a way that is inspired by
 * but different from the C language's
@@ -7,42 +7,25 @@
 *
 * Using this library you can reserve an
 * area of memory of a particular size at
-* a particular address with a particular
-* minimum block size.
+* a particular address with memory 
+* chunks of various sizes.
 *
-* A string stored in the buffer you
-* define is up to 256 bytes long. The
-* first byte represents the number of
-* characters in the string. The rest of
-* the string is the contents of the
-* string.
+* Each chunk contains a header pointing
+* to the next chunk. The header is two
+* bytes in size, and the rest stores 
+* content.
 *
-* Terms:
-* Block - measured in bytes. The 
-*    smallest number of bytes that can
-*    be allocated. When you allocated a
-*    buffer, you specify the block size.
-* Chunk - A collection of one or more
-*    blocks within the buffer.
-*
-* Each chunk starts with 16 header bits.
-* The first bit is set if the chunk is
+* Among the 16 header bits,
+* the first bit is set if the chunk is
 * used, otherwise reset. The other 15
 * are the offset to the next chunk. 
-* The next chunk can be at most >8000
+* The next chunk can be at most >7FFF
 * bytes further away. Chunks are 
 * expected to be sequentially located. 
 * Note that if the block size is >20, 
 * then the first two bytes will be 
 * header bytes and only >1E bytes can 
-* hold data. If a chunk is two blocks 
-* long, it can hold >3E bytes of data.
-*
-* The first two bytes of the buffer hold
-* the address of the first byte 
-* following the buffer. Every byte after
-* that is part of a Chunk. The buffer
-* must not be larger than >8000 bytes.
+* hold data. 
 
 *
 * The >20 bytes would have been used
@@ -50,7 +33,6 @@
 * routines.
 STRWS  BSS  >20
 * holds block size
-BLOCKZ BSS  >2
 * holds address of buffer
 BUFADR BSS  >2
 * holds first address after the buffer
@@ -60,22 +42,20 @@ BUFEND BSS  >2
 FMASK  DATA >8000
 
 * 
-* **** STRALC ****
+* **** BUFALC ****
 * Reserve Space for string buffer
 *
 * R0 - buffer memory address
 * R1 - buffer size (>4 to >7FFF valid)
-* R2 - block size
 *
 * Output:
 * R0 - >0000 if successful
 *      >FFFF if error
 *
-STRALC DATA STRWS,STRALC+4
+BUFALC DATA STRWS,BUFALC+4
 * Get routine parameters
        MOV  *R13,R0
        MOV  @2(13),R1
-       MOV  @4(13),@BLOCKZ
        MOV  R0,@BUFADR
 * Return error if buffer size is less
 * than or equal to 4
@@ -99,7 +79,7 @@ ALC1
        RTWP
  
 * 
-* **** STRGET ****
+* **** BUFGET ****
 * Copy a string from the buffer to
 * another location where it can be
 * manipulated.
@@ -107,6 +87,9 @@ ALC1
 * R0 - string address within buffer.
 * R1 - address presumably outside the
 *      buffer
+* R2 - size to copy.
+*      If zero, treat first byte in
+*      chunk as size of remaining stream
 *
 * The calling code is responsile for
 * ensuring that there is sufficient
@@ -114,31 +97,41 @@ ALC1
 *
 * The first byte in the destination
 * will be the string length.
-STRGET DATA STRWS,STRGET+4
+BUFGET DATA STRWS,BUFGET+4
        MOV  *R13,R0
        MOV  @2(13),R3
+	   MOV  @4(13),R2
+	   JEQ  GET1
        BL   @CPYSTR
        RTWP
+GET1   BL   @CPYST
+	   RTWP
 
 * 
-* **** STRSET ****
+* **** BUFSET ****
 * Put a new string in the buffer
 *
 * Input:
 * R0 - string address outside of buffer
+* R1 - size
+*      If zero, use byte at *R0 as size
 * Output:
 * R0 - contains the new string address
 *    - >FFFF implies an error
-STRSET DATA STRWS,STRSET+4
+BUFSET DATA STRWS,BUFSET+4
 * Get routine parameters
        MOV  *R13,R0
+	   MOV  @2(13),R2
+	   JNE  SET0
 * Find space requirement
-       BL   @CALCSP
+	   MOVB *R0,R2
+	   SRL  R2,8
+       INC  R2
 * R2 now contains the required number
 * of bytes.
 * Find a free chunk of that size or 
 * greater.
-       MOV  @BUFADR,R3
+SET0   MOV  @BUFADR,R3
 SET1   MOV  *R3,R4
        CZC  @FMASK,R4
        JEQ  SET2
@@ -184,7 +177,7 @@ SET4   INCT R1
        RTWP
  
 * 
-* **** STREDT ****
+* **** BUFEDT ****
 * Replace an existing string in the
 * buffer. This will involve an algorithm
 * that reserves more space if the new
@@ -195,30 +188,33 @@ SET4   INCT R1
 * Input:
 * R0 - current address inside of buffer
 * R1 - string address outside of buffer
+* R2 - size, if 0 get size from byte at 
+*      *R1
 * Output:
 * R0 - contains the new string address
-STREDT DATA EDTWS,STREDT+>24
+BUFEDT DATA EDTWS,BUFEDT+>24
 EDTWS  BSS  >20
 * 
 * Delete the string from its old address
        MOV  *R13,R0
-       BLWP @STRDLT
+       BLWP @BUFDLT
 * Put the string at some new address
        MOV  @2(13),R0
-       BLWP @STRSET
+	   MOV  @4(13),R1
+       BLWP @BUFSET
 * Put the new string address in the
 * caller's R13.
        MOV  R0,*R13
        RTWP
  
 *
-* **** STRDLT ****
+* **** BUFDLT ****
 * Remove an existing string from the
 * buffer and mark the space as free.
 *
 * Input:
 * R0 - string address inside of buffer
-STRDLT DATA STRWS,STRDLT+4
+BUFDLT DATA STRWS,BUFDLT+4
 * Get routine parameters
        MOV  *R13,R0
 * The block to free is located two bytes
@@ -232,41 +228,6 @@ STRDLT DATA STRWS,STRDLT+4
        BL   @TRYMRG
        RTWP
 
-*
-* Calc Space Requirements
-* 
-* Input: 
-* R0 - byte at R0 should contain string
-*      length
-*
-* Output:
-* R0 - (unchanged)
-* R1 - zero
-* R2 - The required number of bytes
-CALCSP MOVB *R0,R2
-       SRL  R2,8
-* R2 now contains the number of 
-* characters in string.
-*
-* Add two bytes for chunk header.
-* Add one byte for the the string-
-* length byte.
-* Subtract one byte so we can 
-* round up when we divide
-       INCT R2
-* Divide by the block size
-       CLR  R1
-       DIV  @BLOCKZ,R1
-       INC  R1
-* R1 now contains the required number
-* of blocks in the chunk.
-* Multiply by the block size
-* to calculate the total number of bytes
-       MPY  @BLOCKZ,R1
-* R2 now contains the required number of
-* blocks
-       RT
-       
 *
 * Try Merge Free Space
 *
@@ -317,12 +278,15 @@ TMRG3  RT
 * R2 - (zero)
 * R3 - Address after string
 *
+* BL to CPYST if R2 contains the number
+* of bytes in a string
+*
 CPYSTR
 * Copy the number of characters in the
 * string plus the length byte.
        MOVB *R0,R2
        SRL  R2,8
-       INC  R2
+CPYST  INC  R2
 * Copy       
 CPYS1  MOVB *R0,*R3
        INC  R0
