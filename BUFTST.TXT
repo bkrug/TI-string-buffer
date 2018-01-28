@@ -162,7 +162,7 @@ TSET1  LI   R0,SPACE
        BLWP @BUFSET
        MOV  R0,R3
        LI   R0,SET1MB
-	   LI   R1,TERR1A-SET1MB
+       LI   R1,TERR1A-SET1MB
        BLWP @BUFSET
 * Test first string address
        LI   R2,SPACE+2
@@ -209,7 +209,7 @@ FSET1B MOV  R0,R0
        LI   R1,TERR1E-TERR1A
        BLWP @PRINTL
        RT
-FSET1C MOV  *R0,R0
+FSET1C MOV  *R3,R0
        LI   R1,TERR1H
        BLWP @MAKETX
        MOV  R2,R0
@@ -236,15 +236,17 @@ FSET1E MOV  *R0,R0
        MOV  R2,R0
        LI   R1,TERR1G
        BLWP @MAKETX
-       MOV  @TERR1J,@TERR1F
+       MOVB @TERR1J,@TERR1F
        LI   R0,TERR1E
        LI   R1,TERR1I-TERR1E
        BLWP @PRINTL
        RT       
 SET1MA BYTE 13
        TEXT '13 byte strng'
+	   EVEN
 SET1MB BYTE 14
        TEXT '14 byte string'
+	   EVEN
 TERR1A TEXT 'TSET1 failed. '
 TERR1B TEXT '1st chunk. '
        TEXT 'Expected string to be assigned '

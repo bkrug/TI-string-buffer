@@ -119,15 +119,18 @@ BUFSET DATA STRWS,BUFSET+4
 * Get routine parameters
        MOV  *R13,R0
 	   MOV  @2(13),R2
-	   JNE  SET0
-* Find space requirement
-	   SRL  R2,8
-       INCT R2
+* R2 is odd, add one.
+       INC R2
+       SRL  R2,1
+	   SLA  R2,1
+* Add 2 to space requirement due to
+* header size.
+	   INCT R2
 * R2 now contains the required number
 * of bytes.
 * Find a free chunk of that size or 
 * greater.
-SET0   MOV  @BUFADR,R3
+       MOV  @BUFADR,R3
 SET1   MOV  *R3,R4
        CZC  @FMASK,R4
        JEQ  SET2
@@ -157,6 +160,10 @@ SET2   BL   @TRYMRG
        S    R2,R4
 	   CI   R4,1
        JLE  SET4
+* Decrease offset at newly filled chunk.
+	   S    R4,*R3
+* Record the remainder of the offset at
+* next chunk.
        A    R2,R3
        MOV  R4,*R3
 * Copy string.
@@ -256,7 +263,7 @@ TMRG1  A    R4,R5
 TMGR2  MOV  R5,R4
        S    R3,R4
        JEQ  TMRG3
-* If new offset is greater than 0, but 
+* If new offset is greater than 0, put 
 * it in header of first chunk.
        MOV  R4,*R3
 TMRG3  RT
