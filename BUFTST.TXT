@@ -15,9 +15,9 @@ RUNTST BLWP @OPENF
        BL   @BADDTA
        BL   @TALC3
        BL   @BADDTA
-	   JMP  LOOP-8
        BL   @TSET1
        BL   @BADDTA
+	   JMP  LOOP-8
        BL   @TDLT1
        BL   @BADDTA
        BL   @TDLT2
@@ -169,13 +169,13 @@ TSET1  LI   R0,SPACE
        C    R2,R3
        JNE  FSET1A
 * Test second string address
-       LI   R2,SPACE+4+TERR1A-SET1MB
+       LI   R2,SPACE+4+SET1MB-SET1MA
        C    R2,R0
        JNE  FSET1B
 * Test first chunk
        LI   R2,SET1MB-SET1MA+>8002
        DECT R3
-       C    R2,*R1
+       C    R2,*R3
        JNE  FSET1C
 * Test second chunk
        LI   R2,TERR1A-SET1MB+>8002
@@ -183,7 +183,6 @@ TSET1  LI   R0,SPACE
        C    R2,*R0
        JNE  FSET1D
 * Test free chunk
-* >1000 - >10 - >30 = >FD0
        LI   R0,SPACE+4+TERR1A-SET1MA
        LI   R2,>1000-4-TERR1A+SET1MA
        C    *R0,R2

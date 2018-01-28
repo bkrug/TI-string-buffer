@@ -121,9 +121,8 @@ BUFSET DATA STRWS,BUFSET+4
 	   MOV  @2(13),R2
 	   JNE  SET0
 * Find space requirement
-	   MOVB *R0,R2
 	   SRL  R2,8
-       INC  R2
+       INCT R2
 * R2 now contains the required number
 * of bytes.
 * Find a free chunk of that size or 
@@ -152,12 +151,12 @@ SET2   BL   @TRYMRG
 * Save a copy of its address.
        MOV  R3,R1
 * Mark the chunk as used
-       MOV  R2,*R3
        SOC  @FMASK,*R3
 * If the chunk is large enough to split,
 * do so.       
        S    R2,R4
-       JEQ  SET4
+	   CI   R4,1
+       JLE  SET4
        A    R2,R3
        MOV  R4,*R3
 * Copy string.
