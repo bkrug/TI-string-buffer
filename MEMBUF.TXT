@@ -88,8 +88,6 @@ ALC1
 * R1 - address presumably outside the
 *      buffer
 * R2 - size to copy.
-*      If zero, treat first byte in
-*      chunk as size of remaining stream
 *
 * The calling code is responsile for
 * ensuring that there is sufficient
@@ -114,7 +112,6 @@ GET1   BL   @CPYST
 * Input:
 * R0 - string address outside of buffer
 * R1 - size
-*      If zero, use byte at *R0 as size
 * Output:
 * R0 - contains the new string address
 *    - >FFFF implies an error
@@ -188,8 +185,7 @@ SET4   INCT R1
 * Input:
 * R0 - current address inside of buffer
 * R1 - string address outside of buffer
-* R2 - size, if 0 get size from byte at 
-*      *R1
+* R2 - size
 * Output:
 * R0 - contains the new string address
 BUFEDT DATA EDTWS,BUFEDT+>24
