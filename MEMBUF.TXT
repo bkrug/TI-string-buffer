@@ -120,7 +120,7 @@ BUFSET DATA STRWS,BUFSET+4
        MOV  *R13,R0
 	   MOV  @2(13),R2
 * R2 is odd, add one.
-       INC R2
+       INC  R2
        SRL  R2,1
 	   SLA  R2,1
 * Add 2 to space requirement due to

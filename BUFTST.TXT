@@ -17,7 +17,6 @@ RUNTST BLWP @OPENF
        BL   @BADDTA
        BL   @TSET1
        BL   @BADDTA
-	   JMP  LOOP-8
        BL   @TDLT1
        BL   @BADDTA
        BL   @TDLT2
@@ -274,19 +273,22 @@ TERR1J TEXT '3rd'
 * at the begining of the buffer.
 TDLT1  LI   R0,SPACE
        LI   R1,>100
-       LI   R2,>10
        BLWP @BUFALC
 * Store short strings.
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
@@ -317,11 +319,17 @@ FDLT1  MOV  R0,R0
 DLTADR BSS  >8
 DLT1MA BYTE 12
        TEXT 'short string'
+	   EVEN
 DLT1MB BYTE 43
        TEXT 'a longer string that requires three blocks.'
+	   EVEN
 DERR1A TEXT 'TDLT1 failed. Expected long string at '
 DERR1B TEXT '.... but it was at '
 DERR1C TEXT '....'
+DERR1E TEXT '....'
+DERR1F TEXT '....'
+DERR1G TEXT '....'
+DERR1H TEXT '....'
 DERR1D 
 
 *
@@ -330,19 +338,22 @@ DERR1D
 * That shouldn't change the results.
 TDLT2  LI   R0,SPACE
        LI   R1,>100
-       LI   R2,>10
        BLWP @BUFALC
 * Store short strings.
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
+	   LI   R1,DLT1MB-DLT1MA
        BLWP @BUFSET
        MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
@@ -373,8 +384,8 @@ FDLT2  MOV  R0,R0
 DERR2A TEXT 'TDLT2 failed. Expected long string at '
 DERR2B TEXT '.... but it was at '
 DERR2C TEXT '....'
-DERR2D 
        EVEN
+DERR2D 
        
 * 
 * Create a small string, and edit it
@@ -382,29 +393,33 @@ DERR2D
 * the last string in the buffer.
 TEDT1  LI   R0,SPACE
        LI   R1,>100
-       LI   R2,>10
        BLWP @BUFALC
        LI   R0,TEDT1M
+	   LI   R1,TEDT1N-TEDT1M
        BLWP @BUFSET
-       MOV  R0,R2
+       MOV  R0,R3
        LI   R1,TEDT1N
+	   LI   R2,TEDT1O-TEDT1N
        BLWP @BUFEDT
-       C    R0,R2
+       C    R0,R3
        JNE  FEDT1A
        DECT R0
        MOV  *R0,R1
-       CI   R1,>8040
+       CI   R1,>8000+2+TEDT1O-TEDT1N
        JNE  FEDT1B
-       AI   R0,>40
+       LI   R0,SPACE+2+TEDT1O-TEDT1N
        MOV  *R0,R1
-       CI   R1,>00C0
+       CI   R1,>00C4
        JNE  FEDT1C
        RT
 FEDT1A LI   R0,EERR1A
        LI   R1,EERR1B-EERR1A
        BLWP @PRINTL
        RT
-FEDT1B LI   R0,EERR1B
+FEDT1B MOV  R1,R0
+       LI   R1,EERR1C-4
+	   BLWP @MAKETX
+       LI   R0,EERR1B
        LI   R1,EERR1C-EERR1B
        BLWP @PRINTL
        RT
@@ -417,12 +432,15 @@ FEDT1C MOV  R1,R0
        RT
 TEDT1M BYTE 12
        TEXT 'short string'
+	   EVEN
 TEDT1N BYTE 57
        TEXT 'longer string requiring more '
        TEXT 'blocks than the previous one'
+	   EVEN
 TEDT1O
 EERR1A TEXT 'TEDT1 failed. Location in buffer changed.'
-EERR1B TEXT 'TEDT1 failed. Chunk header was wrong.'
+EERR1B TEXT 'TEDT1 failed. Chunk header was wrong:'
+       BSS  >4
 EERR1C TEXT 'TEDT1 failed. Header of the next chunk '
        TEXT 'was wrong: '
 EERR1D BSS  >4
@@ -431,38 +449,48 @@ EERR1E
 * 
 * Create a small string, and edit it
 * into something larger but requiring
-* the same number of blocks.
+* a chunk that is the same size.
 TEDT2  LI   R0,SPACE
        LI   R1,>100
-       LI   R2,>20
        BLWP @BUFALC
        LI   R0,TEDT2M
+	   LI   R1,TEDT2N-TEDT2M
        BLWP @BUFSET
-       MOV  R0,R2
+* Save a copy of string address.
+       MOV  R0,R3
+* Save a copy of old header value.
+	   MOV  R0,R4
+	   DECT R4
+	   MOV  *R4,R4
        LI   R1,TEDT2N
+	   LI   R2,TEDT2O-TEDT2N
        BLWP @BUFEDT
-       C    R0,R2
+* Confirm address did not change
+       C    R0,R3
        JNE  FEDT2A
+* Confirm header did not change	   
        DECT R0
-       MOV  *R0,R1
-       CI   R1,>8020
+       MOV  *R0,R0
+       C    R0,R4
        JNE  FEDT2B
        RT
 FEDT2A LI   R0,EERR2A
        LI   R1,EERR2B-EERR2A
        BLWP @PRINTL
        RT
-FEDT2B LI   R0,EERR2B
+FEDT2B LI   R1,EERR2C-4
+       BLWP @MAKETX
+       LI   R0,EERR2B
        LI   R1,EERR2C-EERR2B
        BLWP @PRINTL
        RT
 TEDT2M BYTE 12
        TEXT 'short string'
-TEDT2N BYTE 22
-       TEXT 'longer string a little'
+TEDT2N BYTE 12
+       TEXT 'SHORT STRING'
 TEDT2O
 EERR2A TEXT 'TEDT2 failed. Location in buffer changed.'
-EERR2B TEXT 'TEDT2 failed. Chunk header changed.'
+EERR2B TEXT 'TEDT2 failed. Chunk header changed: ....'
 EERR2C
 
 * 
@@ -472,32 +500,36 @@ EERR2C
 * space used by the middle string.
 TEDT3  LI   R0,SPACE
        LI   R1,>100
-       LI   R2,>10
        BLWP @BUFALC
 *
        LI   R0,TEDT3M
+	   LI   R1,TEDT3N-TEDT3M
        BLWP @BUFSET
        MOV  R0,@ADRLST
        LI   R0,TEDT3M
+	   LI   R1,TEDT3N-TEDT3M
        BLWP @BUFSET
        MOV  R0,@ADRLST+2
        LI   R0,TEDT3M
+	   LI   R1,TEDT3N-TEDT3M
        BLWP @BUFSET
-       MOV  R0,@ADRLST+6
+       MOV  R0,@ADRLST+4
 *
        MOV  @ADRLST+2,R0
        BLWP @BUFDLT
 *
        MOV  @ADRLST,R0
        LI   R1,TEDT3N
+	   LI   R2,TEDT3O-TEDT3N
        BLWP @BUFEDT
 * Location should not have changed
        C    R0,@ADRLST
        JNE  FEDT3A
-* Chunk should use 2 blocks
+* Chunk should be large enough for
+* string plus 3 bytes.
        DECT R0
        MOV  *R0,R1
-       CI   R1,>8020
+       CI   R1,>8003+TEDT3O-TEDT3N
        JNE  FEDT3B
 * Next chunk should still be used
 * and should still be 1 block
@@ -538,19 +570,22 @@ EERR3D
 * after the fourth string.
 TEDT4  LI   R0,SPACE
        LI   R1,>100
-       LI   R2,>10
        BLWP @BUFALC
 *
        LI   R0,TEDT4M
+	   LI   R1,TEDT4N-TEDT4M
        BLWP @BUFSET
        MOV  R0,@ADRLS4
        LI   R0,TEDT4M
+	   LI   R1,TEDT4N-TEDT4M
        BLWP @BUFSET
        MOV  R0,@ADRLS4+2
        LI   R0,TEDT4M
+	   LI   R1,TEDT4N-TEDT4M
        BLWP @BUFSET
        MOV  R0,@ADRLS4+4
        LI   R0,TEDT4M
+	   LI   R1,TEDT4N-TEDT4M
        BLWP @BUFSET
        MOV  R0,@ADRLS4+6
 *
@@ -559,6 +594,7 @@ TEDT4  LI   R0,SPACE
 *
        MOV  @ADRLS4,R0
        LI   R1,TEDT4N
+	   LI   R1,TEDT4O-TEDT4N
        BLWP @BUFEDT
 * New address should be in the fifth block.
        CI   R0,SPACE+>42
