@@ -60,22 +60,21 @@ BUFALC DATA STRWS,BUFALC+4
 * Return error if buffer size is less
 * than or equal to 4
        CI   R1,4
-       JLE  ALC0
+       JLE  ALC2
 * Return error if buffer size is greater
 * than or equal to >8000
-       CI   R1,>8000
-       JL   ALC1
-ALC0   SETO *R13
-       RTWP
-ALC1   
+       MOV  R1,R1
+       JLT  ALC2
 * Record empty chunk covering whole
 * space.
-       MOV  R1,*R0
+ALC1   MOV  R1,*R0
 * Record address of end of buffer.
 	   A    R1,R0
 	   MOV  R0,@BUFEND
 * Report success.
        CLR  *R13
+       RTWP
+ALC2   SETO *R13
        RTWP
  
 * 
@@ -119,7 +118,7 @@ BUFSET DATA STRWS,BUFSET+4
 * Get routine parameters
        MOV  *R13,R0
 	   MOV  @2(13),R2
-* R2 is odd, add one.
+* If R2 is odd, add one.
        INC  R2
        SRL  R2,1
 	   SLA  R2,1
