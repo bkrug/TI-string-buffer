@@ -55,8 +55,8 @@ MAKEP1 MOV  R11,*R12+
        MOV  *R12,R11
        RT
 * Convert Byte to ASCII code
-CONVB  CI   R4,>0900
-       JH   CNVB2
+CONVB  CI   R4,>0A00
+       JHE  CNVB2
        AI   R4,>3000
        RT
 CNVB2  AI   R4,>3700
