@@ -74,6 +74,7 @@ ALC1   MOV  R1,*R0
 * Report success.
        CLR  *R13
        RTWP
+* Report error.
 ALC2   SETO *R13
        RTWP
  
@@ -86,7 +87,7 @@ ALC2   SETO *R13
 * R0 - string address within buffer.
 * R1 - address presumably outside the
 *      buffer
-* R2 - size to copy.
+* R2 - size of data to copy.
 *
 * The calling code is responsile for
 * ensuring that there is sufficient
@@ -98,10 +99,7 @@ BUFGET DATA STRWS,BUFGET+4
        MOV  *R13,R0
        MOV  @2(13),R3
 	   MOV  @4(13),R2
-	   JEQ  GET1
-       BL   @CPYSTR
-       RTWP
-GET1   BL   @CPYST
+       BL   @CPYST
 	   RTWP
 
 * 
@@ -165,14 +163,18 @@ SET2   BL   @TRYMRG
 * next chunk.
        A    R2,R3
        MOV  R4,*R3
+* R2 contains size of chunk. Decrease it
+* to the size of the contents.
+       DECT R2
 * Copy string.
 * R0 already contains the address of the
-* source string.
+* source data.
 * R1 contains the address of the 
 * chunk, but don't overcopy the header.
+* R2 contains size of data.
 SET4   INCT R1
        MOV  R1,R3
-       BL   @CPYSTR
+       BL   @CPYST
 * R1 now contains the address of the 
 * string. Put address in caller's R0.
        MOV  R1,*R13
@@ -272,6 +274,7 @@ TMRG3  RT
 *
 * Input:
 * R0 - Address of source string
+* R2 - Number of bytes to copy
 * R3 - Address of destination string
 *
 * Output:
@@ -279,20 +282,11 @@ TMRG3  RT
 * R2 - (zero)
 * R3 - Address after string
 *
-* BL to CPYST if R2 contains the number
-* of bytes in a string
-*
-CPYSTR
-* Copy the number of characters in the
-* string plus the length byte.
-       MOVB *R0,R2
-       SRL  R2,8
-CPYST  INC  R2
 * Copy       
-CPYS1  MOVB *R0,*R3
+CPYST  MOVB *R0,*R3
        INC  R0
        INC  R3
        DEC  R2
-       JNE  CPYS1
+       JNE  CPYST
        RT
        END

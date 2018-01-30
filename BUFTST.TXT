@@ -753,6 +753,7 @@ TGET1  LI   R0,SPACE
 * buffer.
 * Assign Copy-to address to R1.
        LI   R1,TGET1O
+	   LI   R2,TGET1Q-TGET1M
        BLWP @BUFGET
 * The data in TGET1O is expected to
 * match the pre-existing contents of
