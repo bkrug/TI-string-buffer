@@ -594,7 +594,7 @@ TEDT4  LI   R0,SPACE
 *
        MOV  @ADRLS4,R0
        LI   R1,TEDT4N
-	   LI   R1,TEDT4O-TEDT4N
+	   LI   R2,TEDT4O-TEDT4N
        BLWP @BUFEDT
 * New address should be in the fifth block.
        CI   R0,SPACE+>42
@@ -608,13 +608,13 @@ TEDT4  LI   R0,SPACE
 * block chunk.
        LI   R0,SPACE+>40
        MOV  *R0,R0
-       CI   R0,>8020
+       CI   R0,>801A
        JNE  FEDT4C
 * Seventh block should be start of 
 * remaining free space
-       LI   R0,SPACE+>60
+       LI   R0,SPACE+>5A
        MOV  *R0,R0
-       CI   R0,>00A0
+       CI   R0,>00A6
        JNE  FEDT4D
        RT
 FEDT4A LI   R1,EERR1I
@@ -662,46 +662,51 @@ EERR4G TEXT '....'
 EERR4H
 
 *
-* Create three strings, each using
-* two blocks.
+* Create three strings, the same length.
 * Delete the middle string.
-* Edit the first string to use three
-* blocks.
-* There should be one block empty
+* Edit the first string to use a little
+* more space.
+* There should be remaining empty space
 * between the remaining two strings.
 TEDT5  LI   R0,SPACE
        LI   R1,>300
-       LI   R2,>08
        BLWP @BUFALC
 *
        LI   R0,TEDT5M
+	   LI   R1,TEDT5N-TEDT5M
        BLWP @BUFSET
        LI   R0,TEDT5M
+	   LI   R1,TEDT5N-TEDT5M
        BLWP @BUFSET
+	   MOV  R0,R2
        LI   R0,TEDT5M
+	   LI   R1,TEDT5N-TEDT5M
        BLWP @BUFSET
 *
-       LI   R0,SPACE+>12
+       MOV  R2,R0
        BLWP @BUFDLT
 *
        LI   R0,SPACE+2
        LI   R1,TEDT5N
+	   LI   R2,TEDT5O-TEDT5N
        BLWP @BUFEDT
-*
+* Test address space
        CI   R0,SPACE+2
        JNE  FEDT5
-*
+* Test chunk header
        LI   R0,SPACE
        MOV  *R0,R0
-       CI   R0,>8018
+       CI   R0,>8016
        JNE  FEDT5B
-*
-       LI   R0,SPACE+>18
+* Test chunk header of free space
+       LI   R0,SPACE+>16
        MOV  *R0,R0
-       CI   R0,>0008
+       CI   R0,>0002
        JNE  FEDT5C
        RT
-FEDT5  LI   R0,EERR5A
+FEDT5  LI   R1,EERR5B-4
+       BLWP @MAKETX
+       LI   R0,EERR5A
        LI   R1,EERR5B-EERR5A
        BLWP @PRINTL
        RT
@@ -723,7 +728,7 @@ TEDT5N BYTE 19
        TEXT '0123456789ABCDEF012'
 TEDT5O
 EERR5A TEXT 'FEDT5 failed. '
-       TEXT 'wrong address for string.'
+       TEXT 'wrong address for string: ....'
 EERR5B TEXT 'FEDT5 failed. '
        TEXT 'Expected header 8018 but saw '
 EERR5C TEXT '....'
