@@ -219,15 +219,14 @@ EDTWS  BSS  >20
 * R0 - string address inside of buffer
 BUFDLT DATA STRWS,BUFDLT+4
 * Get routine parameters
-       MOV  *R13,R0
+       MOV  *R13,R3
 * The block to free is located two bytes
 * before the string address.
-       DECT R0
+       DECT R3
 * Mark the block free
-       SZC  @FMASK,*R0
+       SZC  @FMASK,*R3
 * Merge this newly freed chunk with 
 * the following chunk if it is free.
-       MOV  R0,R3
        BL   @TRYMRG
        RTWP
 
