@@ -742,13 +742,14 @@ EERR5F EVEN
 * Copy it to a new location
 TGET1  LI   R0,SPACE
        LI   R1,>300
-       LI   R2,>08
        BLWP @BUFALC
 *
        LI   R0,TGET1M
+	   LI   R1,TGET1Q-TGET1M
        BLWP @BUFSET
 * R0 now contains address of string in
 * buffer.
+* Assign Copy-to address to R1.
        LI   R1,TGET1O
        BLWP @BUFGET
 * The data in TGET1O is expected to
@@ -771,7 +772,7 @@ FGET1  LI   R2,TGET1N
        RT
 TGET1M BYTE >12
        TEXT 'THIS IS SOME TEXT.'
-       BYTE 0
+TGET1Q BYTE 0
        DATA 0,0
 TGET1N BYTE >12
        TEXT 'THIS IS SOME TEXT.'
@@ -781,7 +782,7 @@ TGET1O DATA 0,0,0,0
        DATA 0,0,0,0
        DATA 0,>877F,>F805,>E986
 TGET1P
-GERR1  TEXT 'GERR1 failed. '
+GERR1  TEXT 'TGET1 failed. '
        TEXT 'The strings stopped matching '
        TEXT 'at '
 GERR2  TEXT '....'
