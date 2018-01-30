@@ -31,7 +31,9 @@ RUNTST BLWP @OPENF
        BL   @BADDTA
        BL   @TEDT5
        BL   @BADDTA
-       BL   @TGET1       
+       BL   @TGET1
+       BL   @BADDTA
+       BL   @TGET2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -788,4 +790,64 @@ GERR1  TEXT 'TGET1 failed. '
 GERR2  TEXT '....'
        TEXT ' bytes from the start.'
 GERR3  EVEN
+
+*
+* Store and retrieve something other
+* than string
+TGET2  LI   R0,SPACE
+       LI   R1,>180
+	   BLWP @BUFALC
+*
+       LI   R0,TGET2M
+	   LI   R1,>8
+	   BLWP @BUFSET
+*
+       LI   R1,TGET2O
+	   LI   R2,>8
+	   BLWP @BUFGET
+*
+* The data in TGET2O is expected to
+* match the pre-existing contents of
+* TGET2N.
+       LI   R0,TGET2N
+TGET2A C    *R0+,*R1+
+       JNE  FGET2
+       CI   R0,TGET2O
+       JL   TGET2A
+       RT
+FGET2  LI   R1,GERR2B
+       LI   R2,TGET2N
+FGET2A MOV  *R2,R0
+	   BLWP @MAKETX
+	   AI   R1,4
+	   INCT R2
+	   CI   R2,TGET2O
+	   JL   FGET2A
+	   LI   R1,GERR2C
+FGET2B MOV  *R2,R0
+	   BLWP @MAKETX
+	   AI   R1,4
+	   INCT R2
+	   CI   R2,TGET2P
+	   JL   FGET2B
+       LI   R0,GERR2A
+       LI   R1,GERR2D-GERR2A
+       BLWP @PRINTL
+	   RT
+TGET2M DATA >47AF,>8410,>4719,>C381
+TGET2N DATA >47AF,>8410,>4719,>C381
+       DATA >FEFE,>FEFE
+TGET2O DATA 0,0,0,0
+       DATA >FEFE,>FEFE
+TGET2P 
+* >40 bytes of buffer space that *might*
+* protect the output text from being 
+* overwritten
+       BSS  >40
+GERR2A TEXT 'TGET2 failed. '
+       TEXT 'Excpected '
+GERR2B BSS  >18
+	   TEXT ' but found '
+GERR2C BSS  >18
+GERR2D 
        END
