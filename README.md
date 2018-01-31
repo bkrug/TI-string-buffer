@@ -19,7 +19,7 @@ Marks a used chunk of memory as free.
 BUFEDT
 Really just calls BUFDLT first and BUFSET afterwards.
 
-The compiled code uses 310 bytes of memory. If you want to save another 56 bytes, delete the BUFEDT routine.
+The compiled code uses 306 bytes of memory. If you want to save another 56 bytes, delete the BUFEDT routine.
 
 If you wish to run unit tests on the code, assemble all three source files, load them through E/A option 3, and run RUNTST.
 The source files end with the .TXT extension because that seems to be a requirement for my preference of editing the source in NOTEPAD++ and assemblying in the Classic99 emulator.

@@ -289,9 +289,7 @@ TMRG3  RT
 * R3 - Address after string
 *
 * Copy       
-CPYST  MOVB *R0,*R3
-       INC  R0
-       INC  R3
+CPYST  MOVB *R0+,*R3+
        DEC  R2
        JNE  CPYST
        RT
