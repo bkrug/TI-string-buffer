@@ -65,6 +65,9 @@ BUFALC DATA STRWS,BUFALC+4
 * than or equal to >8000
        MOV  R1,R1
        JLT  ALC2
+* Return error if buffer size is odd.
+       COC  @ONE,R1
+       JEQ  ALC2	   
 * Record empty chunk covering whole
 * space.
 ALC1   MOV  R1,*R0
@@ -77,6 +80,7 @@ ALC1   MOV  R1,*R0
 * Report error.
 ALC2   SETO *R13
        RTWP
+ONE    DATA >0001
  
 * 
 * **** BUFGET ****

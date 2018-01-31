@@ -297,7 +297,9 @@ TERR1J TEXT '3rd'
 * You should get an error message.
 TSET2  SETO R3
        LI   R0,SPACE
-       LI   R1,>22
+* >F-bytes of data plus 2 header bytes
+* rounded up to >12 bytes per string.
+       LI   R1,>24
        BLWP @BUFALC
 *
        LI   R0,TSET2M
@@ -345,7 +347,7 @@ SERR2D
 * it is too big to fit.
 TSET3  SETO R3
        LI   R0,SPACE
-       LI   R1,>24
+       LI   R1,>26
        BLWP @BUFALC
 *
        LI   R0,TSET3M
