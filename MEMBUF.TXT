@@ -157,7 +157,11 @@ SET2   BL   @TRYMRG
 * Mark the chunk as used
        SOC  @FMASK,*R3
 * If the chunk is large enough to split,
-* do so.       
+* do so.
+* Note that it is not possible for R4-R2
+* to equal 1. If the difference is not 
+* zero, then there is enough space for add
+* chunk header.
        S    R2,R4
        JEQ  SET4
 * Decrease offset at newly filled chunk.
