@@ -159,8 +159,7 @@ SET2   BL   @TRYMRG
 * If the chunk is large enough to split,
 * do so.       
        S    R2,R4
-	   CI   R4,1
-       JLE  SET4
+       JEQ  SET4
 * Decrease offset at newly filled chunk.
 	   S    R4,*R3
 * Record the remainder of the offset at
