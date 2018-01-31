@@ -15,7 +15,13 @@ RUNTST BLWP @OPENF
        BL   @BADDTA
        BL   @TALC3
        BL   @BADDTA
+       BL   @TALC4
+       BL   @BADDTA
        BL   @TSET1
+       BL   @BADDTA
+       BL   @TSET2
+       BL   @BADDTA
+       BL   @TSET3
        BL   @BADDTA
        BL   @TDLT1
        BL   @BADDTA
@@ -126,8 +132,7 @@ FALC2M TEXT 'TALC2 failed. '
 FALC2N EVEN
 
 *
-* Allocate >0003 bytes of space with
-* >40 byte blocks.
+* Allocate >0003 bytes of space.
 * Expect the allocation to fail because
 * >0003 is too small.
 TALC3  LI   R0,SPACE
@@ -145,6 +150,26 @@ FALC3M TEXT 'TALC3 failed. '
        TEXT 'Expected allocation to fail '
        TEXT 'because space too s.'
 FALC3N EVEN
+
+*
+* Allocate >0013 bytes of space.
+* Expect the allocation to fail because
+* space must be even.
+TALC4  LI   R0,SPACE
+       LI   R1,>13
+       BLWP @BUFALC
+* Test success flag
+       MOV  R0,R0
+       JEQ  FALC4
+       RT
+FALC4  LI   R0,FALC4M
+       LI   R1,FALC4N-FALC4M
+       BLWP @PRINTL
+       RT
+FALC4M TEXT 'TALC4 failed. '
+       TEXT 'Expected allocation to fail '
+       TEXT 'because size must be even.'
+FALC4N EVEN
  
 *
 * Put strings at a new location in the
@@ -264,7 +289,101 @@ TERR1H TEXT '....'
 TERR1I TEXT '2nd'
 TERR1J TEXT '3rd'
        EVEN
-       
+  
+*
+* Put two strings in the buffer. They
+* should fill up the buffer completely.
+* Put a third string in the buffer.
+* You should get an error message.
+TSET2  SETO R3
+       LI   R0,SPACE
+       LI   R1,>22
+       BLWP @BUFALC
+*
+       LI   R0,TSET2M
+	   LI   R1,TSET2N-TSET2M
+       BLWP @BUFSET
+	   C    R0,R3
+	   JEQ  FSET2A
+*
+       LI   R0,TSET2M
+       BLWP @BUFSET	   
+	   C    R0,R3
+	   JEQ  FSET2B
+*
+       LI   R0,TSET2M
+       BLWP @BUFSET
+	   C    R0,R3
+	   JNE  FSET2C
+       RT
+FSET2A LI   R0,SERR2A
+       LI   R1,SERR2B-SERR2A
+	   BLWP @PRINTL
+	   RT
+FSET2B LI   R0,SERR2B
+       LI   R1,SERR2C-SERR2B
+	   BLWP @PRINTL
+	   RT
+FSET2C LI   R0,SERR2C
+       LI   R1,SERR2D-SERR2C
+	   BLWP @PRINTL
+	   RT
+TSET2M BYTE 14
+       TEXT '14 byte string'
+TSET2N
+SERR2A TEXT 'TSET2. First SET failed, expected success.'
+SERR2B TEXT 'TSET2. Second SET failed, expected success.'
+SERR2C TEXT 'TSET2. Third SET succeeded, expected failure.'
+SERR2D
+
+*
+* Put two strings in the buffer. They
+* should leave two empty bytes in the 
+* buffer.
+* Put a third string in the buffer.
+* You should get an error message assigned
+* it is too big to fit.
+TSET3  SETO R3
+       LI   R0,SPACE
+       LI   R1,>24
+       BLWP @BUFALC
+*
+       LI   R0,TSET3M
+	   LI   R1,TSET3N-TSET3M
+       BLWP @BUFSET
+	   C    R0,R3
+	   JEQ  FSET3A
+*
+       LI   R0,TSET3M
+       BLWP @BUFSET	   
+	   C    R0,R3
+	   JEQ  FSET3B
+*
+       LI   R0,TSET3M
+       BLWP @BUFSET
+	   C    R0,R3
+	   JNE  FSET3C
+       RT
+FSET3A LI   R0,SERR3A
+       LI   R1,SERR3B-SERR3A
+	   BLWP @PRINTL
+	   RT
+FSET3B LI   R0,SERR3B
+       LI   R1,SERR3C-SERR3B
+	   BLWP @PRINTL
+	   RT
+FSET3C LI   R0,SERR3C
+       LI   R1,SERR3D-SERR3C
+	   BLWP @PRINTL
+	   RT
+TSET3M BYTE 14
+       TEXT '14 byte string'
+TSET3N
+SERR3A TEXT 'TSET3. First SET failed, expected success.'
+SERR3B TEXT 'TSET3. Second SET failed, expected success.'
+SERR3C TEXT 'TSET3. Third SET succeeded, expected failure.'
+SERR3D
+
 *
 * Put four strings of that require one
 * block of memory in the buffer. Then
