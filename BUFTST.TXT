@@ -23,8 +23,8 @@ RUNTST BLWP @OPENF
        BL   @TFRE1
        BL   @BADDTA
        BL   @TFRE2
-*       BL   @BADDTA
-*       BL   @TEDT1
+       BL   @BADDTA
+       BL   @TEDT1
 *       BL   @BADDTA
 *       BL   @TEDT2
 *       BL   @BADDTA
@@ -482,28 +482,28 @@ DERR2D
 BUFEDT
 
 * 
-* Create a small string, and edit it
-* into something larger. This string is
-* the last string in the buffer.
+* Allocate a small space, free it, and
+* allocate another larger space. This
+* string is the last string in the
+* buffer.
 TEDT1  LI   R0,SPACE
        LI   R1,>100
        BLWP @BUFINT
-       LI   R0,TEDT1M
-       LI   R1,TEDT1N-TEDT1M
-       BLWP @BUFINT
+       LI   R0,15
+       BLWP @BUFALC
        MOV  R0,R3
-       LI   R1,TEDT1N
-       LI   R2,TEDT1O-TEDT1N
-       BLWP @BUFEDT
+       BLWP @BUFREE
+       LI   R0,60
+       BLWP @BUFALC
        C    R0,R3
        JNE  FEDT1A
        DECT R0
        MOV  *R0,R1
-       CI   R1,>8000+2+TEDT1O-TEDT1N
+       CI   R1,>803E
        JNE  FEDT1B
-       LI   R0,SPACE+2+TEDT1O-TEDT1N
+       LI   R0,SPACE+>3E
        MOV  *R0,R1
-       CI   R1,>00C4
+       CI   R1,>0100->3E
        JNE  FEDT1C
        RT
 FEDT1A LI   R0,EERR1A
@@ -524,13 +524,6 @@ FEDT1C MOV  R1,R0
        LI   R1,EERR1E-EERR1C
        BLWP @PRINTL
        RT
-TEDT1M BYTE 12
-       TEXT 'short string'
-       EVEN
-TEDT1N BYTE 57
-       TEXT 'longer string requiring more '
-       TEXT 'blocks than the previous one'
-       EVEN
 TEDT1O
 EERR1A TEXT 'TEDT1 failed. Location in buffer changed.'
 EERR1B TEXT 'TEDT1 failed. Chunk header was wrong:'
