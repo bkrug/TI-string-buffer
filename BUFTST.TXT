@@ -25,10 +25,10 @@ RUNTST BLWP @OPENF
        BL   @TFRE2
        BL   @BADDTA
        BL   @TEDT1
-*       BL   @BADDTA
-*       BL   @TEDT2
-*       BL   @BADDTA
-*       BL   @TEDT3
+       BL   @BADDTA
+       BL   @TEDT2
+       BL   @BADDTA
+       BL   @TEDT3
 *       BL   @BADDTA
 *       BL   @TEDT4
 *       BL   @BADDTA
@@ -534,24 +534,22 @@ EERR1D BSS  >4
 EERR1E
 
 * 
-* Create a small string, and edit it
-* into something larger but requiring
-* a chunk that is the same size.
+* Reserve some space, free it, and
+* reserve space of the same size.
 TEDT2  LI   R0,SPACE
        LI   R1,>100
        BLWP @BUFINT
-       LI   R0,TEDT2M
-       LI   R1,TEDT2N-TEDT2M
-       BLWP @BUFINT
-* Save a copy of string address.
+       LI   R0,>F
+       BLWP @BUFALC
+* Save a copy of address.
        MOV  R0,R3
 * Save a copy of old header value.
        MOV  R0,R4
        DECT R4
        MOV  *R4,R4
-       LI   R1,TEDT2N
-       LI   R2,TEDT2O-TEDT2N
-       BLWP @BUFEDT
+       BLWP @BUFREE
+       LI   R0,>F
+       BLWP @BUFALC
 * Confirm address did not change
        C    R0,R3
        JNE  FEDT2A
@@ -571,52 +569,44 @@ FEDT2B LI   R1,EERR2C-4
        LI   R1,EERR2C-EERR2B
        BLWP @PRINTL
        RT
-TEDT2M BYTE 12
-       TEXT 'short string'
-TEDT2N BYTE 12
-       TEXT 'SHORT STRING'
-TEDT2O
 EERR2A TEXT 'TEDT2 failed. Location in buffer changed.'
 EERR2B TEXT 'TEDT2 failed. Chunk header changed: ....'
 EERR2C
 
 * 
-* Create three small strings.
-* Delete the middle string.
-* Edit the first string to fill the
-* space used by the middle string.
+* Reserve three small chunks.
+* Free the middle chunk.
+* Free the first chunk.
+* Reserve enough space to fill part of the middle chunk.
 TEDT3  LI   R0,SPACE
        LI   R1,>100
        BLWP @BUFINT
 *
-       LI   R0,TEDT3M
-       LI   R1,TEDT3N-TEDT3M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLST
-       LI   R0,TEDT3M
-       LI   R1,TEDT3N-TEDT3M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLST+2
-       LI   R0,TEDT3M
-       LI   R1,TEDT3N-TEDT3M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLST+4
 *
        MOV  @ADRLST+2,R0
        BLWP @BUFREE
-*
        MOV  @ADRLST,R0
-       LI   R1,TEDT3N
-       LI   R2,TEDT3O-TEDT3N
-       BLWP @BUFEDT
+       BLWP @BUFREE
+*
+       LI   R0,>19
+       BLWP @BUFALC
 * Location should not have changed
        C    R0,@ADRLST
        JNE  FEDT3A
 * Chunk should be large enough for
-* string plus 3 bytes.
+* data plus 3 bytes.
        DECT R0
        MOV  *R0,R1
-       CI   R1,>8003+TEDT3O-TEDT3N
+       CI   R1,>801C
        JNE  FEDT3B
 * Next chunk should still be used
 * and should still be 1 block
@@ -638,11 +628,6 @@ FEDT3C LI   R0,EERR3C
        BLWP @PRINTL
        RT
 ADRLST BSS  >6
-TEDT3M BYTE 12
-       TEXT 'short string'
-TEDT3N BYTE 22
-       TEXT 'longer string a little'
-TEDT3O
 EERR3A TEXT 'TEDT3 failed. Location in buffer changed.'
 EERR3B TEXT 'TEDT3 failed. Chunk header has wrong offset.'
 EERR3C TEXT 'TEDT3 failed. Chunk header for the following'
