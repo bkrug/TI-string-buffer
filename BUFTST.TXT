@@ -15,10 +15,10 @@ RUNTST BLWP @OPENF
        BL   @TINT4
        BL   @BADDTA
        BL   @TALC1
-*       BL   @BADDTA
-*       BL   @TALC2
-*       BL   @BADDTA
-*       BL   @TALC3
+       BL   @BADDTA
+       BL   @TALC2
+       BL   @BADDTA
+       BL   @TALC3
 *       BL   @BADDTA
 *       BL   @TFRE1
 *       BL   @BADDTA
@@ -292,47 +292,42 @@ TERR1J TEXT '3rd'
 * should fill up the buffer completely.
 * Put a third string in the buffer.
 * You should get an error message.
-TALC2  SETO R3
-       LI   R0,SPACE
+TALC2  LI   R0,SPACE
 * >F-bytes of data plus 2 header bytes
 * rounded up to >12 bytes per string.
        LI   R1,>24
        BLWP @BUFINT
 *
-       LI   R0,TALC2M
-	   LI   R1,TALC2N-TALC2M
-       BLWP @BUFINT
-	   C    R0,R3
-	   JEQ  FALC2A
+       LI   R0,>F
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JEQ  FALC2A
 *
-       LI   R0,TALC2M
-       BLWP @BUFINT	   
-	   C    R0,R3
-	   JEQ  FALC2B
+       LI   R0,>F
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JEQ  FALC2B
 *
-       LI   R0,TALC2M
-       BLWP @BUFINT
-	   C    R0,R3
-	   JNE  FALC2C
+       LI   R0,>F
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JNE  FALC2C
        RT
 FALC2A LI   R0,SERR2A
        LI   R1,SERR2B-SERR2A
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC2B LI   R0,SERR2B
        LI   R1,SERR2C-SERR2B
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC2C LI   R0,SERR2C
        LI   R1,SERR2D-SERR2C
-	   BLWP @PRINTL
-	   RT
-TALC2M BYTE 14
-       TEXT '14 byte string'
-TALC2N
-SERR2A TEXT 'TALC2. First SET failed, expected success.'
-SERR2B TEXT 'TALC2. Second SET failed, expected success.'
-SERR2C TEXT 'TALC2. Third SET succeeded, expected failure.'
+       BLWP @PRINTL
+       RT
+SERR2A TEXT 'TALC2. First ALC failed, expected success.'
+SERR2B TEXT 'TALC2. Second ALC failed, expected success.'
+SERR2C TEXT 'TALC2. Third ALC succeeded, expected failure.'
 SERR2D
 
 *
@@ -342,45 +337,40 @@ SERR2D
 * Put a third string in the buffer.
 * You should get an error message assigned
 * it is too big to fit.
-TALC3  SETO R3
-       LI   R0,SPACE
+TALC3  LI   R0,SPACE
        LI   R1,>26
        BLWP @BUFINT
 *
-       LI   R0,TALC3M
-	   LI   R1,TALC3N-TALC3M
-       BLWP @BUFINT
-	   C    R0,R3
-	   JEQ  FALC3A
+       LI   R0,>F
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JEQ  FALC3A
 *
-       LI   R0,TALC3M
-       BLWP @BUFINT	   
-	   C    R0,R3
-	   JEQ  FALC3B
+       LI   R0,>F
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JEQ  FALC3B
 *
-       LI   R0,TALC3M
-       BLWP @BUFINT
-	   C    R0,R3
-	   JNE  FALC3C
+       LI   R0,>F
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JNE  FALC3C
        RT
 FALC3A LI   R0,SERR3A
        LI   R1,SERR3B-SERR3A
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC3B LI   R0,SERR3B
        LI   R1,SERR3C-SERR3B
-	   BLWP @PRINTL
-	   RT
+       BLWP @PRINTL
+       RT
 FALC3C LI   R0,SERR3C
        LI   R1,SERR3D-SERR3C
-	   BLWP @PRINTL
-	   RT
-TALC3M BYTE 14
-       TEXT '14 byte string'
-TALC3N
-SERR3A TEXT 'TALC3. First SET failed, expected success.'
-SERR3B TEXT 'TALC3. Second SET failed, expected success.'
-SERR3C TEXT 'TALC3. Third SET succeeded, expected failure.'
+       BLWP @PRINTL
+       RT
+SERR3A TEXT 'TALC3. First ALC failed, expected success.'
+SERR3B TEXT 'TALC3. Second ALC failed, expected success.'
+SERR3C TEXT 'TALC3. Third ALC succeeded, expected failure.'
 SERR3D
 
 *
@@ -396,19 +386,19 @@ TFRE1  LI   R0,SPACE
        BLWP @BUFINT
 * Store short strings.
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
@@ -439,10 +429,10 @@ FFRE1  MOV  R0,R0
 DLTADR BSS  >8
 DLT1MA BYTE 12
        TEXT 'short string'
-	   EVEN
+       EVEN
 DLT1MB BYTE 43
        TEXT 'a longer string that requires three blocks.'
-	   EVEN
+       EVEN
 DERR1A TEXT 'TFRE1 failed. Expected long string at '
 DERR1B TEXT '.... but it was at '
 DERR1C TEXT '....'
@@ -461,19 +451,19 @@ TFRE2  LI   R0,SPACE
        BLWP @BUFINT
 * Store short strings.
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
-	   LI   R1,DLT1MB-DLT1MA
+       LI   R1,DLT1MB-DLT1MA
        BLWP @BUFINT
        MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
@@ -517,11 +507,11 @@ TEDT1  LI   R0,SPACE
        LI   R1,>100
        BLWP @BUFINT
        LI   R0,TEDT1M
-	   LI   R1,TEDT1N-TEDT1M
+       LI   R1,TEDT1N-TEDT1M
        BLWP @BUFINT
        MOV  R0,R3
        LI   R1,TEDT1N
-	   LI   R2,TEDT1O-TEDT1N
+       LI   R2,TEDT1O-TEDT1N
        BLWP @BUFEDT
        C    R0,R3
        JNE  FEDT1A
@@ -540,7 +530,7 @@ FEDT1A LI   R0,EERR1A
        RT
 FEDT1B MOV  R1,R0
        LI   R1,EERR1C-4
-	   BLWP @MAKETX
+       BLWP @MAKETX
        LI   R0,EERR1B
        LI   R1,EERR1C-EERR1B
        BLWP @PRINTL
@@ -554,11 +544,11 @@ FEDT1C MOV  R1,R0
        RT
 TEDT1M BYTE 12
        TEXT 'short string'
-	   EVEN
+       EVEN
 TEDT1N BYTE 57
        TEXT 'longer string requiring more '
        TEXT 'blocks than the previous one'
-	   EVEN
+       EVEN
 TEDT1O
 EERR1A TEXT 'TEDT1 failed. Location in buffer changed.'
 EERR1B TEXT 'TEDT1 failed. Chunk header was wrong:'
@@ -576,21 +566,21 @@ TEDT2  LI   R0,SPACE
        LI   R1,>100
        BLWP @BUFINT
        LI   R0,TEDT2M
-	   LI   R1,TEDT2N-TEDT2M
+       LI   R1,TEDT2N-TEDT2M
        BLWP @BUFINT
 * Save a copy of string address.
        MOV  R0,R3
 * Save a copy of old header value.
-	   MOV  R0,R4
-	   DECT R4
-	   MOV  *R4,R4
+       MOV  R0,R4
+       DECT R4
+       MOV  *R4,R4
        LI   R1,TEDT2N
-	   LI   R2,TEDT2O-TEDT2N
+       LI   R2,TEDT2O-TEDT2N
        BLWP @BUFEDT
 * Confirm address did not change
        C    R0,R3
        JNE  FEDT2A
-* Confirm header did not change	   
+* Confirm header did not change       
        DECT R0
        MOV  *R0,R0
        C    R0,R4
@@ -625,15 +615,15 @@ TEDT3  LI   R0,SPACE
        BLWP @BUFINT
 *
        LI   R0,TEDT3M
-	   LI   R1,TEDT3N-TEDT3M
+       LI   R1,TEDT3N-TEDT3M
        BLWP @BUFINT
        MOV  R0,@ADRLST
        LI   R0,TEDT3M
-	   LI   R1,TEDT3N-TEDT3M
+       LI   R1,TEDT3N-TEDT3M
        BLWP @BUFINT
        MOV  R0,@ADRLST+2
        LI   R0,TEDT3M
-	   LI   R1,TEDT3N-TEDT3M
+       LI   R1,TEDT3N-TEDT3M
        BLWP @BUFINT
        MOV  R0,@ADRLST+4
 *
@@ -642,7 +632,7 @@ TEDT3  LI   R0,SPACE
 *
        MOV  @ADRLST,R0
        LI   R1,TEDT3N
-	   LI   R2,TEDT3O-TEDT3N
+       LI   R2,TEDT3O-TEDT3N
        BLWP @BUFEDT
 * Location should not have changed
        C    R0,@ADRLST
@@ -695,19 +685,19 @@ TEDT4  LI   R0,SPACE
        BLWP @BUFINT
 *
        LI   R0,TEDT4M
-	   LI   R1,TEDT4N-TEDT4M
+       LI   R1,TEDT4N-TEDT4M
        BLWP @BUFINT
        MOV  R0,@ADRLS4
        LI   R0,TEDT4M
-	   LI   R1,TEDT4N-TEDT4M
+       LI   R1,TEDT4N-TEDT4M
        BLWP @BUFINT
        MOV  R0,@ADRLS4+2
        LI   R0,TEDT4M
-	   LI   R1,TEDT4N-TEDT4M
+       LI   R1,TEDT4N-TEDT4M
        BLWP @BUFINT
        MOV  R0,@ADRLS4+4
        LI   R0,TEDT4M
-	   LI   R1,TEDT4N-TEDT4M
+       LI   R1,TEDT4N-TEDT4M
        BLWP @BUFINT
        MOV  R0,@ADRLS4+6
 *
@@ -716,7 +706,7 @@ TEDT4  LI   R0,SPACE
 *
        MOV  @ADRLS4,R0
        LI   R1,TEDT4N
-	   LI   R2,TEDT4O-TEDT4N
+       LI   R2,TEDT4O-TEDT4N
        BLWP @BUFEDT
 * New address should be in the fifth block.
        CI   R0,SPACE+>42
@@ -795,14 +785,14 @@ TEDT5  LI   R0,SPACE
        BLWP @BUFINT
 *
        LI   R0,TEDT5M
-	   LI   R1,TEDT5N-TEDT5M
+       LI   R1,TEDT5N-TEDT5M
        BLWP @BUFINT
        LI   R0,TEDT5M
-	   LI   R1,TEDT5N-TEDT5M
+       LI   R1,TEDT5N-TEDT5M
        BLWP @BUFINT
-	   MOV  R0,R2
+       MOV  R0,R2
        LI   R0,TEDT5M
-	   LI   R1,TEDT5N-TEDT5M
+       LI   R1,TEDT5N-TEDT5M
        BLWP @BUFINT
 *
        MOV  R2,R0
@@ -810,7 +800,7 @@ TEDT5  LI   R0,SPACE
 *
        LI   R0,SPACE+2
        LI   R1,TEDT5N
-	   LI   R2,TEDT5O-TEDT5N
+       LI   R2,TEDT5O-TEDT5N
        BLWP @BUFEDT
 * Test address space
        CI   R0,SPACE+2
@@ -867,13 +857,13 @@ TGET1  LI   R0,SPACE
        BLWP @BUFINT
 *
        LI   R0,TGET1M
-	   LI   R1,TGET1Q-TGET1M
+       LI   R1,TGET1Q-TGET1M
        BLWP @BUFINT
 * R0 now contains address of string in
 * buffer.
 * Assign Copy-to address to R1.
        LI   R1,TGET1O
-	   LI   R2,TGET1Q-TGET1M
+       LI   R2,TGET1Q-TGET1M
        BLWP @BUFCPY
 * The data in TGET1O is expected to
 * match the pre-existing contents of
@@ -917,15 +907,15 @@ GERR3  EVEN
 * than string
 TGET2  LI   R0,SPACE
        LI   R1,>180
-	   BLWP @BUFINT
+       BLWP @BUFINT
 *
        LI   R0,TGET2M
-	   LI   R1,>8
-	   BLWP @BUFINT
+       LI   R1,>8
+       BLWP @BUFINT
 *
        LI   R1,TGET2O
-	   LI   R2,>8
-	   BLWP @BUFCPY
+       LI   R2,>8
+       BLWP @BUFCPY
 *
 * The data in TGET2O is expected to
 * match the pre-existing contents of
@@ -939,22 +929,22 @@ TGET2A C    *R0+,*R1+
 FGET2  LI   R1,GERR2B
        LI   R2,TGET2N
 FGET2A MOV  *R2,R0
-	   BLWP @MAKETX
-	   AI   R1,4
-	   INCT R2
-	   CI   R2,TGET2O
-	   JL   FGET2A
-	   LI   R1,GERR2C
+       BLWP @MAKETX
+       AI   R1,4
+       INCT R2
+       CI   R2,TGET2O
+       JL   FGET2A
+       LI   R1,GERR2C
 FGET2B MOV  *R2,R0
-	   BLWP @MAKETX
-	   AI   R1,4
-	   INCT R2
-	   CI   R2,TGET2P
-	   JL   FGET2B
+       BLWP @MAKETX
+       AI   R1,4
+       INCT R2
+       CI   R2,TGET2P
+       JL   FGET2B
        LI   R0,GERR2A
        LI   R1,GERR2D-GERR2A
        BLWP @PRINTL
-	   RT
+       RT
 TGET2M DATA >47AF,>8410,>4719,>C381
 TGET2N DATA >47AF,>8410,>4719,>C381
        DATA >FEFE,>FEFE
@@ -968,7 +958,7 @@ TGET2P
 GERR2A TEXT 'TGET2 failed. '
        TEXT 'Excpected '
 GERR2B BSS  >18
-	   TEXT ' but found '
+       TEXT ' but found '
 GERR2C BSS  >18
 GERR2D 
        END

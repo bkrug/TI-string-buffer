@@ -67,13 +67,13 @@ BUFINT DATA STRWS,BUFINT+4
        JLT  ALC2
 * Return error if buffer size is odd.
        COC  @ONE,R1
-       JEQ  ALC2	   
+       JEQ  ALC2       
 * Record empty chunk covering whole
 * space.
 ALC1   MOV  R1,*R0
 * Record address of end of buffer.
-	   A    R1,R0
-	   MOV  R0,@BUFEND
+       A    R1,R0
+       MOV  R0,@BUFEND
 * Report success.
        CLR  *R13
        RTWP
@@ -99,9 +99,9 @@ ONE    DATA >0001
 BUFCPY DATA STRWS,BUFCPY+4
        MOV  *R13,R0
        MOV  @2(13),R3
-	   MOV  @4(13),R2
+       MOV  @4(13),R2
        BL   @CPYST
-	   RTWP
+       RTWP
 
 * 
 * **** BUFALC ****
@@ -118,10 +118,10 @@ BUFALC DATA STRWS,BUFALC+4
 * Round R0 up to an even number.
        INC  R0
        SRL  R0,1
-	   SLA  R0,1
+       SLA  R0,1
 * Add 2 to space requirement due to
 * header size.
-	   INCT R0
+       INCT R0
 * R0 now contains the required number
 * of bytes.
 * Find a free chunk of that size or 
@@ -160,7 +160,7 @@ SET2   BL   @TRYMRG
        S    R0,R4
        JEQ  SET4
 * Decrease offset at newly filled chunk.
-	   S    R4,*R3
+       S    R4,*R3
 * Record the remainder of the offset at
 * next chunk.
        A    R0,R3
