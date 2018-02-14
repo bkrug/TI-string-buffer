@@ -73,6 +73,7 @@ PRINTL DATA WORKSP,PRINTP
 LINLNG DATA 32
 SCRN   BSS  >300
 CLRTXT TEXT '                                '
+       EVEN
 PRINTP LI   R12,STACK
        MOV  *R13,R0
        MOV  @2(R13),R1
