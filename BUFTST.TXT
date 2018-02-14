@@ -1,48 +1,48 @@
        DEF  RUNTST
-       REF  BUFALC,BUFGET,BUFSET,BUFDLT,BUFEDT
+       REF  BUFINT,BUFCPY,BUFALC,BUFREE
        REF  MAKETX,PRINTL,OPENF,CLOSEF
        
-SPACE  BSS  >1000
-SPEND
- 
 * Run all tests
 RUNTST BLWP @OPENF
        BL   @WRTST
        BL   @BADDTA
+       BL   @TINT1
+       BL   @BADDTA
+       BL   @TINT2
+       BL   @BADDTA
+       BL   @TINT3
+       BL   @BADDTA
+       BL   @TINT4
+       BL   @BADDTA
        BL   @TALC1
-       BL   @BADDTA
-       BL   @TALC2
-       BL   @BADDTA
-       BL   @TALC3
-       BL   @BADDTA
-       BL   @TALC4
-       BL   @BADDTA
-       BL   @TSET1
-       BL   @BADDTA
-       BL   @TSET2
-       BL   @BADDTA
-       BL   @TSET3
-       BL   @BADDTA
-       BL   @TDLT1
-       BL   @BADDTA
-       BL   @TDLT2
-       BL   @BADDTA
-       BL   @TEDT1
-       BL   @BADDTA
-       BL   @TEDT2
-       BL   @BADDTA
-       BL   @TEDT3
-       BL   @BADDTA
-       BL   @TEDT4
-       BL   @BADDTA
-       BL   @TEDT5
-       BL   @BADDTA
-       BL   @TGET1
-       BL   @BADDTA
-       BL   @TGET2
+*       BL   @BADDTA
+*       BL   @TALC2
+*       BL   @BADDTA
+*       BL   @TALC3
+*       BL   @BADDTA
+*       BL   @TFRE1
+*       BL   @BADDTA
+*       BL   @TFRE2
+*       BL   @BADDTA
+*       BL   @TEDT1
+*       BL   @BADDTA
+*       BL   @TEDT2
+*       BL   @BADDTA
+*       BL   @TEDT3
+*       BL   @BADDTA
+*       BL   @TEDT4
+*       BL   @BADDTA
+*       BL   @TEDT5
+*       BL   @BADDTA
+*       BL   @TGET1
+*       BL   @BADDTA
+*       BL   @TGET2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
+ 
+SPACE  BSS  >1000
+SPEND
  
 * Write something
 WRTST  LI   R0,STARTM
@@ -77,12 +77,12 @@ BADDT2 MOV  R2,*R0+
 * Expect the first word to contain the
 * header for one empty chunk covering
 * the entire buffer.
-TALC1  LI   R0,SPACE
+TINT1  LI   R0,SPACE
        LI   R1,>1000
-       BLWP @BUFALC
+       BLWP @BUFINT
 * Test success flag
        MOV  R0,R0
-       JNE  FALC1A
+       JNE  FINT1A
 * Test first chunk shoul have highest
 * bit reset.
 * Remaining 15-bits will contain offset
@@ -90,131 +90,134 @@ TALC1  LI   R0,SPACE
        LI   R0,SPACE
        LI   R1,>1000
        C    *R0,R1
-       JNE  FALC1C
+       JNE  FINT1C
        RT
-FALC1A LI   R0,FALC1P
-       LI   R1,FALC1Q-FALC1P
+FINT1A LI   R0,FINT1P
+       LI   R1,FINT1Q-FINT1P
        BLWP @PRINTL
        RT
-FALC1C MOV  *R0,R0
-       LI   R1,FALC1S
+FINT1C MOV  *R0,R0
+       LI   R1,FINT1S
        BLWP @MAKETX
-       LI   R0,FALC1Q
-       LI   R1,FALC1T-FALC1Q
+       LI   R0,FINT1Q
+       LI   R1,FINT1T-FINT1Q
        BLWP @PRINTL
        RT
-FALC1P TEXT 'TALC1 failed. '
-       TEXT 'BUFALC reports failure.'
-FALC1Q TEXT 'TALC1 expected a free chunck '
+FINT1P TEXT 'TINT1 failed. '
+       TEXT 'BUFINT reports failure.'
+FINT1Q TEXT 'TINT1 expected a free chunck '
        TEXT 'with 1000 bytes but found '
-FALC1S TEXT '.... instead'
-FALC1T EVEN
+FINT1S TEXT '.... instead'
+FINT1T EVEN
  
 *
 * Allocate >8000 bytes of space with
 * >40 byte blocks.
 * Expect the allocation to fail because
 * >8000 is too big.
-TALC2  LI   R0,SPACE
+TINT2  LI   R0,SPACE
        LI   R1,>8000
-       BLWP @BUFALC
+       BLWP @BUFINT
 * Test success flag
        MOV  R0,R0
-       JEQ  FALC2
+       JEQ  FINT2
        RT
-FALC2  LI   R0,FALC2M
-       LI   R1,FALC2N-FALC2M
+FINT2  LI   R0,FINT2M
+       LI   R1,FINT2N-FINT2M
        BLWP @PRINTL
        RT
-FALC2M TEXT 'TALC2 failed. '
+FINT2M TEXT 'TINT2 failed. '
        TEXT 'Expected allocation to fail '
        TEXT 'because space too big.'
-FALC2N EVEN
+FINT2N EVEN
 
 *
 * Allocate >0003 bytes of space.
 * Expect the allocation to fail because
 * >0003 is too small.
-TALC3  LI   R0,SPACE
+TINT3  LI   R0,SPACE
        LI   R1,>3
-       BLWP @BUFALC
+       BLWP @BUFINT
 * Test success flag
        MOV  R0,R0
-       JEQ  FALC3
+       JEQ  FINT3
        RT
-FALC3  LI   R0,FALC3M
-       LI   R1,FALC3N-FALC3M
+FINT3  LI   R0,FINT3M
+       LI   R1,FINT3N-FINT3M
        BLWP @PRINTL
        RT
-FALC3M TEXT 'TALC3 failed. '
+FINT3M TEXT 'TINT3 failed. '
        TEXT 'Expected allocation to fail '
        TEXT 'because space too s.'
-FALC3N EVEN
+FINT3N EVEN
 
 *
 * Allocate >0013 bytes of space.
 * Expect the allocation to fail because
 * space must be even.
-TALC4  LI   R0,SPACE
+TINT4  LI   R0,SPACE
        LI   R1,>13
-       BLWP @BUFALC
+       BLWP @BUFINT
 * Test success flag
        MOV  R0,R0
-       JEQ  FALC4
+       JEQ  FINT4
        RT
-FALC4  LI   R0,FALC4M
-       LI   R1,FALC4N-FALC4M
+FINT4  LI   R0,FINT4M
+       LI   R1,FINT4N-FINT4M
        BLWP @PRINTL
        RT
-FALC4M TEXT 'TALC4 failed. '
+FINT4M TEXT 'TINT4 failed. '
        TEXT 'Expected allocation to fail '
        TEXT 'because size must be even.'
-FALC4N EVEN
+FINT4N EVEN
  
 *
-* Put strings at a new location in the
+* Reserve space at a new location in the
 * buffer.
-* First string of 13 bytes should take
-* up a 15 byte chunk (2 header bytes).
-* Second string of 14 bytes should take
+* First stream of 14 bytes should take
 * up a 16 byte chunk (2 header bytes).
+* Second string of 15 bytes should take
+* up a 18 byte chunk (2 header bytes
+* plus empty space).
 * Expect a new free chunk at the end of
 * the full chunks.
-TSET1  LI   R0,SPACE
+TALC1  LI   R0,SPACE
        LI   R1,>1000
+       BLWP @BUFINT
+       LI   R0,14
        BLWP @BUFALC
-       LI   R0,SET1MA
-	   LI   R1,SET1MB-SET1MA
-       BLWP @BUFSET
        MOV  R0,R3
-       LI   R0,SET1MB
-       LI   R1,TERR1A-SET1MB
-       BLWP @BUFSET
-* Test first string address
+       LI   R0,15
+       BLWP @BUFALC
+* Test first memory address
        LI   R2,SPACE+2
        C    R2,R3
-       JNE  FSET1A
-* Test second string address
-       LI   R2,SPACE+4+SET1MB-SET1MA
+       JNE  FALC1A
+* Test second memory address
+* First chunk took 16 bytes,
+* then there is a 2-byte header.
+       LI   R2,SPACE+16+2
        C    R2,R0
-       JNE  FSET1B
-* Test first chunk
-       LI   R2,SET1MB-SET1MA+>8002
+       JNE  FALC1B
+* Test first chunk header
+* Filled with next chunk >10 bytes later
+       LI   R2,>8010
        DECT R3
        C    R2,*R3
-       JNE  FSET1C
+       JNE  FALC1C
 * Test second chunk
-       LI   R2,TERR1A-SET1MB+>8002
+* Filled with next chunk >12 bytes later
+       LI   R2,>8012
        DECT R0
        C    R2,*R0
-       JNE  FSET1D
+       JNE  FALC1D
 * Test free chunk
-       LI   R0,SPACE+4+TERR1A-SET1MA
-       LI   R2,>1000-4-TERR1A+SET1MA
+       LI   R0,SPACE+>10+>12
+       LI   R2,>1000->10->12
        C    *R0,R2
-       JNE  FSET1E
+       JNE  FALC1E
        RT
-FSET1A MOV  R1,R0
+FALC1A MOV  R1,R0
        LI   R1,TERR1D
        BLWP @MAKETX
        MOV  R2,R0
@@ -224,7 +227,7 @@ FSET1A MOV  R1,R0
        LI   R1,TERR1E-TERR1A
        BLWP @PRINTL
        RT
-FSET1B MOV  R0,R0
+FALC1B MOV  R0,R0
        LI   R1,TERR1D
        BLWP @MAKETX
        MOV  R2,R0
@@ -235,7 +238,7 @@ FSET1B MOV  R0,R0
        LI   R1,TERR1E-TERR1A
        BLWP @PRINTL
        RT
-FSET1C MOV  *R3,R0
+FALC1C MOV  *R3,R0
        LI   R1,TERR1H
        BLWP @MAKETX
        MOV  R2,R0
@@ -245,7 +248,7 @@ FSET1C MOV  *R3,R0
        LI   R1,TERR1I-TERR1E
        BLWP @PRINTL
        RT
-FSET1D MOV  *R1,R0
+FALC1D MOV  *R1,R0
        LI   R1,TERR1H
        BLWP @MAKETX
        MOV  R2,R0
@@ -256,7 +259,7 @@ FSET1D MOV  *R1,R0
        LI   R1,TERR1I-TERR1E
        BLWP @PRINTL
        RT       
-FSET1E MOV  *R0,R0
+FALC1E MOV  *R0,R0
        LI   R1,TERR1H
        BLWP @MAKETX
        MOV  R2,R0
@@ -267,21 +270,15 @@ FSET1E MOV  *R0,R0
        LI   R1,TERR1I-TERR1E
        BLWP @PRINTL
        RT       
-SET1MA BYTE 13
-       TEXT '13 byte strng'
-	   EVEN
-SET1MB BYTE 14
-       TEXT '14 byte string'
-	   EVEN
-TERR1A TEXT 'TSET1 failed. '
-TERR1B TEXT '1st chunk. '
-       TEXT 'Expected string to be assigned '
-       TEXT 'at address '
+TERR1A TEXT 'TALC1 failed. '
+TERR1B TEXT '1st chunk.        '
+       TEXT 'Expected chunk to be assigned at'
+       TEXT 'address '
 TERR1C TEXT '.... but found address '
 TERR1D TEXT '....'
 *
-TERR1E TEXT 'TSET1 failed. '
-TERR1F TEXT '1st chunk. '
+TERR1E TEXT 'TALC1 failed. '
+TERR1F TEXT '1st chunk.        '
        TEXT 'Expected chunk header '
 TERR1G TEXT '.... but found '
 TERR1H TEXT '....'
@@ -295,47 +292,47 @@ TERR1J TEXT '3rd'
 * should fill up the buffer completely.
 * Put a third string in the buffer.
 * You should get an error message.
-TSET2  SETO R3
+TALC2  SETO R3
        LI   R0,SPACE
 * >F-bytes of data plus 2 header bytes
 * rounded up to >12 bytes per string.
        LI   R1,>24
-       BLWP @BUFALC
+       BLWP @BUFINT
 *
-       LI   R0,TSET2M
-	   LI   R1,TSET2N-TSET2M
-       BLWP @BUFSET
+       LI   R0,TALC2M
+	   LI   R1,TALC2N-TALC2M
+       BLWP @BUFINT
 	   C    R0,R3
-	   JEQ  FSET2A
+	   JEQ  FALC2A
 *
-       LI   R0,TSET2M
-       BLWP @BUFSET	   
+       LI   R0,TALC2M
+       BLWP @BUFINT	   
 	   C    R0,R3
-	   JEQ  FSET2B
+	   JEQ  FALC2B
 *
-       LI   R0,TSET2M
-       BLWP @BUFSET
+       LI   R0,TALC2M
+       BLWP @BUFINT
 	   C    R0,R3
-	   JNE  FSET2C
+	   JNE  FALC2C
        RT
-FSET2A LI   R0,SERR2A
+FALC2A LI   R0,SERR2A
        LI   R1,SERR2B-SERR2A
 	   BLWP @PRINTL
 	   RT
-FSET2B LI   R0,SERR2B
+FALC2B LI   R0,SERR2B
        LI   R1,SERR2C-SERR2B
 	   BLWP @PRINTL
 	   RT
-FSET2C LI   R0,SERR2C
+FALC2C LI   R0,SERR2C
        LI   R1,SERR2D-SERR2C
 	   BLWP @PRINTL
 	   RT
-TSET2M BYTE 14
+TALC2M BYTE 14
        TEXT '14 byte string'
-TSET2N
-SERR2A TEXT 'TSET2. First SET failed, expected success.'
-SERR2B TEXT 'TSET2. Second SET failed, expected success.'
-SERR2C TEXT 'TSET2. Third SET succeeded, expected failure.'
+TALC2N
+SERR2A TEXT 'TALC2. First SET failed, expected success.'
+SERR2B TEXT 'TALC2. Second SET failed, expected success.'
+SERR2C TEXT 'TALC2. Third SET succeeded, expected failure.'
 SERR2D
 
 *
@@ -345,45 +342,45 @@ SERR2D
 * Put a third string in the buffer.
 * You should get an error message assigned
 * it is too big to fit.
-TSET3  SETO R3
+TALC3  SETO R3
        LI   R0,SPACE
        LI   R1,>26
-       BLWP @BUFALC
+       BLWP @BUFINT
 *
-       LI   R0,TSET3M
-	   LI   R1,TSET3N-TSET3M
-       BLWP @BUFSET
+       LI   R0,TALC3M
+	   LI   R1,TALC3N-TALC3M
+       BLWP @BUFINT
 	   C    R0,R3
-	   JEQ  FSET3A
+	   JEQ  FALC3A
 *
-       LI   R0,TSET3M
-       BLWP @BUFSET	   
+       LI   R0,TALC3M
+       BLWP @BUFINT	   
 	   C    R0,R3
-	   JEQ  FSET3B
+	   JEQ  FALC3B
 *
-       LI   R0,TSET3M
-       BLWP @BUFSET
+       LI   R0,TALC3M
+       BLWP @BUFINT
 	   C    R0,R3
-	   JNE  FSET3C
+	   JNE  FALC3C
        RT
-FSET3A LI   R0,SERR3A
+FALC3A LI   R0,SERR3A
        LI   R1,SERR3B-SERR3A
 	   BLWP @PRINTL
 	   RT
-FSET3B LI   R0,SERR3B
+FALC3B LI   R0,SERR3B
        LI   R1,SERR3C-SERR3B
 	   BLWP @PRINTL
 	   RT
-FSET3C LI   R0,SERR3C
+FALC3C LI   R0,SERR3C
        LI   R1,SERR3D-SERR3C
 	   BLWP @PRINTL
 	   RT
-TSET3M BYTE 14
+TALC3M BYTE 14
        TEXT '14 byte string'
-TSET3N
-SERR3A TEXT 'TSET3. First SET failed, expected success.'
-SERR3B TEXT 'TSET3. Second SET failed, expected success.'
-SERR3C TEXT 'TSET3. Third SET succeeded, expected failure.'
+TALC3N
+SERR3A TEXT 'TALC3. First SET failed, expected success.'
+SERR3B TEXT 'TALC3. Second SET failed, expected success.'
+SERR3C TEXT 'TALC3. Third SET succeeded, expected failure.'
 SERR3D
 
 *
@@ -394,42 +391,42 @@ SERR3D
 * blocks.
 * Expect this new string to be inserted
 * at the begining of the buffer.
-TDLT1  LI   R0,SPACE
+TFRE1  LI   R0,SPACE
        LI   R1,>100
-       BLWP @BUFALC
+       BLWP @BUFINT
 * Store short strings.
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
 * order.
        MOV  @DLTADR+4,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
        MOV  @DLTADR+2,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
        MOV  @DLTADR,R0
-       BLWP @BUFDLT       
+       BLWP @BUFREE       
 * Store long string
        LI   R0,DLT1MB
-       BLWP @BUFSET
+       BLWP @BUFINT
        LI   R2,SPACE+2
        C    R0,R2
-       JNE  FDLT1
+       JNE  FFRE1
        RT
-FDLT1  MOV  R0,R0
+FFRE1  MOV  R0,R0
        LI   R1,DERR1C
        BLWP @MAKETX
        MOV  R2,R0
@@ -446,7 +443,7 @@ DLT1MA BYTE 12
 DLT1MB BYTE 43
        TEXT 'a longer string that requires three blocks.'
 	   EVEN
-DERR1A TEXT 'TDLT1 failed. Expected long string at '
+DERR1A TEXT 'TFRE1 failed. Expected long string at '
 DERR1B TEXT '.... but it was at '
 DERR1C TEXT '....'
 DERR1E TEXT '....'
@@ -456,45 +453,45 @@ DERR1H TEXT '....'
 DERR1D 
 
 *
-* Just like TDLT1 except that we delete
+* Just like TFRE1 except that we delete
 * the strings in the opposite order.
 * That shouldn't change the results.
-TDLT2  LI   R0,SPACE
+TFRE2  LI   R0,SPACE
        LI   R1,>100
-       BLWP @BUFALC
+       BLWP @BUFINT
 * Store short strings.
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR+2
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR+4
        LI   R0,DLT1MA
 	   LI   R1,DLT1MB-DLT1MA
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@DLTADR+6
 * Delete first three strings in reverse
 * order.
        MOV  @DLTADR,R0
-       BLWP @BUFDLT       
+       BLWP @BUFREE       
        MOV  @DLTADR+2,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
        MOV  @DLTADR+4,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
 * Store long string
        LI   R0,DLT1MB
-       BLWP @BUFSET
+       BLWP @BUFINT
        LI   R2,SPACE+2
        C    R0,R2
-       JNE  FDLT2
+       JNE  FFRE2
        RT
-FDLT2  MOV  R0,R0
+FFRE2  MOV  R0,R0
        LI   R1,DERR2C
        BLWP @MAKETX
        MOV  R2,R0
@@ -504,22 +501,24 @@ FDLT2  MOV  R0,R0
        LI   R1,DERR2D-DERR2A
        BLWP @PRINTL
        RT       
-DERR2A TEXT 'TDLT2 failed. Expected long string at '
+DERR2A TEXT 'TFRE2 failed. Expected long string at '
 DERR2B TEXT '.... but it was at '
 DERR2C TEXT '....'
        EVEN
-DERR2D 
-       
+DERR2D
+
+BUFEDT
+
 * 
 * Create a small string, and edit it
 * into something larger. This string is
 * the last string in the buffer.
 TEDT1  LI   R0,SPACE
        LI   R1,>100
-       BLWP @BUFALC
+       BLWP @BUFINT
        LI   R0,TEDT1M
 	   LI   R1,TEDT1N-TEDT1M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,R3
        LI   R1,TEDT1N
 	   LI   R2,TEDT1O-TEDT1N
@@ -575,10 +574,10 @@ EERR1E
 * a chunk that is the same size.
 TEDT2  LI   R0,SPACE
        LI   R1,>100
-       BLWP @BUFALC
+       BLWP @BUFINT
        LI   R0,TEDT2M
 	   LI   R1,TEDT2N-TEDT2M
-       BLWP @BUFSET
+       BLWP @BUFINT
 * Save a copy of string address.
        MOV  R0,R3
 * Save a copy of old header value.
@@ -623,23 +622,23 @@ EERR2C
 * space used by the middle string.
 TEDT3  LI   R0,SPACE
        LI   R1,>100
-       BLWP @BUFALC
+       BLWP @BUFINT
 *
        LI   R0,TEDT3M
 	   LI   R1,TEDT3N-TEDT3M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLST
        LI   R0,TEDT3M
 	   LI   R1,TEDT3N-TEDT3M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLST+2
        LI   R0,TEDT3M
 	   LI   R1,TEDT3N-TEDT3M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLST+4
 *
        MOV  @ADRLST+2,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
 *
        MOV  @ADRLST,R0
        LI   R1,TEDT3N
@@ -693,27 +692,27 @@ EERR3D
 * after the fourth string.
 TEDT4  LI   R0,SPACE
        LI   R1,>100
-       BLWP @BUFALC
+       BLWP @BUFINT
 *
        LI   R0,TEDT4M
 	   LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLS4
        LI   R0,TEDT4M
 	   LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLS4+2
        LI   R0,TEDT4M
 	   LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLS4+4
        LI   R0,TEDT4M
 	   LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFSET
+       BLWP @BUFINT
        MOV  R0,@ADRLS4+6
 *
        MOV  @ADRLS4+4,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
 *
        MOV  @ADRLS4,R0
        LI   R1,TEDT4N
@@ -793,21 +792,21 @@ EERR4H
 * between the remaining two strings.
 TEDT5  LI   R0,SPACE
        LI   R1,>300
-       BLWP @BUFALC
+       BLWP @BUFINT
 *
        LI   R0,TEDT5M
 	   LI   R1,TEDT5N-TEDT5M
-       BLWP @BUFSET
+       BLWP @BUFINT
        LI   R0,TEDT5M
 	   LI   R1,TEDT5N-TEDT5M
-       BLWP @BUFSET
+       BLWP @BUFINT
 	   MOV  R0,R2
        LI   R0,TEDT5M
 	   LI   R1,TEDT5N-TEDT5M
-       BLWP @BUFSET
+       BLWP @BUFINT
 *
        MOV  R2,R0
-       BLWP @BUFDLT
+       BLWP @BUFREE
 *
        LI   R0,SPACE+2
        LI   R1,TEDT5N
@@ -865,17 +864,17 @@ EERR5F EVEN
 * Copy it to a new location
 TGET1  LI   R0,SPACE
        LI   R1,>300
-       BLWP @BUFALC
+       BLWP @BUFINT
 *
        LI   R0,TGET1M
 	   LI   R1,TGET1Q-TGET1M
-       BLWP @BUFSET
+       BLWP @BUFINT
 * R0 now contains address of string in
 * buffer.
 * Assign Copy-to address to R1.
        LI   R1,TGET1O
 	   LI   R2,TGET1Q-TGET1M
-       BLWP @BUFGET
+       BLWP @BUFCPY
 * The data in TGET1O is expected to
 * match the pre-existing contents of
 * TGET1N.
@@ -918,15 +917,15 @@ GERR3  EVEN
 * than string
 TGET2  LI   R0,SPACE
        LI   R1,>180
-	   BLWP @BUFALC
+	   BLWP @BUFINT
 *
        LI   R0,TGET2M
 	   LI   R1,>8
-	   BLWP @BUFSET
+	   BLWP @BUFINT
 *
        LI   R1,TGET2O
 	   LI   R2,>8
-	   BLWP @BUFGET
+	   BLWP @BUFCPY
 *
 * The data in TGET2O is expected to
 * match the pre-existing contents of

@@ -1,7 +1,7 @@
-       DEF  BUFALC,BUFSET,BUFGET
-       DEF  BUFEDT,BUFDLT
+       DEF  BUFINT,BUFALC,BUFCPY
+       DEF  BUFREE
 * This library of routines stores
-* strings in a way that is inspired by
+* chunks in a way that is inspired by
 * but different from the C language's
 * malloc() and free() methods.
 *
@@ -42,8 +42,8 @@ BUFEND BSS  >2
 FMASK  DATA >8000
 
 * 
-* **** BUFALC ****
-* Reserve Space for string buffer
+* **** BUFINT ****
+* Reserve Space for a memory buffer
 *
 * R0 - buffer memory address
 * R1 - buffer size (>4 to >7FFF valid)
@@ -52,7 +52,7 @@ FMASK  DATA >8000
 * R0 - >0000 if successful
 *      >FFFF if error
 *
-BUFALC DATA STRWS,BUFALC+4
+BUFINT DATA STRWS,BUFINT+4
 * Get routine parameters
        MOV  *R13,R0
        MOV  @2(13),R1
@@ -83,14 +83,11 @@ ALC2   SETO *R13
 ONE    DATA >0001
  
 * 
-* **** BUFGET ****
-* Copy a string from the buffer to
-* another location where it can be
-* manipulated.
+* **** BUFCPY ****
+* Copy data between two locations.
 *
-* R0 - string address within buffer.
-* R1 - address presumably outside the
-*      buffer
+* R0 - source address.
+* R1 - destination address
 * R2 - size of data to copy.
 *
 * The calling code is responsile for
@@ -98,8 +95,8 @@ ONE    DATA >0001
 * space for the copy.
 *
 * The first byte in the destination
-* will be the string length.
-BUFGET DATA STRWS,BUFGET+4
+* will be the data length.
+BUFCPY DATA STRWS,BUFCPY+4
        MOV  *R13,R0
        MOV  @2(13),R3
 	   MOV  @4(13),R2
@@ -107,27 +104,25 @@ BUFGET DATA STRWS,BUFGET+4
 	   RTWP
 
 * 
-* **** BUFSET ****
-* Put a new string in the buffer
+* **** BUFALC ****
+* Reserve space in the buffer
 *
 * Input:
-* R0 - string address outside of buffer
-* R1 - size
+* R0 - size
 * Output:
-* R0 - contains the new string address
+* R0 - the new address of assigned space
 *    - >FFFF implies an error
-BUFSET DATA STRWS,BUFSET+4
+BUFALC DATA STRWS,BUFALC+4
 * Get routine parameters
        MOV  *R13,R0
-	   MOV  @2(13),R2
-* If R2 is odd, add one.
-       INC  R2
-       SRL  R2,1
-	   SLA  R2,1
+* Round R0 up to an even number.
+       INC  R0
+       SRL  R0,1
+	   SLA  R0,1
 * Add 2 to space requirement due to
 * header size.
-	   INCT R2
-* R2 now contains the required number
+	   INCT R0
+* R0 now contains the required number
 * of bytes.
 * Find a free chunk of that size or 
 * greater.
@@ -149,7 +144,7 @@ SET2   BL   @TRYMRG
 * If required space is still larger than
 * the size of merged chunk, continue
 * loop.
-       C    R2,R4
+       C    R0,R4
        JH   SET3
 * This chunk at R3 is large enough.
 * Save a copy of its address.
@@ -158,73 +153,35 @@ SET2   BL   @TRYMRG
        SOC  @FMASK,*R3
 * If the chunk is large enough to split,
 * do so.
-* Note that it is not possible for R4-R2
+* Note that it is not possible for R4-R0
 * to equal 1. If the difference is not 
-* zero, then there is enough space for add
-* chunk header.
-       S    R2,R4
+* zero, then there is enough space to add
+* a chunk header.
+       S    R0,R4
        JEQ  SET4
 * Decrease offset at newly filled chunk.
 	   S    R4,*R3
 * Record the remainder of the offset at
 * next chunk.
-       A    R2,R3
+       A    R0,R3
        MOV  R4,*R3
-* R2 contains size of chunk. Decrease it
-* to the size of the contents.
-       DECT R2
-* Copy string.
-* R0 already contains the address of the
-* source data.
 * R1 contains the address of the 
-* chunk, but don't overcopy the header.
-* R2 contains size of data.
+* chunk. Change it to address of chunk
+* contents.
 SET4   INCT R1
-       MOV  R1,R3
-       BL   @CPYST
 * R1 now contains the address of the 
 * string. Put address in caller's R0.
        MOV  R1,*R13
        RTWP
  
-* 
-* **** BUFEDT ****
-* Replace an existing string in the
-* buffer. This will involve an algorithm
-* that reserves more space if the new
-* string is larger than the old. It will
-* move the string to a new location if
-* necessary to create enough room.
 *
-* Input:
-* R0 - current address inside of buffer
-* R1 - string address outside of buffer
-* R2 - size
-* Output:
-* R0 - contains the new string address
-BUFEDT DATA EDTWS,BUFEDT+>24
-EDTWS  BSS  >20
-* 
-* Delete the string from its old address
-       MOV  *R13,R0
-       BLWP @BUFDLT
-* Put the string at some new address
-       MOV  @2(13),R0
-	   MOV  @4(13),R1
-       BLWP @BUFSET
-* Put the new string address in the
-* caller's R13.
-       MOV  R0,*R13
-       RTWP
- 
-*
-* **** BUFDLT ****
-* Remove an existing string from the
+* **** BUFREE ****
+* Remove an existing chunk from the
 * buffer and mark the space as free.
 *
 * Input:
 * R0 - string address inside of buffer
-BUFDLT DATA STRWS,BUFDLT+4
+BUFREE DATA STRWS,BUFREE+4
 * Get routine parameters
        MOV  *R13,R3
 * The block to free is located two bytes
