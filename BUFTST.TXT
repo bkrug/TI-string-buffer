@@ -29,10 +29,10 @@ RUNTST BLWP @OPENF
        BL   @TEDT2
        BL   @BADDTA
        BL   @TEDT3
-*       BL   @BADDTA
-*       BL   @TEDT4
-*       BL   @BADDTA
-*       BL   @TEDT5
+       BL   @BADDTA
+       BL   @TEDT4
+       BL   @BADDTA
+       BL   @TEDT5
        BL   @BADDTA
        BL   @TGET1
        BL   @BADDTA
@@ -635,39 +635,35 @@ EERR3C TEXT 'TEDT3 failed. Chunk header for the following'
 EERR3D
        
 * 
-* Create four small strings.
-* Delete the third string.
-* Edit the first string in a way that
-* fources the string to be moved to
-* after the fourth string.
+* Create four small memory chunks.
+* Free the third memory chunk.
+* Free the first memory chunk.
+* Reserve a new memory chunk that won't
+* fit in either empty chunk.
 TEDT4  LI   R0,SPACE
        LI   R1,>100
        BLWP @BUFINT
 *
-       LI   R0,TEDT4M
-       LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLS4
-       LI   R0,TEDT4M
-       LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLS4+2
-       LI   R0,TEDT4M
-       LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLS4+4
-       LI   R0,TEDT4M
-       LI   R1,TEDT4N-TEDT4M
-       BLWP @BUFINT
+       LI   R0,>D
+       BLWP @BUFALC
        MOV  R0,@ADRLS4+6
 *
        MOV  @ADRLS4+4,R0
        BLWP @BUFREE
-*
        MOV  @ADRLS4,R0
-       LI   R1,TEDT4N
-       LI   R2,TEDT4O-TEDT4N
-       BLWP @BUFEDT
+       BLWP @BUFREE
+*
+       LI   R0,>17
+       BLWP @BUFALC
 * New address should be in the fifth block.
        CI   R0,SPACE+>42
        JNE  FEDT4A
@@ -714,11 +710,6 @@ FEDT4D LI   R1,EERR4G
        BLWP @PRINTL
        RT
 ADRLS4 BSS  >6
-TEDT4M BYTE 12
-       TEXT 'short string'
-TEDT4N BYTE 22
-       TEXT 'longer string a little'
-TEDT4O
 EERR4A TEXT 'TEDT4 failed. The string is in the '
        TEXT 'wrong address: '
 EERR1I TEXT '....'
@@ -734,34 +725,32 @@ EERR4G TEXT '....'
 EERR4H
 
 *
-* Create three strings, the same length.
-* Delete the middle string.
-* Edit the first string to use a little
-* more space.
+* Create three chunks of equal size.
+* Free the middle chunk.
+* Free the first chunk.
+* Allocate a new chunk slightly larger 
+* than the freed up ones.
 * There should be remaining empty space
-* between the remaining two strings.
+* between the remaining two chunks.
 TEDT5  LI   R0,SPACE
        LI   R1,>300
        BLWP @BUFINT
 *
-       LI   R0,TEDT5M
-       LI   R1,TEDT5N-TEDT5M
-       BLWP @BUFINT
-       LI   R0,TEDT5M
-       LI   R1,TEDT5N-TEDT5M
-       BLWP @BUFINT
+       LI   R0,>A
+       BLWP @BUFALC
+       LI   R0,>A
+       BLWP @BUFALC
        MOV  R0,R2
-       LI   R0,TEDT5M
-       LI   R1,TEDT5N-TEDT5M
-       BLWP @BUFINT
+       LI   R0,>A
+       BLWP @BUFALC
 *
        MOV  R2,R0
        BLWP @BUFREE
-*
        LI   R0,SPACE+2
-       LI   R1,TEDT5N
-       LI   R2,TEDT5O-TEDT5N
-       BLWP @BUFEDT
+       BLWP @BUFREE
+*
+       LI   R0,>13
+       BLWP @BUFALC
 * Test address space
        CI   R0,SPACE+2
        JNE  FEDT5
@@ -794,11 +783,6 @@ FEDT5C LI   R1,EERR5E
        LI   R1,EERR5F-EERR5D
        BLWP @PRINTL
        RT
-TEDT5M BYTE 9
-       TEXT 'ABCDEFGHI'
-TEDT5N BYTE 19
-       TEXT '0123456789ABCDEF012'
-TEDT5O
 EERR5A TEXT 'FEDT5 failed. '
        TEXT 'wrong address for string: ....'
 EERR5B TEXT 'FEDT5 failed. '
