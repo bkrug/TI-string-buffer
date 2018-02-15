@@ -33,10 +33,10 @@ RUNTST BLWP @OPENF
 *       BL   @TEDT4
 *       BL   @BADDTA
 *       BL   @TEDT5
-*       BL   @BADDTA
-*       BL   @TGET1
-*       BL   @BADDTA
-*       BL   @TGET2
+       BL   @BADDTA
+       BL   @TGET1
+       BL   @BADDTA
+       BL   @TGET2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -812,16 +812,11 @@ EERR5F EVEN
 *
 * Create a string
 * Copy it to a new location
-TGET1  LI   R0,SPACE
-       LI   R1,>300
-       BLWP @BUFINT
-*
-       LI   R0,TGET1M
-       LI   R1,TGET1Q-TGET1M
-       BLWP @BUFINT
+TGET1
 * R0 now contains address of string in
 * buffer.
 * Assign Copy-to address to R1.
+       LI   R0,TGET1M
        LI   R1,TGET1O
        LI   R2,TGET1Q-TGET1M
        BLWP @BUFCPY
@@ -865,14 +860,7 @@ GERR3  EVEN
 *
 * Store and retrieve something other
 * than string
-TGET2  LI   R0,SPACE
-       LI   R1,>180
-       BLWP @BUFINT
-*
-       LI   R0,TGET2M
-       LI   R1,>8
-       BLWP @BUFINT
-*
+TGET2  LI   R0,TGET2M
        LI   R1,TGET2O
        LI   R2,>8
        BLWP @BUFCPY
