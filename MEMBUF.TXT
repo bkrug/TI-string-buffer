@@ -98,9 +98,11 @@ ONE    DATA >0001
 * will be the data length.
 BUFCPY DATA STRWS,BUFCPY+4
        MOV  *R13,R0
-       MOV  @2(13),R3
-       MOV  @4(13),R2
-       BL   @CPYST
+       MOV  @2(13),R2
+       MOV  @4(13),R3
+CPYST  MOVB *R0+,*R2+
+       DEC  R3
+       JNE  CPYST
        RTWP
 
 * 
@@ -231,23 +233,4 @@ TMGR2  MOV  R5,R4
 * it in header of first chunk.
        MOV  R4,*R3
 TMRG3  RT
-
-*
-* Copy string
-*
-* Input:
-* R0 - Address of source string
-* R2 - Number of bytes to copy
-* R3 - Address of destination string
-*
-* Output:
-* R0 - Address after string
-* R2 - (zero)
-* R3 - Address after string
-*
-* Copy       
-CPYST  MOVB *R0+,*R3+
-       DEC  R2
-       JNE  CPYST
-       RT
        END

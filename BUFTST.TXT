@@ -479,8 +479,6 @@ DERR2C TEXT '....'
        EVEN
 DERR2D
 
-BUFEDT
-
 * 
 * Allocate a small space, free it, and
 * allocate another larger space. This
