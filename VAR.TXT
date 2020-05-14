@@ -2,21 +2,7 @@
 * Definitions in this file
 *
 * Register Workspaces
-       DEF  WRAPSP,SCRNWS,ARRYWS,INPTWS
-* Arrays
-       DEF  LINLST,FMTLST,MGNLST
-* WRAP.TXT
-       DEF  FMTEND,MGNEND,LNWDT1,LNWDTH
-* SCRNWRT.TXT
-       DEF  SRCLIN,INDENT,CPI,NXTFMT
-       DEF  DSPSTR,CURSTR
-* INPUT.TXT
-       DEF  PARINX,LININX,CHRPAX,CHRLIX
-       DEF  WINOFF
-       DEF  INSTMD
-* KEY.TXT
-       DEF  TIMER,PREVKY,KEYBUF
-	   DEF  BUFSTR,BUFEND,BUFWRT,BUFRD
+       DEF  ARRYWS
 
 * Areas of memory that absolutely have
 * to be in RAM and could never be part
@@ -26,76 +12,5 @@
 * Areas for workspace registers
 *
        TEXT 'WORKSPCE'
-WRAPSP BSS  >20
-SCRNWS BSS  >20
 ARRYWS BSS  >20
-INPTWS BSS  >20
-
-*
-* Areas for changeable values
-*
-
-       TEXT 'VARIABLE'
-* Address of line list
-LINLST DATA 0
-* Address of format line list
-FMTLST DATA 0
-* Address of margin list
-MGNLST DATA 0
-
-* WRAP.TXT
-FMTEND DATA 0
-MGNEND DATA 0
-* Width of first paragraph line
-* If there is no indent it will match
-* LNWDTH.
-LNWDT1 DATA 0
-* General line width
-LNWDTH DATA 0
-
-* SCRNWRT.TXT
-SRCLIN DATA 0
-INDENT DATA 0
-CPI    DATA 0
-NXTFMT DATA 0
-DSPSTR DATA 0
-CURSTR DATA 0
-
-* INPUT.TXT
-* Current Paragraph Index
-PARINX DATA 0
-* Line Index in Paragraph
-LININX DATA 0
-* Character Index in Paragraph
-CHRPAX DATA 0
-* Character Index in line
-CHRLIX DATA 0
-* Window offset
-WINOFF DATA 0
-* Insert Mode. 0 = insert, -1 = overwrit
-INSTMD DATA 0
-       EVEN
-
-* KEY.TXT
-* Time remaining before character repeat
-TIMER  DATA 0
-* The previously detected key press.
-* Wait a while before letting this key
-* repeat.
-PREVKY BYTE 0
-* First address of key buffer
-BUFSTR
-* Buffer to store keypresses
-KEYBUF BSS  >20
-* First address after key buffer
-BUFEND 
-* Address where the next keypress 
-* should be stored.
-BUFWRT DATA 0
-* Next address to read a keypress from.
-* If the value here is equal to the
-* value in BUFWRT, then there are no
-* new characters to write.===
-BUFRD  DATA 0
-
        END
