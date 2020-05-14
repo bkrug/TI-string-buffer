@@ -1,0 +1,330 @@
+       DEF  ARYALC,ARYADD,ARYINS,ARYDEL
+       DEF  ARYADR
+*
+       REF  BUFALC,BUFREE,BUFCPY
+       REF  ARRYWS,BLKUSE
+
+*
+* Array format:
+*   Word 0: number of items in array
+*   Word 1: exponent representing size
+*           of each item in the array
+*          (1 for 2 bytes,
+*           2 for 4 bytes,
+*           3 for 8 bytes, etc.)
+*   Rest of the memory is a list of
+*   items in the array.
+*
+
+*
+* Allocate space for an array.
+* Initially there will be space for
+* 8 items.
+*
+* Input:
+* R0 - Size of each item
+* Output:
+* R0 - address of array
+*      >FFFF indicates error
+ARYALC DATA ARRYWS,ARYALC+4
+* Input of zero is invalid
+       MOV  *R13,R0
+       MOV  *R13,R3
+       JEQ  ALC2
+* Get array item size * 4 + 4.
+* We'll initially give array space for
+* 4 items and the array header
+       LI   R2,4
+       SLA  R2,0
+       C    *R2+,*R2+           Add four to R2
+* Allocate space
+       MOV  R2,R0
+       BLWP @BUFALC
+* Handle memory error
+       CI   R0,>FFFF
+       JEQ  ALC2
+* Notify caller of array address
+       MOV  R0,*R13
+* Declare that the array length is 0
+       CLR  *R0+
+* Put record item size in bytes 2 and 3.
+       MOV  R3,*R0
+       RTWP
+* Notify caller of error
+ALC2   SETO *R13
+       RTWP
+
+
+*
+* Add element to end of array.
+*
+* Input:
+* R0 - array address
+* Output:
+* R0 - address of array
+*      >FFFF indicates error
+* R1 - address of new item
+ARYADD DATA ARRYWS,ARYADD+4
+*
+       BL   @ADRSIZ
+       BL   @REALC
+* Restore item size to R0 if necessary.
+       MOV  R9,R0
+* Put address of soon-to-be last element
+* in the array in caller's R1
+       MOV  *R10,R8
+       SLA  R8,0
+       A    R10,R8
+       C    *R8+,*R8+
+       MOV  R8,@2(13)
+* Increase length of array
+       INC  *R10
+* Put array address in caller's R0
+ADDRT  MOV  R10,*R13
+       RTWP
+
+
+*
+* Insert element into the array.
+*
+* Input:
+* R0 - array address
+* R1 - index to insert at
+* Output:
+* R0 - address of array
+*      >FFFF indicates error
+* R1 - address of new item
+ARYINS DATA ARRYWS,ARYINS+4
+       BL   @ADRSIZ
+       BL   @REALC
+       B    @CPYBCK
+*
+* Put address of new element in the
+* array in caller's R1
+*
+INS1   MOV  R1,@2(13)
+*
+* Increase length of array
+*
+       INC  *R10
+*
+* Put array address in caller's R0
+*
+       MOV  R10,*R13
+       RTWP
+
+
+*
+* Remove element from the array.
+*
+* Input:
+* R0 - array address
+* R1 - index to delete at
+* Output:
+* R0 - address of array
+*      >FFFF indicates error
+ARYDEL DATA ARRYWS,ARYDEL+4
+*
+       BL   @ADRSIZ
+       MOV  R0,R9
+* ---- Main delete function ----
+* Get address directly after array.
+       MOV  *R10,R2
+       SLA  R2,0
+       A    R10,R2
+       C    *R2+,*R2+
+* Get destination to copy to.
+       MOV  @2(13),R1
+       SLA  R1,0
+       A    R10,R1
+       C    *R1+,*R1+
+* Get source to copy from.
+       LI   R8,1
+       SLA  R8,0
+       MOV  R1,R0
+       A    R8,R0
+* Get length to copy
+       S    R1,R2
+*
+       BLWP @BUFCPY
+* Decrease array length
+       DEC  *R10
+*
+* ---- Adjust memory block size ----
+* Get new memory size of the array in R2.
+* Calc: array length * Item size + 4
+       MOV  R9,R0
+       MOV  *R10,R2
+       SLA  R2,0
+       C    *R2+,*R2+
+* Get current size of memory block - 2
+* Put in R3
+       MOV  R10,R4
+       DECT R4
+       MOV  *R4,R3
+       SZC  @BLKUSE,R3
+       MOV  R3,R5
+       DECT R3
+* Get minimum reservable space for array
+* (item size * 4 + 4)
+       LI   R6,4
+       SLA  R6,0
+       C    *R6+,*R6+
+* If current block size is at least 4
+* times larger than array size AND a 
+* space twice as large as array size is
+* larger than minimum reservable space,
+* then shrink memory block.
+       SRL  R3,2
+       C    R3,R2
+       JL   DELRT
+       SLA  R2,1
+       C    R6,R2
+       JH   DELRT
+* Shrink block to twice the array size
+* R2 still has array size * 2.
+* R4 still has address of meory block.
+* R5 still has size of memory block.
+       INCT R2
+       S    R2,R5
+       S    R5,*R4
+* Create a new free block
+       A    R2,R4
+       MOV  R5,*R4
+DELRT  RTWP
+
+
+*
+* Get index address
+*
+* Input:
+* R0 - array address
+* R1 - index of item
+* Output:
+* R1 - address of item
+ARYADR DATA ARRYWS,ARYADR+4
+       BL   @ADRSIZ
+       MOV  @2(13),R8
+       SLA  R8,0
+       A    R10,R8
+       C    *R8+,*R8+
+       MOV  R8,@2(13)
+       RTWP
+
+*
+* Get address of array and exponent of
+* size of each item.
+*
+* Output:
+*  R0 - exponent for item size
+*  R10 - address of array
+ADRSIZ
+* First get address of array
+       MOV  *R13,R10
+* Get memory size of array item
+       MOV  R10,R9
+       INCT R9
+       MOV  *R9,R0
+       RT
+
+*
+* Check if it is necessary to move the
+* array to an area of a larger size.
+*
+* Input:
+*  R0 - exponent for item size
+*  R10 - address of array
+* Output:
+*  R0, R1, R2, R3
+*  R9 - exponent for item size
+REALC
+* Continue to store item size in R9
+       MOV  R0,R9
+*
+* Get potential size of array after add.
+* Put in R2
+* Calc: (array length + 1) * Item size + 4
+*
+       MOV  *R10,R2
+       INC  R2
+       SLA  R2,0
+       C    *R2+,*R2+
+*
+* Get current size of memory block - 2
+* Put in R3
+*
+       MOV  R10,R3
+       DECT R3
+       MOV  *R3,R3
+       SZC  @BLKUSE,R3
+       DECT R3
+*
+* Increase memory reserved for array if
+* necessary.
+*
+       C    R2,R3
+       JLE  REALC2
+* Allocate required space * 2
+       MOV  R2,R0
+       SLA  R0,1
+       BLWP @BUFALC
+       CI   R0,>FFFF
+       JEQ  RTERR
+* Copy to new location
+       MOV  R0,R1
+       MOV  R10,R0
+       BLWP @BUFCPY
+* Free up old space
+       BLWP @BUFREE
+* Save new address
+       MOV  R1,R10
+REALC2 RT
+
+RTERR  SETO *R13
+       RTWP
+
+
+*
+* Copy part of memory backwards.
+* The insertion algorithm needs this.
+*
+* Input:
+*  R9 - exponent for item size
+*  R10 - address of array
+*  R13 - caller's workspace
+* Output:
+*  R0
+*  R1 - Address of insertion index
+*  R2,R3,R4,R7,R8
+CPYBCK
+* R0 must have memory size of item
+       MOV  R9,R0
+* Get address of insertion index
+       MOV  @2(13),R1
+       SLA  R1,0
+       A    R10,R1
+       C    *R1+,*R1+
+* Get address immediately following the
+* end of the array + item size - 2
+       MOV  *R10,R3
+       INC  R3
+       SLA  R3,0
+       A    R10,R3
+       INCT R3
+* Get address of last word in last item
+* in array
+       MOV  *R10,R2
+       SLA  R2,0
+       A    R10,R2
+       INCT R2
+* Copy each word until we reach the
+* address of insertion.
+CPYBK1 MOV  *R2,*R3
+       DECT R2
+       DECT R3
+       C    R2,R1
+       JHE  CPYBK1
+*
+       B    @INS1
+
+       END
