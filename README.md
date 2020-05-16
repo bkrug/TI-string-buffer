@@ -17,7 +17,7 @@ You normally want to store those in scratch pad RAM between >8300 and >83FF.
 
 See the unit tests for more complete documentation, but here is the general idea.
 
-BUFINT initializes initializes a buffer.
+BUFINT initializes initializes a chunk buffer.
 The buffer is able to contain many different areas of memory allocated at different sizes.
 The below code initilizes a buffer with 4KB of space and allocates two chunks of different sizes.
 The addresses are then stored at STRING1 and STRING2 so that a different part of the program can then populate the chunk with an appropriate amount of data.
