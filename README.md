@@ -130,6 +130,10 @@ To run unit tests in this project:
 6. Enter LTEST as the program to run.
 7. As list of files will be displayed on the screen as they are loaded. Then the tests will run. You sould see the messages 'Testing' and 'Done' if all tests pass. Otherwise you should see a message for the first failing test.
 
+## Release versioning.
+
+Object files in each release contain a comment specifying the version number.
+
 ## Files in the Repo
 
 ### MEMBUF
