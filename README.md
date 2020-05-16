@@ -7,11 +7,12 @@ This repository contains utility routines to help you manage memory within an Ed
 Download the object files listed in a particular release (https://github.com/bkrug/TI-string-buffer/releases) and copy them to the disk that contains your own program.
 Object files in the release have the .O extension.
 
-If you don't need array functionality, you can skip using ARRAY.O.
-
+ARRAY.O and MEMBUF.O only contain executable object code. 
+VAR.O contains only memory locations for variables, including space for workspace registers.
 You may wish to re-assemble VAR.TXT instead of using the included VAR.O.
-The VAR file specifies the locations of workspace registers.
-You normally want to store those in scratch pad RAM between >8300 and >83FF.
+That way you can place workspace registers in a part of the TI's scratch pad RAM that you do not use.
+
+Note that ARRAY.O is dependent on MEMBUF.O.
 
 ## Tutorial
 
