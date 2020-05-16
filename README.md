@@ -95,7 +95,7 @@ Allocates a certain amount of memory in the range of 4 to >8000 bytes (must be a
 BUFALC
 Allocates copies a chunk of data from some source location (usually outside the buffer) into the buffer, reserving the specified amount of space
 
-BUFGET
+BUFCPY
 Copies a chunk of memory from one location inside of the bugger to a location (likely outside of the buffer).
 
 BUFREE
