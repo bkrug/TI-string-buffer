@@ -1,5 +1,7 @@
        DEF  BUFINT,BUFALC,BUFCPY,BUFREE
        DEF  BLKUSE
+*
+       REF  STRWS,BUFADR,BUFEND
 * This library of routines stores
 * chunks in a way that is inspired by
 * but different from the C language's
@@ -26,17 +28,6 @@
 * then the first two bytes will be 
 * header bytes and only >1E bytes can 
 * hold data. 
-
-*
-* The >20 bytes would have been used
-* as the workspace for all STRBUF
-* routines.
-STRWS  BSS  >20
-* holds block size
-* holds address of buffer
-BUFADR BSS  >2
-* holds first address after the buffer
-BUFEND BSS  >2
 
 * Mask to set or reset the "used" bit.
 BLKUSE DATA >8000
