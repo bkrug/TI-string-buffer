@@ -37,6 +37,8 @@ RUNTST BLWP @OPENF
        BL   @TGET1
        BL   @BADDTA
        BL   @TGET2
+       BL   @BADDTA
+       BL   @TGET3
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -891,4 +893,46 @@ GERR2B BSS  >18
        TEXT ' but found '
 GERR2C BSS  >18
 GERR2D 
+
+*
+* Create a string
+* Insert space for a new char
+TGET3
+* R0 now contains address of string in
+* buffer.
+* Assign Copy-to address to R1.
+       LI   R0,TGET3M+4
+       LI   R1,TGET3M+5
+       LI   R2,TGET3N-TGET3M
+       BLWP @BUFCPY
+* The data in TGET1O is expected to
+* match the pre-existing contents of
+* TGET1N.
+       LI   R0,TGET3M
+       LI   R1,TGET3O
+TGET3A C    *R0+,*R1+
+       JNE  FGET3
+       CI   R0,TGET3N+1
+       JL   TGET3A
+       RT
+FGET3  LI   R2,TGET3M+1
+       S    R2,R0
+       LI   R1,GERR31
+       BLWP @MAKETX
+       LI   R0,GERR30
+       LI   R1,GERR32-GERR30
+       BLWP @PRINTL
+       RT
+TGET3M BYTE >8
+       TEXT 'abcd1234'
+TGET3N BSS  >10
+TGET3O BYTE >8
+       TEXT 'abcd11234'
+GERR30 TEXT 'TGET3 failed. '
+       TEXT 'The strings stopped matching '
+       TEXT 'at '
+GERR31 TEXT '....'
+       TEXT ' bytes from the start.'
+GERR32 EVEN
+
        END
