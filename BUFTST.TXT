@@ -903,7 +903,7 @@ TGET3
 * Assign Copy-to address to R1.
        LI   R0,TGET3M+4
        LI   R1,TGET3M+5
-       LI   R2,TGET3N-TGET3M
+       LI   R2,4
        BLWP @BUFCPY
 * The data in TGET1O is expected to
 * match the pre-existing contents of

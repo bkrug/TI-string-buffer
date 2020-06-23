@@ -89,12 +89,22 @@ ONE    DATA >0001
 * will be the data length.
 BUFCPY DATA STRWS,BUFCPY+4
        MOV  *R13,R0
-       MOV  @2(13),R2
-       MOV  @4(13),R3
-CPYST  MOVB *R0+,*R2+
-       DEC  R3
-       JNE  CPYST
-       RTWP
+       MOV  @2(13),R1
+       MOV  @4(13),R2
+* Check if source and destination
+* overlap.
+       A    R0,R2
+       C    R0,R1
+       JH   CPYST
+       C    R2,R1
+       JL   CPYST
+* Copy from end to start	   
+       JMP  CPYRT
+* Copy from start to end
+CPYST  MOVB *R0+,*R1+
+       C    R0,R2
+       JL   CPYST
+CPYRT  RTWP
 
 * 
 * **** BUFALC ****
