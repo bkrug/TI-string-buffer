@@ -100,11 +100,11 @@ BUFCPY DATA STRWS,BUFCPY+4
        JL   CPYST
 * Copy from end to start
        A    @4(13),R1
-CPY1   MOVB *R2,*R1
-       DEC  R1
+CPY1   DEC  R1
        DEC  R2
+       MOVB *R2,*R1
        C    R2,R0
-       JHE  CPY1
+       JH   CPY1
        RTWP
 * Copy from start to end
 CPYST  MOVB *R0+,*R1+

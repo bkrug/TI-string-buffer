@@ -910,24 +910,23 @@ TGET3
 * TGET1N.
        LI   R0,TGET3M
        LI   R1,TGET3O
-TGET3A C    *R0+,*R1+
+TGET3A CB   *R0+,*R1+
        JNE  FGET3
        CI   R0,TGET3N+1
        JL   TGET3A
        RT
 FGET3  LI   R2,TGET3M+1
        S    R2,R0
+	   DEC  R0
        LI   R1,GERR31
        BLWP @MAKETX
        LI   R0,GERR30
        LI   R1,GERR32-GERR30
        BLWP @PRINTL
        RT
-TGET3M BYTE >8
-       TEXT 'abcd1234'
+TGET3M TEXT 'abcd1234'
 TGET3N BSS  >10
-TGET3O BYTE >8
-       TEXT 'abcd11234'
+TGET3O TEXT 'abcd11234'
 GERR30 TEXT 'TGET3 failed. '
        TEXT 'The strings stopped matching '
        TEXT 'at '
