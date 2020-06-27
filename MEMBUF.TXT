@@ -110,7 +110,7 @@ CPY1   DEC  R1
 CPYST  MOVB *R0+,*R1+
        C    R0,R2
        JL   CPYST
-CPYRT  RTWP
+       RTWP
 
 * 
 * **** BUFALC ****

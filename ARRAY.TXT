@@ -97,12 +97,12 @@ ADDRT  MOV  R10,*R13
 ARYINS DATA ARRYWS,ARYINS+4
        BL   @ADRSIZ
        BL   @REALC
-       B    @CPYBCK
+       BL   @CPYBCK
 *
 * Put address of new element in the
 * array in caller's R1
 *
-INS1   MOV  R1,@2(13)
+INS1   MOV  R0,@2(13)
 *
 * Increase length of array
 *
@@ -299,32 +299,28 @@ RTERR  SETO *R13
 CPYBCK
 * R0 must have memory size of item
        MOV  R9,R0
-* Get address of insertion index
-       MOV  @2(13),R1
-       SLA  R1,0
-       A    R10,R1
-       C    *R1+,*R1+
-* Get address immediately following the
-* end of the array + item size - 2
-       MOV  *R10,R3
-       INC  R3
-       SLA  R3,0
-       A    R10,R3
-       INCT R3
-* Get address of last word in last item
-* in array
+* Let R2 = size of array
        MOV  *R10,R2
-       SLA  R2,0
-       A    R10,R2
-       INCT R2
-* Copy each word until we reach the
-* address of insertion.
-CPYBK1 MOV  *R2,*R3
-       DECT R2
-       DECT R3
-       C    R2,R1
-       JHE  CPYBK1
+	   SLA  R2,0
+	   C    *R2+,*R2+
+* Let R1 = length of each element
+       LI   R1,1
+	   SLA  R1,0
+* Let R0 = offset of insert element
+* from array start
+       MOV  @2(13),R3
+	   SLA  R3,0
+	   C    *R3+,*R3+
+	   MOV  R3,R0
+* Let R2 = number of bytes to move
+       S    R0,R2
+* Let R0 = address of insert element
+	   A    R10,R0
+* Let R1 = address of following element
+	   A    R0,R1
 *
-       B    @INS1
+       BLWP @BUFCPY
+*
+       RT
 
        END
