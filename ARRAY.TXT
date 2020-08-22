@@ -301,23 +301,23 @@ CPYBCK
        MOV  R9,R0
 * Let R2 = size of array
        MOV  *R10,R2
-	   SLA  R2,0
-	   C    *R2+,*R2+
+       SLA  R2,0
+       C    *R2+,*R2+
 * Let R1 = length of each element
        LI   R1,1
-	   SLA  R1,0
+       SLA  R1,0
 * Let R0 = offset of insert element
 * from array start
        MOV  @2(13),R3
-	   SLA  R3,0
-	   C    *R3+,*R3+
-	   MOV  R3,R0
+       SLA  R3,0
+       C    *R3+,*R3+
+       MOV  R3,R0
 * Let R2 = number of bytes to move
        S    R0,R2
 * Let R0 = address of insert element
-	   A    R10,R0
+       A    R10,R0
 * Let R1 = address of following element
-	   A    R0,R1
+       A    R0,R1
 *
        BLWP @BUFCPY
 *

@@ -39,6 +39,8 @@ RUNTST BLWP @OPENF
        BL   @TGET2
        BL   @BADDTA
        BL   @TGET3
+       BL   @BADDTA
+       BL   @TGET4
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -915,7 +917,7 @@ TGET3A CB   *R0+,*R1+
        CI   R0,TGET3N+1
        JL   TGET3A
        RT
-FGET3  LI   R2,TGET3M+1
+FGET3  LI   R2,TGET3M
        S    R2,R0
 	   DEC  R0
        LI   R1,GERR31
@@ -933,5 +935,45 @@ GERR30 TEXT 'TGET3 failed. '
 GERR31 TEXT '....'
        TEXT ' bytes from the start.'
 GERR32 EVEN
+
+*
+* Create a string
+* Delete a char
+TGET4
+* R0 now contains address of string in
+* buffer.
+* Assign Copy-to address to R1.
+       LI   R0,TGET4M+5
+       LI   R1,TGET4M+4
+       LI   R2,4
+       BLWP @BUFCPY
+* The data in TGET4O is expected to
+* match the pre-existing contents of
+* TGET4N.
+       LI   R0,TGET4M
+       LI   R1,TGET4O
+TGET4A CB   *R0+,*R1+
+       JNE  FGET4
+       CI   R1,GERR40
+       JL   TGET4A
+       RT
+FGET4  LI   R2,TGET4M
+       S    R2,R0
+	   DEC  R0
+       LI   R1,GERR41
+       BLWP @MAKETX
+       LI   R0,GERR40
+       LI   R1,GERR42-GERR40
+       BLWP @PRINTL
+       RT
+TGET4M TEXT 'abcd1234'
+TGET4N BSS  >10
+TGET4O TEXT 'abcd234'
+GERR40 TEXT 'TGET4 failed. '
+       TEXT 'The strings stopped matching '
+       TEXT 'at '
+GERR41 TEXT '....'
+       TEXT ' bytes from the start.'
+GERR42 EVEN
 
        END
