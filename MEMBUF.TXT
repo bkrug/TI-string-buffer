@@ -256,9 +256,10 @@ TMRG3  RT
 * R1 - maximum acceptable size
 BUFLES DATA STRWS,BUFLES+4
 * Let R8 = address of block
-* Let R9 = max size
+* Let R9 = max size + 2
        MOV  *R13,R8
        MOV  @2(13),R9
+       INCT R9
 * Let R10 = current block size
        MOV  *R8,R10
        SZC  @BLKUSE,R10
@@ -272,10 +273,12 @@ BUFLES DATA STRWS,BUFLES+4
 	   MOV  R9,*R8
 * Create a new empty block header
        SZC  @BLKUSE,R9
-	   INCT R8
 	   A    R9,R8
-	   DECT R10
 	   MOV  R10,*R8
+* Merge new free block with later free
+* blocks.
+       MOV  R8,R3
+       BL   @TRYMRG
 *
 LESRT  RTWP
        END

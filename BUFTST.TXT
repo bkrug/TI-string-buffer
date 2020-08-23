@@ -44,6 +44,8 @@ RUNTST BLWP @OPENF
        BL   @TGET4
        BL   @BADDTA
        BL   @TLES1
+       BL   @BADDTA
+       BL   @TLES2
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -989,27 +991,27 @@ TLES1  LI   R0,SPACE
        BLWP @BUFINT
 * Arrange test data
        LI   R0,TLES1M
-       LI   R1,SPACE+2
+       LI   R1,SPACE
        LI   R2,TLES1N-TLES1M
        BLWP @BUFCPY
 * Act: assume that the user wants to
 * guarantee that a maximum of >14 bytes
 * is allocated as SPACE+4
-       LI   R0,SPACE+2
+       LI   R0,SPACE
        LI   R1,>14
        BLWP @BUFLES
 * Assert that the change is correct
-       LI   R0,SPACE+2
+       LI   R0,SPACE
        LI   R1,TLES1N
        C    *R0,*R1
        JNE  TLES1A
 *
-       LI   R0,SPACE+2+>16
+       LI   R0,SPACE+>16
        LI   R1,TLES1N+>16
        C    *R0,*R1
        JNE  TLES1B
 *      
-       LI   R0,SPACE+2+>1A
+       LI   R0,SPACE+>1A
        LI   R1,TLES1N+>1A
        C    *R0,*R1
        JNE  TLES1C
@@ -1031,13 +1033,13 @@ TLES1C LI   R0,TLES1Q
        BLWP @PRINTL
        RT
 * Initial Test data
-TLES1M DATA >8018
+TLES1M DATA >801A
        BSS  >18
        DATA >8064
 * Expected Result data
-TLES1N DATA >8014
+TLES1N DATA >8016
        BSS  >14
-       DATA >0002
+       DATA >0004
        BSS  >2
        DATA >8064
 TLES1O TEXT 'TLES1 failed. '
@@ -1047,6 +1049,59 @@ TLES1P TEXT 'TLES1 failed. '
 TLES1Q TEXT 'TLES1 failed. '
        TEXT '3rd block header wrong.'	   
 TLES1R
+
+*
+* Too much space is allocated for a
+* particular purpose. Shrink the
+* allocation. Merge new blank space
+* with following empty space.
+TLES2  LI   R0,SPACE
+       LI   R1,>1000
+       BLWP @BUFINT
+* Arrange test data
+       LI   R0,TLES2M
+       LI   R1,SPACE
+       LI   R2,TLES2N-TLES2M
+       BLWP @BUFCPY
+* Act: assume that the user wants to
+* guarantee that a maximum of >14 bytes
+* is allocated as SPACE+4
+       LI   R0,SPACE
+       LI   R1,>14
+       BLWP @BUFLES
+* Assert that the change is correct
+       LI   R0,SPACE
+       LI   R1,TLES2N
+       C    *R0,*R1
+       JNE  TLES2A
+*
+       LI   R0,SPACE+>16
+       LI   R1,TLES2N+>16
+       C    *R0,*R1
+       JNE  TLES2B
+*
+	   RT
+* Report failure
+TLES2A LI   R0,TLES1O
+       LI   R1,TLES1P-TLES1O
+       BLWP @PRINTL
+       RT
+*
+TLES2B LI   R0,TLES1P
+       LI   R1,TLES1Q-TLES1P
+       BLWP @PRINTL
+       RT
+* Initial Test data
+TLES2M DATA >801A
+       BSS  >18
+       DATA >0066
+	   BSS  >64
+	   DATA >8404
+* Expected Result data
+TLES2N DATA >8016
+       BSS  >14
+       DATA >006A
+TLES2O
 
 *
 * The amount of space allocated to a
