@@ -37,6 +37,9 @@ STARTM TEXT 'Testing'
 ENDM   TEXT 'Done'
 ENDME  EVEN
 
+SPACE  BSS  >2000
+SPAEND
+
 *
 * Initialize buffer.
 *
@@ -445,7 +448,4 @@ COMPM  TEXT 'TST : Wrong array contents. '
 COMPN  EVEN
 COMPO  EQU  COMPM+3
 
-
-SPACE  BSS  >2000
-SPAEND
        END

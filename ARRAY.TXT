@@ -1,7 +1,7 @@
        DEF  ARYALC,ARYADD,ARYINS,ARYDEL
        DEF  ARYADR
 *
-       REF  BUFALC,BUFREE,BUFCPY
+       REF  BUFALC,BUFREE,BUFCPY,BUFLES
        REF  ARRYWS,BLKUSE
 
 *
@@ -151,47 +151,20 @@ ARYDEL DATA ARRYWS,ARYDEL+4
        DEC  *R10
 *
 * ---- Adjust memory block size ----
-* Get new memory size of the array in R2.
+* Get new memory size of the array in R1.
 * Calc: array length * Item size + 4
        MOV  R9,R0
-       MOV  *R10,R2
-       SLA  R2,0
-       C    *R2+,*R2+
-* Get current size of memory block - 2
-* Put in R3
-       MOV  R10,R4
-       DECT R4
-       MOV  *R4,R3
-       SZC  @BLKUSE,R3
-       MOV  R3,R5
-       DECT R3
-* Get minimum reservable space for array
-* (item size * 4 + 4)
-       LI   R6,4
-       SLA  R6,0
-       C    *R6+,*R6+
-* If current block size is at least 4
-* times larger than array size AND a 
-* space twice as large as array size is
-* larger than minimum reservable space,
-* then shrink memory block.
-       SRL  R3,2
-       C    R3,R2
-       JL   DELRT
-       SLA  R2,1
-       C    R6,R2
-       JH   DELRT
-* Shrink block to twice the array size
-* R2 still has array size * 2.
-* R4 still has address of meory block.
-* R5 still has size of memory block.
-       INCT R2
-       S    R2,R5
-       S    R5,*R4
-* Create a new free block
-       A    R2,R4
-       MOV  R5,*R4
-DELRT  RTWP
+       MOV  *R10,R1
+       SLA  R1,0
+       C    *R1+,*R1+
+* Let R0 = address of array
+* Let R1 = array size * 2
+       MOV  *R13,R0
+       SLA  R1,1
+* Shrink memory allocation if needed
+       BLWP @BUFLES
+*
+       RTWP
 
 
 *
