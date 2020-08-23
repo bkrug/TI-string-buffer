@@ -1,10 +1,22 @@
        DEF  TSTLST,RSLTFL
-       REF  AEQ
+       REF  AEQ,ABLCK
 *
        REF  BUFINT,BUFCPY,BUFALC,BUFREE
        REF  BUFLES
 
 TSTLST DATA TSTEND-TSTLST-2/8
+* Copy memory block. Non-overlapping.
+       DATA TCPY1
+       TEXT 'TCPY1 '
+* Copy memory block. Length is zero.
+       DATA TCPY2
+       TEXT 'TCPY2 '
+* Copy memory block. Overlapping.
+       DATA TCPY3
+       TEXT 'TCPY3 '
+* Copy memory block. Overlapping.
+       DATA TCPY4
+       TEXT 'TCPY4 '
 * Initialize a >1000 bytes buffer.
        DATA TINT1
        TEXT 'TINT1 '
@@ -24,6 +36,102 @@ RSLTFE
        EVEN
 *
 SPACE  BSS  >1800
+
+*
+* Copy memory block. Non-overlapping.
+TCPY1
+* Act
+       LI   R0,TCPY1A
+	   LI   R1,TCPY1C
+	   LI   R2,TCPY1B-TCPY1A
+	   BLWP @BUFCPY
+* Assert the data was copied correctly.
+       LI   R0,TCPY1A
+	   LI   R1,TCPY1C
+	   LI   R2,TCPY1B-TCPY1A
+	   LI   R3,TCPY1D
+	   LI   R4,TCPY1E-TCPY1D
+	   BLWP @ABLCK
+*
+       RT
+TCPY1A TEXT 'Some data to copy.'
+TCPY1B EVEN
+       BSS  >10
+TCPY1C BSS  >20
+TCPY1D TEXT 'Copied string should match original.'
+TCPY1E
+
+*
+* Copy memory block. Length is zero.
+TCPY2
+* Act
+       LI   R0,TCPY2A
+	   LI   R1,TCPY2C
+	   LI   R2,0
+	   BLWP @BUFCPY
+* No real assertion.
+* If this test fails, it will probably
+* mean an infinate loop.
+       RT
+TCPY2A BSS  >2
+TCPY2C BSS  >2
+
+*
+* Copy memory block. Overlapping.
+* Source block is earlier than
+* destination block.
+TCPY3
+* Act
+       LI   R0,TCPY3B
+	   LI   R1,TCPY3D
+	   LI   R2,TCPY3C-TCPY3B
+	   BLWP @BUFCPY
+* Assert
+       LI   R0,TCPY3A
+	   LI   R1,TCPY3D
+	   LI   R2,TCPY3B-TCPY3A
+	   LI   R3,TCPY1D
+	   LI   R4,TCPY1E-TCPY1D
+	   BLWP @ABLCK
+*
+       RT
+* Expected text
+TCPY3A TEXT 'This is some data that may be copied._'
+       EVEN
+* Source to copy from
+TCPY3B TEXT 'This is some data that may be copied._'
+       EVEN
+TCPY3C BSS  >20
+TCPY3D EQU  TCPY3B+>8
+
+*
+* Copy memory block. Overlapping.
+* Source block is later than
+* destination block.
+TCPY4
+* Act
+       LI   R0,TCPY4C
+	   LI   R1,TCPY4E
+	   LI   R2,TCPY4D-TCPY4C
+	   BLWP @BUFCPY
+* Assert
+       LI   R0,TCPY4A
+	   LI   R1,TCPY4E
+	   LI   R2,TCPY4B-TCPY4A
+	   LI   R3,TCPY1D
+	   LI   R4,TCPY1E-TCPY1D
+	   BLWP @ABLCK
+*
+       RT
+* Expected text
+TCPY4A TEXT 'This is some data that may be copied._'
+TCPY4B EVEN
+       BSS  >20
+* Source to copy from
+TCPY4C TEXT 'This is some data that may be copied._'
+TCPY4D
+TCPY4E EQU  TCPY4C->8
+       EVEN
 
 *
 * Initialize a >1000 bytes buffer.
