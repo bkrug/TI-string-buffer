@@ -40,8 +40,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        TEXT 'TALC2 '
 * Allocate space between two allocated
 *    spaces.
-*       DATA TALC3
-*       TEXT 'TALC3 '
+       DATA TALC3
+       TEXT 'TALC3 '
 * Allocate space.
 *    Earlier empty space too small.
 *       DATA TALC4
@@ -340,6 +340,59 @@ TALC2E EVEN
 * Allocate space between two allocated
 *    spaces.
 TALC3
+* Arrange
+       LI   R0,TALC3A
+       MOV  R0,@BUFADR
+       LI   R0,TALC3B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,>16
+       BLWP @BUFALC
+* Assert
+*
+       LI   R0,>8008
+	   LI   R1,TALC3A
+       MOV  *R1,R1
+       LI   R2,TALC3B
+       LI   R3,TALC3C-TALC3B
+       BLWP @AEQ
+*
+       LI   R0,>8010
+	   LI   R1,TALC3A+>20
+       MOV  *R1,R1
+       LI   R2,TALC3B
+       LI   R3,TALC3C-TALC3B
+       BLWP @AEQ
+* >18 bytes should be allocated
+* (>16 bytes + header)
+       LI   R0,>8018
+	   LI   R1,TALC3A+>08
+       MOV  *R1,R1
+       LI   R2,TALC3C
+       LI   R3,TALC3D-TALC3C
+       BLWP @AEQ
+* >10 bytes remain unallocated
+       LI   R0,>0010
+       LI   R1,TALC3A+>30
+       MOV  *R1,R1
+       LI   R2,TALC3D
+       LI   R3,TALC3E-TALC3D
+       BLWP @AEQ
+*
+       RT
+* Starting buffer
+TALC3A DATA >8008
+       BSS  >06
+       DATA >0018
+       BSS  >16
+       DATA >8010
+	   BSS  >0E
+	   DATA >0010
+	   BSS  >0E
+TALC3B TEXT 'Space should remain allocated.'
+TALC3C TEXT 'Space should be newly allocated.'
+TALC3D TEXT 'Space should remain unallocated.'
+TALC3E EVEN
 
 * Allocate space.
 *    Earlier empty space too small.
