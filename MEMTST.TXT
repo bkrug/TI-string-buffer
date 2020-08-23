@@ -1,0 +1,118 @@
+       DEF  TSTLST,RSLTFL
+       REF  AEQ
+*
+       REF  BUFINT,BUFCPY,BUFALC,BUFREE
+       REF  BUFLES
+
+TSTLST DATA TSTEND-TSTLST-2/8
+* Initialize a >1000 bytes buffer.
+       DATA TINT1
+       TEXT 'TINT1 '
+* Fail to initialize with >8000 bytes.
+       DATA TINT2
+       TEXT 'TINT2 '
+* Fail to initialize with >2 bytes.
+       DATA TINT3
+       TEXT 'TINT3 '
+* Fail to initialize with >13 bytes.
+       DATA TINT4
+       TEXT 'TINT4 '
+TSTEND
+RSLTFL BYTE RSLTFE-RSLTFL-1
+       TEXT 'DSK2.TESTRESULT.TXT'
+RSLTFE
+       EVEN
+*
+SPACE  BSS  >1800
+
+*
+* Initialize a >1000 bytes buffer.
+* Expect the first word to contain the
+* header for one empty chunk covering
+* the entire buffer.
+TINT1
+* Act
+       LI   R0,SPACE
+       LI   R1,>1000
+       BLWP @BUFINT
+* Assert R0 = zero (no error)
+       MOV  R0,R1
+       CLR  R0
+       LI   R2,TINT1A
+       LI   R3,TINT1B-TINT1A
+       BLWP @AEQ
+* Assert R0 = zero (no error)
+       LI   R0,>1000
+       LI   R1,SPACE
+       MOV  *R1,R1
+       LI   R2,TINT1B
+       LI   R3,TINT1C-TINT1B
+       BLWP @AEQ       
+*
+       RT
+TINT1A TEXT 'There should be no allocation error.'
+TINT1B TEXT 'The first word should contain >1000.'
+TINT1C
+ 
+*
+* Fail to initialize with >8000 bytes.
+* Expect the allocation to fail because
+* >8000 is too big.
+TINT2
+* Act
+       LI   R0,SPACE
+       LI   R1,>8000
+       BLWP @BUFINT
+* Assert R0 = >FFFF (error)
+       MOV  R0,R1
+       SETO R0
+       LI   R2,TINT2A
+       LI   R3,TINT2B-TINT2A
+       BLWP @AEQ
+*
+       RT
+TINT2A TEXT 'Allocation should fail. '
+       TEXT '>8000 is too big.'
+TINT2B
+
+*
+* Fail to initialize with >2 bytes.
+* Expect the allocation to fail because
+* >0002 is too small.
+TINT3  LI   R0,SPACE
+       LI   R1,>2
+       BLWP @BUFINT
+* Assert R0 = >FFFF (error)
+       MOV  R0,R1
+       SETO R0
+       LI   R2,TINT3A
+       LI   R3,TINT3B-TINT3A
+       BLWP @AEQ
+*
+       RT
+TINT3A TEXT 'Allocation should fail. '
+       TEXT '>3 is too small.'
+TINT3B
+
+*
+* Fail to initialize with >13 bytes.
+* Expect the allocation to fail because
+* space must be even.
+TINT4
+* Act
+       LI   R0,SPACE
+       LI   R1,>13
+       BLWP @BUFINT
+* Assert R0 = >FFFF (error)
+       MOV  R0,R1
+       SETO R0
+       LI   R2,TINT4A
+       LI   R3,TINT4B-TINT4A
+       BLWP @AEQ
+*
+       RT
+TINT4A TEXT 'Allocation should fail. '
+       TEXT 'Allocated space must be even.'
+TINT4B
+
+       END

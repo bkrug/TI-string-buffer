@@ -72,9 +72,10 @@ RPTERR
        LI   R2,ERRFL1-ERRFL
        BLWP @VMBW
        A    R2,R0
-       MOV  R4,R1
-       AI   R1,10
-       MOV  @8(4),R2
+       DECT R4
+       MOV  *R4+,R1
+	   MOV  *R4,R2
+	   S    R1,R2
        BLWP @VMBW
 JMP    LIMI 2
        LIMI 0
