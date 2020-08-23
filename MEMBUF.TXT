@@ -1,4 +1,5 @@
        DEF  BUFINT,BUFALC,BUFCPY,BUFREE
+       DEF  BUFLES
        DEF  BLKUSE
 *
        REF  STRWS,BUFADR,BUFEND
@@ -245,4 +246,36 @@ TMGR2  MOV  R5,R4
 * it in header of first chunk.
        MOV  R4,*R3
 TMRG3  RT
+
+*
+* Reduce allocation of space
+* if necessary
+*
+* Input:
+* R0 - address inside of buffer
+* R1 - maximum acceptable size
+BUFLES DATA STRWS,BUFLES+4
+* Let R8 = address of block
+* Let R9 = max size
+       MOV  *R13,R8
+       MOV  @2(13),R9
+* Let R10 = current block size
+       MOV  *R8,R10
+       SZC  @BLKUSE,R10
+* Check if too big
+       C    R10,R9
+	   JLE  LESRT
+* Mark block header with less space
+* Let R10 = spare space
+       S    R9,R10
+	   SOC  @BLKUSE,R9
+	   MOV  R9,*R8
+* Create a new empty block header
+       SZC  @BLKUSE,R9
+	   INCT R8
+	   A    R9,R8
+	   DECT R10
+	   MOV  R10,*R8
+*
+LESRT  RTWP
        END

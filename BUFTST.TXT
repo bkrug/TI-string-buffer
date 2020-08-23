@@ -1,5 +1,6 @@
        DEF  RUNTST
        REF  BUFINT,BUFCPY,BUFALC,BUFREE
+       REF  BUFLES
        REF  MAKETX,PRINTL,OPENF,CLOSEF
        
 * Run all tests
@@ -41,10 +42,13 @@ RUNTST BLWP @OPENF
        BL   @TGET3
        BL   @BADDTA
        BL   @TGET4
+       BL   @BADDTA
+       BL   @TLES1
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
- 
+
+       TEXT '   SPACE' 
 SPACE  BSS  >1000
 SPEND
  
@@ -919,7 +923,7 @@ TGET3A CB   *R0+,*R1+
        RT
 FGET3  LI   R2,TGET3M
        S    R2,R0
-	   DEC  R0
+       DEC  R0
        LI   R1,GERR31
        BLWP @MAKETX
        LI   R0,GERR30
@@ -959,7 +963,7 @@ TGET4A CB   *R0+,*R1+
        RT
 FGET4  LI   R2,TGET4M
        S    R2,R0
-	   DEC  R0
+       DEC  R0
        LI   R1,GERR41
        BLWP @MAKETX
        LI   R0,GERR40
@@ -975,5 +979,81 @@ GERR40 TEXT 'TGET4 failed. '
 GERR41 TEXT '....'
        TEXT ' bytes from the start.'
 GERR42 EVEN
+
+*
+* Too much space is allocated for a
+* particular purpose. Shrink the
+* allocation.
+TLES1  LI   R0,SPACE
+       LI   R1,>1000
+       BLWP @BUFINT
+* Arrange test data
+       LI   R0,TLES1M
+       LI   R1,SPACE+2
+       LI   R2,TLES1N-TLES1M
+       BLWP @BUFCPY
+* Act: assume that the user wants to
+* guarantee that a maximum of >14 bytes
+* is allocated as SPACE+4
+       LI   R0,SPACE+2
+       LI   R1,>14
+       BLWP @BUFLES
+* Assert that the change is correct
+       LI   R0,SPACE+2
+       LI   R1,TLES1N
+       C    *R0,*R1
+       JNE  TLES1A
+*
+       LI   R0,SPACE+2+>16
+       LI   R1,TLES1N+>16
+       C    *R0,*R1
+       JNE  TLES1B
+*      
+       LI   R0,SPACE+2+>1A
+       LI   R1,TLES1N+>1A
+       C    *R0,*R1
+       JNE  TLES1C
+*
+	   RT
+* Report failure
+TLES1A LI   R0,TLES1O
+       LI   R1,TLES1P-TLES1O
+       BLWP @PRINTL
+       RT
+*
+TLES1B LI   R0,TLES1P
+       LI   R1,TLES1Q-TLES1P
+       BLWP @PRINTL
+       RT
+*
+TLES1C LI   R0,TLES1Q
+       LI   R1,TLES1R-TLES1Q
+       BLWP @PRINTL
+       RT
+* Initial Test data
+TLES1M DATA >8018
+       BSS  >18
+       DATA >8064
+* Expected Result data
+TLES1N DATA >8014
+       BSS  >14
+       DATA >0002
+       BSS  >2
+       DATA >8064
+TLES1O TEXT 'TLES1 failed. '
+       TEXT '1st block header wrong.'
+TLES1P TEXT 'TLES1 failed. '
+       TEXT '2nd block header wrong.'
+TLES1Q TEXT 'TLES1 failed. '
+       TEXT '3rd block header wrong.'	   
+TLES1R
+
+*
+* The amount of space allocated to a
+* particular purpose is not too large.
+* Don't shrink it.
+TLES3  LI   R0,SPACE
+       LI   R1,>1000
+       BLWP @BUFINT
 
        END
