@@ -3,6 +3,8 @@
 *
        REF  BUFINT,BUFCPY,BUFALC,BUFREE
        REF  BUFLES
+*
+       REF  BUFADR,BUFEND
 
 TSTLST DATA TSTEND-TSTLST-2/8
 * Copy memory block. Non-overlapping.
@@ -29,29 +31,47 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Fail to initialize with >13 bytes.
        DATA TINT4
        TEXT 'TINT4 '
+* Allocate space in empty buffer.
+       DATA TALC1
+       TEXT 'TALC1 '
+* Allocate space following another
+*    allocation.
+       DATA TALC2
+       TEXT 'TALC2 '
+* Allocate space between two allocated
+*    spaces.
+*       DATA TALC3
+*       TEXT 'TALC3 '
+* Allocate space.
+*    Earlier empty space too small.
+*       DATA TALC4
+*       TEXT 'TALC4 '
+* No unallocated space is large enough.
+*       DATA TALC5
+*       TEXT 'TALC5 '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
 RSLTFE
        EVEN
 *
-SPACE  BSS  >1800
+SPACE  BSS  >400
 
 *
 * Copy memory block. Non-overlapping.
 TCPY1
 * Act
        LI   R0,TCPY1A
-	   LI   R1,TCPY1C
-	   LI   R2,TCPY1B-TCPY1A
-	   BLWP @BUFCPY
+       LI   R1,TCPY1C
+       LI   R2,TCPY1B-TCPY1A
+       BLWP @BUFCPY
 * Assert the data was copied correctly.
        LI   R0,TCPY1A
-	   LI   R1,TCPY1C
-	   LI   R2,TCPY1B-TCPY1A
-	   LI   R3,TCPY1D
-	   LI   R4,TCPY1E-TCPY1D
-	   BLWP @ABLCK
+       LI   R1,TCPY1C
+       LI   R2,TCPY1B-TCPY1A
+       LI   R3,TCPY1D
+       LI   R4,TCPY1E-TCPY1D
+       BLWP @ABLCK
 *
        RT
 TCPY1A TEXT 'Some data to copy.'
@@ -59,16 +79,16 @@ TCPY1B EVEN
        BSS  >10
 TCPY1C BSS  >20
 TCPY1D TEXT 'Copied string should match original.'
-TCPY1E
+TCPY1E EVEN
 
 *
 * Copy memory block. Length is zero.
 TCPY2
 * Act
        LI   R0,TCPY2A
-	   LI   R1,TCPY2C
-	   LI   R2,0
-	   BLWP @BUFCPY
+       LI   R1,TCPY2C
+       LI   R2,0
+       BLWP @BUFCPY
 * No real assertion.
 * If this test fails, it will probably
 * mean an infinate loop.
@@ -83,16 +103,16 @@ TCPY2C BSS  >2
 TCPY3
 * Act
        LI   R0,TCPY3B
-	   LI   R1,TCPY3D
-	   LI   R2,TCPY3C-TCPY3B
-	   BLWP @BUFCPY
+       LI   R1,TCPY3D
+       LI   R2,TCPY3C-TCPY3B
+       BLWP @BUFCPY
 * Assert
        LI   R0,TCPY3A
-	   LI   R1,TCPY3D
-	   LI   R2,TCPY3B-TCPY3A
-	   LI   R3,TCPY1D
-	   LI   R4,TCPY1E-TCPY1D
-	   BLWP @ABLCK
+       LI   R1,TCPY3D
+       LI   R2,TCPY3B-TCPY3A
+       LI   R3,TCPY1D
+       LI   R4,TCPY1E-TCPY1D
+       BLWP @ABLCK
 *
        RT
 * Expected text
@@ -111,16 +131,16 @@ TCPY3D EQU  TCPY3B+>8
 TCPY4
 * Act
        LI   R0,TCPY4C
-	   LI   R1,TCPY4E
-	   LI   R2,TCPY4D-TCPY4C
-	   BLWP @BUFCPY
+       LI   R1,TCPY4E
+       LI   R2,TCPY4D-TCPY4C
+       BLWP @BUFCPY
 * Assert
        LI   R0,TCPY4A
-	   LI   R1,TCPY4E
-	   LI   R2,TCPY4B-TCPY4A
-	   LI   R3,TCPY1D
-	   LI   R4,TCPY1E-TCPY1D
-	   BLWP @ABLCK
+       LI   R1,TCPY4E
+       LI   R2,TCPY4B-TCPY4A
+       LI   R3,TCPY1D
+       LI   R4,TCPY1E-TCPY1D
+       BLWP @ABLCK
 *
        RT
 * Expected text
@@ -141,7 +161,7 @@ TCPY4E EQU  TCPY4C->8
 TINT1
 * Act
        LI   R0,SPACE
-       LI   R1,>1000
+       LI   R1,>200
        BLWP @BUFINT
 * Assert R0 = zero (no error)
        MOV  R0,R1
@@ -150,7 +170,7 @@ TINT1
        LI   R3,TINT1B-TINT1A
        BLWP @AEQ
 * Assert R0 = zero (no error)
-       LI   R0,>1000
+       LI   R0,>200
        LI   R1,SPACE
        MOV  *R1,R1
        LI   R2,TINT1B
@@ -160,7 +180,7 @@ TINT1
        RT
 TINT1A TEXT 'There should be no allocation error.'
 TINT1B TEXT 'The first word should contain >1000.'
-TINT1C
+TINT1C EVEN
  
 *
 * Fail to initialize with >8000 bytes.
@@ -181,13 +201,15 @@ TINT2
        RT
 TINT2A TEXT 'Allocation should fail. '
        TEXT '>8000 is too big.'
-TINT2B
+TINT2B EVEN
 
 *
 * Fail to initialize with >2 bytes.
 * Expect the allocation to fail because
 * >0002 is too small.
-TINT3  LI   R0,SPACE
+TINT3
+* Act
+       LI   R0,SPACE
        LI   R1,>2
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
@@ -200,7 +222,7 @@ TINT3  LI   R0,SPACE
        RT
 TINT3A TEXT 'Allocation should fail. '
        TEXT '>3 is too small.'
-TINT3B
+TINT3B EVEN
 
 *
 * Fail to initialize with >13 bytes.
@@ -221,6 +243,106 @@ TINT4
        RT
 TINT4A TEXT 'Allocation should fail. '
        TEXT 'Allocated space must be even.'
-TINT4B
+TINT4B EVEN
+
+* Allocate space in empty buffer.
+TALC1
+* Arrange
+       LI   R0,TALC1A
+       MOV  R0,@BUFADR
+       LI   R0,TALC1B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,>E
+       BLWP @BUFALC
+* Assert
+* >10 bytes should be allocated
+* (>E bytes + header)
+       LI   R0,>8010
+       MOV  @TALC1A,R1
+       LI   R2,TALC1B
+       LI   R3,TALC1C-TALC1B
+       BLWP @AEQ
+* >30 bytes remain unallocated
+       LI   R0,>0030
+       LI   R1,TALC1A+>10
+       MOV  *R1,R1
+       LI   R2,TALC1C
+       LI   R3,TALC1D-TALC1C
+       BLWP @AEQ
+*
+       RT
+* Starting buffer
+TALC1A
+* Header
+       DATA >0040
+* Allocated space
+       BSS  >3E
+TALC1B TEXT 'Space should have been allocated.'
+TALC1C TEXT 'Some space should remain unallocated.'
+TALC1D EVEN
+
+* Allocate space following another
+*    allocation.
+TALC2
+* Arrange
+       LI   R0,TALC2A
+       MOV  R0,@BUFADR
+       LI   R0,TALC2B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,>C
+       BLWP @BUFALC
+* Assert
+*
+       LI   R0,>8008
+	   LI   R1,TALC2A
+       MOV  *R1,R1
+       LI   R2,TALC2B
+       LI   R3,TALC2C-TALC2B
+       BLWP @AEQ
+*
+       LI   R0,>8018
+	   LI   R1,TALC2A+>8
+       MOV  *R1,R1
+       LI   R2,TALC2B
+       LI   R3,TALC2C-TALC2B
+       BLWP @AEQ
+* >E bytes should be allocated
+* (>C bytes + header)
+       LI   R0,>800E
+	   LI   R1,TALC2A+>20
+       MOV  *R1,R1
+       LI   R2,TALC2C
+       LI   R3,TALC2D-TALC2C
+       BLWP @AEQ
+* >12 bytes remain unallocated
+       LI   R0,>0012
+       LI   R1,TALC2A+>2E
+       MOV  *R1,R1
+       LI   R2,TALC2D
+       LI   R3,TALC2E-TALC2D
+       BLWP @AEQ
+*
+       RT
+* Starting buffer
+TALC2A DATA >8008
+	   BSS  >06
+       DATA >8018
+	   BSS  >16
+	   DATA >0020
+       BSS  >1E
+TALC2B TEXT 'Space should remain allocated.'
+TALC2C TEXT 'Space should be newly allocated.'
+TALC2D TEXT 'Some space should remain unallocated.'
+TALC2E EVEN
+
+* Allocate space between two allocated
+*    spaces.
+TALC3
+
+* Allocate space.
+*    Earlier empty space too small.
+TALC4  RT
 
        END
