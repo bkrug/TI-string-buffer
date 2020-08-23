@@ -46,6 +46,8 @@ RUNTST BLWP @OPENF
        BL   @TLES1
        BL   @BADDTA
        BL   @TLES2
+       BL   @BADDTA
+       BL   @TLES3
        BL   @WREND
        BLWP @CLOSEF
 LOOP   JMP  LOOP
@@ -1110,5 +1112,47 @@ TLES2O
 TLES3  LI   R0,SPACE
        LI   R1,>1000
        BLWP @BUFINT
+* Arrange test data
+       LI   R0,TLES3M
+       LI   R1,SPACE
+       LI   R2,TLES3N-TLES3M
+       BLWP @BUFCPY
+* Act: assume that the user wants to
+* guarantee that a maximum of >58 bytes
+* is allocated as SPACE+2
+       LI   R0,SPACE
+       LI   R1,>58
+       BLWP @BUFLES
+* Assert that the change is correct
+       LI   R0,SPACE
+       LI   R1,TLES3N
+       C    *R0,*R1
+       JNE  TLES3A
+*
+       LI   R0,SPACE+>24
+       LI   R1,TLES3N+>24
+       C    *R0,*R1
+       JNE  TLES3B
+*
+	   RT
+* Report failure
+TLES3A LI   R0,TLES1O
+       LI   R1,TLES1P-TLES1O
+       BLWP @PRINTL
+       RT
+*
+TLES3B LI   R0,TLES1P
+       LI   R1,TLES1Q-TLES1P
+       BLWP @PRINTL
+       RT
+* Initial Test data
+TLES3M DATA >8024
+       BSS  >22
+       DATA >0066
+* Expected Result data
+TLES3N DATA >8024
+       BSS  >22
+       DATA >0066
+TLES3O
 
        END
