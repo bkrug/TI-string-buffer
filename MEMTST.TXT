@@ -42,13 +42,17 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *    spaces.
        DATA TALC3
        TEXT 'TALC3 '
-* Allocate space.
-*    Earlier empty space too small.
+* Allocate space between two allocated
+*    spaces, leave some allocated remaining.
 *       DATA TALC4
 *       TEXT 'TALC4 '
-* No unallocated space is large enough.
+* Allocate space.
+*    Earlier empty space too small.
 *       DATA TALC5
 *       TEXT 'TALC5 '
+* No unallocated space is large enough.
+*       DATA TALC6
+*       TEXT 'TALC6 '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
