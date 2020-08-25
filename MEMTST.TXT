@@ -181,8 +181,6 @@ TINT1
        LI   R0,SPACE
        LI   R1,>200
        BLWP @BUFINT
-*
-       CLR  R3
 * Assert R0 = zero (no error)
        MOV  R0,R1
        CLR  R0
@@ -210,7 +208,6 @@ TINT2
        LI   R1,>8000
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
-       CLR  R3
        MOV  R0,R1
        SETO R0
        BLWP @AEQ
@@ -231,7 +228,6 @@ TINT3
        LI   R1,>2
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
-       CLR  R3
        MOV  R0,R1
        SETO R0
        BLWP @AEQ
@@ -252,7 +248,6 @@ TINT4
        LI   R1,>13
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
-       CLR  R3
        MOV  R0,R1
        SETO R0
        BLWP @AEQ
@@ -275,7 +270,14 @@ TALC1
        LI   R0,>E
        BLWP @BUFALC
 * Assert
-       CLR  R3
+       MOV  R0,R1
+	   LI   R0,TALC1A+>02
+	   BLWP @AEQ
+	   TEXT 'R0 should have contained address '
+	   TEXT 'of newly allocated space. '
+	   TEXT 'It should be at beginning of buffer.'
+	   BYTE 0
+	   EVEN
 * >10 bytes should be allocated
 * (>E bytes + header)
        LI   R0,>8010
@@ -313,7 +315,13 @@ TALC2
        LI   R0,>C
        BLWP @BUFALC
 * Assert
-       CLR  R3
+       MOV  R0,R1
+	   LI   R0,TALC2A+>22
+	   BLWP @AEQ
+	   TEXT 'R0 should have contained address '
+	   TEXT 'of allocated space.'
+	   BYTE 0
+	   EVEN
 *
        LI   R0,>8008
        MOV  @TALC2A,R1
@@ -366,7 +374,13 @@ TALC3
        LI   R0,>16
        BLWP @BUFALC
 * Assert
-       CLR  R3
+       MOV  R0,R1
+	   LI   R0,TALC3A+>0A
+	   BLWP @AEQ
+	   TEXT 'R0 should have contained address '
+	   TEXT 'of allocated space.'
+	   BYTE 0
+	   EVEN
 *
        LI   R0,>8008
        MOV  @TALC3A,R1
@@ -422,7 +436,13 @@ TALC4
        LI   R0,>14
        BLWP @BUFALC
 * Assert
-       CLR  R3
+       MOV  R0,R1
+	   LI   R0,TALC4A+>0A
+	   BLWP @AEQ
+	   TEXT 'R0 should have contained address '
+	   TEXT 'of allocated space.'
+	   BYTE 0
+	   EVEN
 * >08 bytes remain allocated
        LI   R0,>8008
        MOV  @TALC4A,R1
@@ -485,6 +505,14 @@ TALC5
        LI   R0,>E
        BLWP @BUFALC
 * Assert
+       MOV  R0,R1
+	   LI   R0,TALC5A+>32
+	   BLWP @AEQ
+	   TEXT 'R0 should have contained address '
+	   TEXT 'of allocated space.'
+	   BYTE 0
+	   EVEN
+*
        LI   R0,>8008
        MOV  @TALC5A,R1
        BLWP @AEQ
@@ -562,6 +590,14 @@ TALC6
        LI   R0,>1C
        BLWP @BUFALC
 * Assert
+       MOV  R0,R1
+	   LI   R0,TALC6A+>18
+	   BLWP @AEQ
+	   TEXT 'R0 should have contained address '
+	   TEXT 'of allocated space.'
+	   BYTE 0
+	   EVEN
+*
        LI   R0,>8016
        MOV  @TALC6A,R1
        BLWP @AEQ
