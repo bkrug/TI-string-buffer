@@ -52,11 +52,11 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA TALC5
        TEXT 'TALC5 '
 * Allocate last remaining space in buffer.
-*       DATA TALC6
-*       TEXT 'TALC6 '
+       DATA TALC6
+       TEXT 'TALC6 '
 * No unallocated space is large enough.
-*       DATA TALC7
-*       TEXT 'TALC7 '
+       DATA TALC7
+       TEXT 'TALC7 '
 
 * Deallocate only allocated space
 * Deallocate last of several allocated
@@ -472,6 +472,7 @@ TALC4A DATA >8008
        BSS  >0E
 TALC4B
 
+*
 * Allocate space.
 *    Earlier empty space too small.
 TALC5
@@ -543,10 +544,74 @@ TALC5A DATA >8008
        BSS  >2
        DATA >8020
        BSS  >1E
-	   DATA >0018
-	   BSS  >16
-	   DATA >8010
-	   BSS  >E
+       DATA >0018
+       BSS  >16
+       DATA >8010
+       BSS  >E
 TALC5B
+
+*
+* Allocate last remaining space in buffer.
+TALC6
+* Arrange
+       LI   R0,TALC6A
+       MOV  R0,@BUFADR
+       LI   R0,TALC6B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,>1C
+       BLWP @BUFALC
+* Assert
+       LI   R0,>8016
+       MOV  @TALC6A,R1
+       BLWP @AEQ
+       TEXT 'Space should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>801E
+       MOV  @TALC6A+>16,R1
+       BLWP @AEQ
+       TEXT 'The last bit of space should now be allocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Starting buffer
+TALC6A DATA >8016
+       BSS  >14
+       DATA >001E
+       BSS  >1C
+TALC6B
+
+*
+* No unallocated space is large enough.
+TALC7
+* Arrange
+       LI   R0,TALC7A
+       MOV  R0,@BUFADR
+       LI   R0,TALC7B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,>12
+       BLWP @BUFALC
+* Assert
+       MOV  R0,R1
+       SETO R0
+       BLWP @AEQ
+       TEXT 'An error should be reported. '
+       TEXT 'There is not enough space.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Starting buffer
+TALC7A DATA >8016
+       BSS  >14
+       DATA >0010
+       BSS  >0E
+       DATA >801C
+       BSS  >1A
+TALC7B
 
        END
