@@ -400,8 +400,6 @@ ERRRT
 * R0: Address of Expected block
 * R1: Address of Actual block
 * R2: Length of expected block
-* R3: Address of fail message
-* R4: Length of fail message
 *
 * Return true if contents of two blocks
 * are equal. Displays first point where
@@ -453,23 +451,12 @@ ABFL   DECT R0
        LI   R1,ABLME-ABLMES
        BL   @SCRLPT
 * Display user-defined failure message
-       MOV  @6(13),R0
-       MOV  @8(13),R1
-       CI   R1,>200
-       JL   AB2
-       LI   R1,>200
-AB2    BL   @SCRLPT
-* Don't return to the test being run. No
-* need to run extra assertions
-* in the same test.
-       B    @TSTL20
+       B    @RF1
 
 * Assert Ones Corresponding
 * ----------------------
 * R0: Bits expected to be set
 * R1: Actual value
-* R2: Address of fail message
-* R3: Length of fail message
 * Assert Words Are Equal
 * ----------------------
 * Return true if ones in R2
@@ -490,18 +477,16 @@ AOCP
        COC  R0,R1
        JEQ  AOCS
 * Report failure
-       BL   @RF
+       BL   @ONFAIL
        DATA AOCM1,AOCM2
        DATA AOCMES,AOCME-AOCMES
 * Report success
-AOCS   RTWP
+AOCS   B    @ONPASS
 
 * Assert Zeros Corresponding
 * ----------------------
 * R0: Bits expected to be reset
 * R1: Actual value
-* R2: Address of fail message
-* R3: Length of fail message
 * Assert Words Are Equal
 * ----------------------
 * Return true if ones in R2 have 
@@ -522,18 +507,16 @@ AZCP
        CZC  R0,R1
        JEQ  AZCS
 * Report failure
-       BL   @RF
+       BL   @ONFAIL
        DATA AZCM1,AZCM2
        DATA AZCMES,AZCME-AZCMES
 * Report success
-AZCS   RTWP
+AZCS   B    @ONPASS
 
 * Assert Words are Equal
 * ----------------------
 * R0: Expected value
 * R1: Actual value
-* R2: Address of fail message
-* R3: Length of fail message
 * Assert Words Are Equal
 * ----------------------
 * Return true if contents of R2 and R3
@@ -555,7 +538,7 @@ AEQP
        C    R0,R1
        JEQ  AEQS
 * Report failure
-       BL   @RF
+       BL   @ONFAIL
        DATA AEQM1,AEQM2
        DATA AEQMES,AEQME-AEQMES
 * Report success
@@ -579,11 +562,11 @@ ANEQP
        C    R0,R1
        JNE  ANEQS
 * Report failure
-       BL   @RF
+       BL   @ONFAIL
        DATA ANEQM1,ANEQM1
        DATA ANEQM,ANEQME-ANEQM
 * Report success
-ANEQS  RTWP
+ANEQS  B    @ONPASS
 
 * Assert Words Logical Low
 * --------------------------
@@ -603,11 +586,11 @@ ALP
        C    R0,R1
        JL   ALS
 * Report failure
-       BL   @RF
+       BL   @ONFAIL
        DATA ALM1,ALM2
        DATA ALM,ALME-ALM
 * Report success
-ALS    RTWP
+ALS    B    @ONPASS
 
 * Routines shared by assert
 * routines.
@@ -624,14 +607,12 @@ COPYP  LI   R12,STACK
 * Report Failure
 * R0: Expected Value
 * R1: Actual Value
-* R2: User-defined failure message
-* R3: Message length
 * Memory Addresses after BL command
 * +02: Dest address of expected text
 * +04: Dest address of actual text
 * +06: Address of standard failure message
 * +08: length of failure message
-RF     
+ONFAIL     
        MOV  R11,R10
        MOV  R1,R4
 * Convert values to Hexadecimal Text.
@@ -646,14 +627,6 @@ RF
        MOV  *R10+,R0
        MOV  *R10+,R1
        BL   @SCRLPT
-* Find location of user-defined message
-       MOV  R3,R3
-       JEQ  RF1
-* Display user-defined failure message
-       MOV  R2,R0
-       MOV  R3,R1
-       BL   @SCRLPT
-       JMP  RF2
 * Display user-defined failure message
 RF1    MOV  R14,R0
 RF1A   MOVB *R14+,R1
@@ -669,10 +642,10 @@ RF1A   MOVB *R14+,R1
 * Don't return to the test being run. No
 * need to run extra assertions
 * in the same test.
-RF2    B    @TSTL20
+       B    @TSTL20
 
+*
 * On Success
-* R3: Message length
 ONPASS
 * Find location of user-defined message
        MOV  R3,R3
@@ -690,4 +663,4 @@ FIND1  MOVB *R14+,R1
 * in the same test.
 FIND2  RTWP
 
-       END       
+       END

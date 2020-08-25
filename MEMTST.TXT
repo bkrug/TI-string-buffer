@@ -86,17 +86,16 @@ TCPY1
        LI   R0,TCPY1A
        LI   R1,TCPY1C
        LI   R2,TCPY1B-TCPY1A
-       LI   R3,TCPY1D
-       LI   R4,TCPY1E-TCPY1D
        BLWP @ABLCK
+       TEXT 'Copied string should match original.'
+       BYTE 0
+       EVEN
 *
        RT
 TCPY1A TEXT 'Some data to copy.'
 TCPY1B EVEN
        BSS  >10
 TCPY1C BSS  >20
-TCPY1D TEXT 'Copied string should match original.'
-TCPY1E EVEN
 
 *
 * Copy memory block. Length is zero.
@@ -127,9 +126,10 @@ TCPY3
        LI   R0,TCPY3A
        LI   R1,TCPY3D
        LI   R2,TCPY3B-TCPY3A
-       LI   R3,TCPY1D
-       LI   R4,TCPY1E-TCPY1D
        BLWP @ABLCK
+       TEXT 'Copied string should match original.'
+       BYTE 0
+       EVEN
 *
        RT
 * Expected text
@@ -155,9 +155,10 @@ TCPY4
        LI   R0,TCPY4A
        LI   R1,TCPY4E
        LI   R2,TCPY4B-TCPY4A
-       LI   R3,TCPY1D
-       LI   R4,TCPY1E-TCPY1D
        BLWP @ABLCK
+       TEXT 'Copied string should match original.'
+       BYTE 0
+       EVEN
 *
        RT
 * Expected text
