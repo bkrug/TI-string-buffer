@@ -62,11 +62,18 @@ TSTLST DATA TSTEND-TSTLST-2/8
        TEXT 'TFRE1 '
 * Deallocate last of several allocated
 *    spaces
-* Deallocate space at end of buffer
+       DATA TFRE2
+       TEXT 'TFRE2 '
+* Deallocate space following free space
+       DATA TFRE3
+       TEXT 'TFRE3 '
+* Deallocate space between two free
+*    spaces
 * Deallocate space between two allocated
 *    spaces
 * Deallocate space after allocated but
 *    before deallocated space
+* Deallocate space at end of buffer
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -651,7 +658,9 @@ TALC7A DATA >8016
        BSS  >1A
 TALC7B
 
-* Deallocate only allocated space
+*
+* Only one block of space is allocated.
+* Deallocated it.
 TFRE1
 * Arrange
        LI   R0,TFRE1A
@@ -676,5 +685,94 @@ TFRE1A DATA >8016
        DATA >0010
        BSS  >0E
 TFRE1B
+
+*
+* Deallocate last of several allocated
+*    spaces.
+TFRE2
+* Arrange
+       LI   R0,TFRE2A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE2B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE2A+>32
+       BLWP @BUFREE
+*
+       LI   R0,>8010
+	   MOV  @TFRE2A,R1
+	   BLWP @AEQ
+	   TEXT 'Space should still be allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8020
+	   MOV  @TFRE2A+>10,R1
+	   BLWP @AEQ
+	   TEXT 'Space should still be allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0028
+	   MOV  @TFRE2A+>30,R1
+	   BLWP @AEQ
+	   TEXT 'Space should no longer be allocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+TFRE2A DATA >8010
+       BSS  >0E
+       DATA >8020
+       BSS  >1E
+	   DATA >8008
+	   BSS  >06
+	   DATA >0020
+	   BSS  >1E
+TFRE2B
+
+*
+* Deallocate space following free space
+TFRE3
+* Arrange
+       LI   R0,TFRE3A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE3B+>2
+       BLWP @BUFREE
+* Assert
+       LI   R0,>0014
+	   MOV  @TFRE3A,R1
+	   BLWP @AEQ
+	   TEXT 'We cant merge this. '
+	   TEXT 'We would have to start from beginning '
+	   TEXT 'of the buffer.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0006
+	   MOV  @TFRE3B,R1
+	   BLWP @AEQ
+	   TEXT 'Space should now be deallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8010
+	   MOV  @TFRE3C,R1
+	   BLWP @AEQ
+	   TEXT 'Space should still be allocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+TFRE3A DATA >0014
+       BSS  >12
+TFRE3B DATA >8006
+       BSS  >04
+TFRE3C DATA >8010
+	   BSS  >0E
+TFRE3Z
 
        END
