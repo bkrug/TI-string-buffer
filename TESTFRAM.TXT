@@ -400,8 +400,8 @@ ERRRT
 * R0: Address of Expected block
 * R1: Address of Actual block
 * R2: Length of expected block
-* R2: Address of fail message
-* R3: Length of fail message
+* R3: Address of fail message
+* R4: Length of fail message
 *
 * Return true if contents of two blocks
 * are equal. Displays first point where
@@ -646,13 +646,32 @@ RF
        MOV  *R10+,R0
        MOV  *R10+,R1
        BL   @SCRLPT
+* Find location of user-defined message
+       MOV  R3,R3
+       JEQ  RF1
 * Display user-defined failure message
        MOV  R2,R0
        MOV  R3,R1
        BL   @SCRLPT
+	   JMP  RF2
+* Display user-defined failure message
+RF1    MOV  R14,R0
+       MOV  R14,R2
+       AI   R2,256    
+RF1A   C    R14,R2
+	   JHE  RF1B
+       MOVB *R14+,R1
+	   JNE  RF1A
+RF1B   MOV  R14,R1
+       S    R0,R1
+       BL   @SCRLPT
+* Round R14 up to even number
+       INC  R14
+       SRL  R14,1
+       SLA  R14,1
 * Don't return to the test being run. No
 * need to run extra assertions
 * in the same test.
-       B    @TSTL20
+RF2    B    @TSTL20
 
        END       

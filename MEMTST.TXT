@@ -424,42 +424,43 @@ TALC4
        LI   R0,>14
        BLWP @BUFALC
 * Assert
+       CLR  R3
 * >08 bytes remain allocated
        LI   R0,>8008
-	   LI   R1,TALC4A
-       MOV  *R1,R1
-       LI   R2,TALC4B
-       LI   R3,TALC4C-TALC4B
+       MOV  @TALC4A,R1
        BLWP @AEQ
+	   TEXT 'Space should remain allocated.'
+	   BYTE 0
+       EVEN
 * >16 bytes should be allocated
 * (>14 bytes + header)
        LI   R0,>8016
-	   LI   R1,TALC4A+>08
-       MOV  *R1,R1
-       LI   R2,TALC4C
-       LI   R3,TALC4D-TALC4C
+       MOV  @TALC4A+>08,R1
        BLWP @AEQ
+	   TEXT 'Space should now be allocated.'
+	   BYTE 0
+       EVEN
 * >02 bytes remain unallocated
        LI   R0,>0002
-       LI   R1,TALC4A+>1E
-       MOV  *R1,R1
-       LI   R2,TALC4D
-       LI   R3,TALC4E-TALC4D
+       MOV  @TALC4A+>1E,R1
        BLWP @AEQ
+	   TEXT 'Space should remain unallocated.'
+	   BYTE 0
+	   EVEN
 * >10 bytes remain allocated
        LI   R0,>8010
-	   LI   R1,TALC4A+>20
-       MOV  *R1,R1
-       LI   R2,TALC4B
-       LI   R3,TALC4C-TALC4B
+       MOV  @TALC4A+>20,R1
        BLWP @AEQ
+	   TEXT 'Space should remain allocated.'
+	   BYTE 0
+       EVEN
 * >10 bytes remain unallocated
        LI   R0,>0010
-       LI   R1,TALC4A+>30
-       MOV  *R1,R1
-       LI   R2,TALC4D
-       LI   R3,TALC4E-TALC4D
+       MOV  @TALC4A+>30,R1
        BLWP @AEQ
+	   TEXT 'Space should remain unallocated.'
+	   BYTE 0
+	   EVEN
 *
        RT
 * Starting buffer
@@ -471,9 +472,6 @@ TALC4A DATA >8008
 	   BSS  >0E
 	   DATA >0010
 	   BSS  >0E
-TALC4B TEXT 'Space should remain allocated.'
-TALC4C TEXT 'Space should be newly allocated.'
-TALC4D TEXT 'Space should remain unallocated.'
-TALC4E EVEN
+TALC4B
 
        END
