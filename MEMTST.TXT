@@ -57,8 +57,9 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * No unallocated space is large enough.
        DATA TALC7
        TEXT 'TALC7 '
-
 * Deallocate only allocated space
+       DATA TFRE1
+       TEXT 'TFRE1 '
 * Deallocate last of several allocated
 *    spaces
 * Deallocate space at end of buffer
@@ -271,13 +272,13 @@ TALC1
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-	   LI   R0,TALC1A+>02
-	   BLWP @AEQ
-	   TEXT 'R0 should have contained address '
-	   TEXT 'of newly allocated space. '
-	   TEXT 'It should be at beginning of buffer.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TALC1A+>02
+       BLWP @AEQ
+       TEXT 'R0 should have contained address '
+       TEXT 'of newly allocated space. '
+       TEXT 'It should be at beginning of buffer.'
+       BYTE 0
+       EVEN
 * >10 bytes should be allocated
 * (>E bytes + header)
        LI   R0,>8010
@@ -316,12 +317,12 @@ TALC2
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-	   LI   R0,TALC2A+>22
-	   BLWP @AEQ
-	   TEXT 'R0 should have contained address '
-	   TEXT 'of allocated space.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TALC2A+>22
+       BLWP @AEQ
+       TEXT 'R0 should have contained address '
+       TEXT 'of allocated space.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8008
        MOV  @TALC2A,R1
@@ -375,12 +376,12 @@ TALC3
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-	   LI   R0,TALC3A+>0A
-	   BLWP @AEQ
-	   TEXT 'R0 should have contained address '
-	   TEXT 'of allocated space.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TALC3A+>0A
+       BLWP @AEQ
+       TEXT 'R0 should have contained address '
+       TEXT 'of allocated space.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8008
        MOV  @TALC3A,R1
@@ -437,12 +438,12 @@ TALC4
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-	   LI   R0,TALC4A+>0A
-	   BLWP @AEQ
-	   TEXT 'R0 should have contained address '
-	   TEXT 'of allocated space.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TALC4A+>0A
+       BLWP @AEQ
+       TEXT 'R0 should have contained address '
+       TEXT 'of allocated space.'
+       BYTE 0
+       EVEN
 * >08 bytes remain allocated
        LI   R0,>8008
        MOV  @TALC4A,R1
@@ -506,12 +507,12 @@ TALC5
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-	   LI   R0,TALC5A+>32
-	   BLWP @AEQ
-	   TEXT 'R0 should have contained address '
-	   TEXT 'of allocated space.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TALC5A+>32
+       BLWP @AEQ
+       TEXT 'R0 should have contained address '
+       TEXT 'of allocated space.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8008
        MOV  @TALC5A,R1
@@ -591,12 +592,12 @@ TALC6
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-	   LI   R0,TALC6A+>18
-	   BLWP @AEQ
-	   TEXT 'R0 should have contained address '
-	   TEXT 'of allocated space.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TALC6A+>18
+       BLWP @AEQ
+       TEXT 'R0 should have contained address '
+       TEXT 'of allocated space.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8016
        MOV  @TALC6A,R1
@@ -649,5 +650,31 @@ TALC7A DATA >8016
        DATA >801C
        BSS  >1A
 TALC7B
+
+* Deallocate only allocated space
+TFRE1
+* Arrange
+       LI   R0,TFRE1A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE1B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE1A+>02
+       BLWP @BUFREE
+*
+       LI   R0,>0026
+	   MOV  @TFRE1A,R1
+	   BLWP @AEQ
+	   TEXT 'Space should be deallocated '
+	   TEXT 'and merged with following free space.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+TFRE1A DATA >8016
+       BSS  >14
+       DATA >0010
+       BSS  >0E
+TFRE1B
 
        END
