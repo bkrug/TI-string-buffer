@@ -3,12 +3,12 @@
 * Creates HEX value as text string
        DEF  MAKETX
 * Prints text at screen bottom
-	   DEF  PRINTL
+       DEF  PRINTL
 *******
 * Assert block contents are equal
-	   DEF  ABLCK
+       DEF  ABLCK
 * Assert Ones Corresponding, Zeros Corresponding
-	   DEF  AOC,AZC
+       DEF  AOC,AZC
 * Assert Words Equal, Words Not Equal
        DEF  AEQ,ANEQ
 * Assert Word Logical Low
@@ -21,7 +21,7 @@
 * Next 6 bytes: ASCII name of test
        REF  TSTLST
 * Name of results output file
-	   REF  RSLTFL
+       REF  RSLTFL
 *
        REF  VMBW,VMBR,VSBW,DSRLNK
 
@@ -179,8 +179,8 @@ PRINTP LI   R12,STACK
 SCRLPT MOV  R11,*R12+
 * If text length > 23*32, limit it.
        CI   R1,23*32
-	   JLE  SCROL0
-	   LI   R1,23*32
+       JLE  SCROL0
+       LI   R1,23*32
 *
 SCROL0 BL   @WRITEF
        BL   @SCRLP
@@ -423,22 +423,22 @@ ABLCKP
 * Compare each 16-bit word
 AB1    C    *R0+,*R1+
        JNE  ABFL
-	   INCT R5
-	   C    R5,R2
-	   JL   AB1
+       INCT R5
+       C    R5,R2
+       JL   AB1
 * Report success
        RTWP
 * Report Failure
 * Backtrack to unmatching bytes.
 ABFL   DECT R0
-	   DECT R1
+       DECT R1
 * 
-	   MOV  R1,R6
+       MOV  R1,R6
 * Convert values to Hexadecimal Text.
 * R0 already contains address of 
 * the expected value
        MOV  *R0,R0
-	   LI   R1,ABLM1
+       LI   R1,ABLM1
        BL   @MAKEHX
 * the actual value is copied from R6
        MOV  *R6,R0
@@ -446,8 +446,8 @@ ABFL   DECT R0
        BL   @MAKEHX
 * 
        MOV  R5,R0
-	   LI   R1,ABLM3
-	   BL   @MAKEHX
+       LI   R1,ABLM3
+       BL   @MAKEHX
 * Display standard failure message
        LI   R0,ABLMES
        LI   R1,ABLME-ABLMES
@@ -455,9 +455,9 @@ ABFL   DECT R0
 * Display user-defined failure message
        MOV  @6(13),R0
        MOV  @8(13),R1
-	   CI   R1,>200
-	   JL   AB2
-	   LI   R1,>200
+       CI   R1,>200
+       JL   AB2
+       LI   R1,>200
 AB2    BL   @SCRLPT
 * Don't return to the test being run. No
 * need to run extra assertions
@@ -481,7 +481,7 @@ AOCM1  BSS  >4
        TEXT ' B: '
 AOCM2  BSS  >4
        TEXT ' Ones in A should have '
-	   TEXT 'corresponding ones in B.'
+       TEXT 'corresponding ones in B.'
 AOCME  EVEN
 AOCP
 * Copy Parameters
@@ -513,7 +513,7 @@ AZCM1  BSS  >4
        TEXT ' B: '
 AZCM2  BSS  >4
        TEXT ' Ones in A should have '
-	   TEXT 'corresponding zeros in B.'
+       TEXT 'corresponding zeros in B.'
 AZCME  EVEN
 AZCP
 * Copy Parameters
@@ -559,7 +559,7 @@ AEQP
        DATA AEQM1,AEQM2
        DATA AEQMES,AEQME-AEQMES
 * Report success
-AEQS   RTWP
+AEQS   B    @ONPASS
 
 * Assert Words Are Not Equal
 * --------------------------
@@ -653,17 +653,14 @@ RF
        MOV  R2,R0
        MOV  R3,R1
        BL   @SCRLPT
-	   JMP  RF2
+       JMP  RF2
 * Display user-defined failure message
 RF1    MOV  R14,R0
-       MOV  R14,R2
-       AI   R2,256    
-RF1A   C    R14,R2
-	   JHE  RF1B
-       MOVB *R14+,R1
-	   JNE  RF1A
-RF1B   MOV  R14,R1
+RF1A   MOVB *R14+,R1
+       JNE  RF1A
+       MOV  R14,R1
        S    R0,R1
+       DEC  R1
        BL   @SCRLPT
 * Round R14 up to even number
        INC  R14
@@ -673,5 +670,24 @@ RF1B   MOV  R14,R1
 * need to run extra assertions
 * in the same test.
 RF2    B    @TSTL20
+
+* On Success
+* R3: Message length
+ONPASS
+* Find location of user-defined message
+       MOV  R3,R3
+       JNE  FIND2
+* Display user-defined failure message
+       MOV  R14,R0
+FIND1  MOVB *R14+,R1
+       JNE  FIND1
+* Round R14 up to even number
+       INC  R14
+       SRL  R14,1
+       SLA  R14,1
+* Don't return to the test being run. No
+* need to run extra assertions
+* in the same test.
+FIND2  RTWP
 
        END       

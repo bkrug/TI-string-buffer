@@ -180,24 +180,24 @@ TINT1
        LI   R0,SPACE
        LI   R1,>200
        BLWP @BUFINT
+*
+       CLR  R3
 * Assert R0 = zero (no error)
        MOV  R0,R1
        CLR  R0
-       LI   R2,TINT1A
-       LI   R3,TINT1B-TINT1A
        BLWP @AEQ
+       TEXT 'There should be no allocation error.'
+       BYTE 0
+       EVEN
 * Assert R0 = zero (no error)
        LI   R0,>200
-       LI   R1,SPACE
-       MOV  *R1,R1
-       LI   R2,TINT1B
-       LI   R3,TINT1C-TINT1B
-       BLWP @AEQ       
+       MOV  @SPACE,R1
+       BLWP @AEQ
+       TEXT 'The first word should contain >0200.'
+       BYTE 0
+       EVEN
 *
        RT
-TINT1A TEXT 'There should be no allocation error.'
-TINT1B TEXT 'The first word should contain >1000.'
-TINT1C EVEN
  
 *
 * Fail to initialize with >8000 bytes.
@@ -209,16 +209,16 @@ TINT2
        LI   R1,>8000
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
+       CLR  R3
        MOV  R0,R1
        SETO R0
-       LI   R2,TINT2A
-       LI   R3,TINT2B-TINT2A
        BLWP @AEQ
+       TEXT 'Allocation should fail. '
+       TEXT '>8000 is too big.'
+       BYTE 0
+       EVEN
 *
        RT
-TINT2A TEXT 'Allocation should fail. '
-       TEXT '>8000 is too big.'
-TINT2B EVEN
 
 *
 * Fail to initialize with >2 bytes.
@@ -230,16 +230,16 @@ TINT3
        LI   R1,>2
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
+       CLR  R3
        MOV  R0,R1
        SETO R0
-       LI   R2,TINT3A
-       LI   R3,TINT3B-TINT3A
        BLWP @AEQ
+       TEXT 'Allocation should fail. '
+       TEXT '>03 is too small.'
+       BYTE 0
+       EVEN
 *
        RT
-TINT3A TEXT 'Allocation should fail. '
-       TEXT '>3 is too small.'
-TINT3B EVEN
 
 *
 * Fail to initialize with >13 bytes.
@@ -251,17 +251,18 @@ TINT4
        LI   R1,>13
        BLWP @BUFINT
 * Assert R0 = >FFFF (error)
+       CLR  R3
        MOV  R0,R1
        SETO R0
-       LI   R2,TINT4A
-       LI   R3,TINT4B-TINT4A
        BLWP @AEQ
+       TEXT 'Allocation should fail. '
+       TEXT 'Allocated space must be even.'
+       BYTE 0
+       EVEN
 *
        RT
-TINT4A TEXT 'Allocation should fail. '
-       TEXT 'Allocated space must be even.'
-TINT4B EVEN
 
+*
 * Allocate space in empty buffer.
 TALC1
 * Arrange
@@ -279,16 +280,16 @@ TALC1
        LI   R0,>8010
        MOV  @TALC1A,R1
        BLWP @AEQ
-	   TEXT 'Space should now be allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should now be allocated.'
+       BYTE 0
+       EVEN
 * >30 bytes remain unallocated
        LI   R0,>0030
        MOV  @TALC1A+>10,R1
        BLWP @AEQ
-	   TEXT 'Space should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain unallocated.'
+       BYTE 0
+       EVEN
 *
        RT
 * Starting buffer
@@ -316,39 +317,39 @@ TALC2
        LI   R0,>8008
        MOV  @TALC2A,R1
        BLWP @AEQ
-	   TEXT 'Space should remain allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain allocated.'
+       BYTE 0
+       EVEN
 * >E bytes should be allocated
 * (>C bytes + header)
        LI   R0,>800E
        MOV  @TALC2A+>20,R1
        BLWP @AEQ
-	   TEXT 'Space should now be allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should now be allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8018
        MOV  @TALC2A+>8,R1
        BLWP @AEQ
-	   TEXT 'Space should remain allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0012
        MOV  @TALC2A+>2E,R1
        BLWP @AEQ
-	   TEXT 'Space should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain unallocated.'
+       BYTE 0
+       EVEN
 *
        RT
 * Starting buffer
 TALC2A DATA >8008
-	   BSS  >06
+       BSS  >06
        DATA >8018
-	   BSS  >16
-	   DATA >0020
+       BSS  >16
+       DATA >0020
        BSS  >1E
 TALC2B
 
@@ -369,31 +370,31 @@ TALC3
        LI   R0,>8008
        MOV  @TALC3A,R1
        BLWP @AEQ
-	   TEXT 'Space should remain allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain allocated.'
+       BYTE 0
+       EVEN
 * >18 bytes should be allocated
 * (>16 bytes + header)
        LI   R0,>8018
        MOV  @TALC3A+>08,R1
        BLWP @AEQ
-	   TEXT 'Space should now be allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should now be allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8010
        MOV  @TALC3A+>20,R1
        BLWP @AEQ
-	   TEXT 'Space should remain allocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain allocated.'
+       BYTE 0
+       EVEN
 * >10 bytes remain unallocated
        LI   R0,>0010
        MOV  @TALC3A+>30,R1
        BLWP @AEQ
-	   TEXT 'Space should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain unallocated.'
+       BYTE 0
+       EVEN
 *
        RT
 * Starting buffer
@@ -402,9 +403,9 @@ TALC3A DATA >8008
        DATA >0018
        BSS  >16
        DATA >8010
-	   BSS  >0E
-	   DATA >0010
-	   BSS  >0E
+       BSS  >0E
+       DATA >0010
+       BSS  >0E
 TALC3B
 
 * Allocate space between two allocated
@@ -425,38 +426,38 @@ TALC4
        LI   R0,>8008
        MOV  @TALC4A,R1
        BLWP @AEQ
-	   TEXT 'Space should remain allocated.'
-	   BYTE 0
+       TEXT 'Space should remain allocated.'
+       BYTE 0
        EVEN
 * >16 bytes should be allocated
 * (>14 bytes + header)
        LI   R0,>8016
        MOV  @TALC4A+>08,R1
        BLWP @AEQ
-	   TEXT 'Space should now be allocated.'
-	   BYTE 0
+       TEXT 'Space should now be allocated.'
+       BYTE 0
        EVEN
 * >02 bytes remain unallocated
        LI   R0,>0002
        MOV  @TALC4A+>1E,R1
        BLWP @AEQ
-	   TEXT 'Space should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain unallocated.'
+       BYTE 0
+       EVEN
 * >10 bytes remain allocated
        LI   R0,>8010
        MOV  @TALC4A+>20,R1
        BLWP @AEQ
-	   TEXT 'Space should remain allocated.'
-	   BYTE 0
+       TEXT 'Space should remain allocated.'
+       BYTE 0
        EVEN
 * >10 bytes remain unallocated
        LI   R0,>0010
        MOV  @TALC4A+>30,R1
        BLWP @AEQ
-	   TEXT 'Space should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       TEXT 'Space should remain unallocated.'
+       BYTE 0
+       EVEN
 *
        RT
 * Starting buffer
@@ -465,9 +466,9 @@ TALC4A DATA >8008
        DATA >0018
        BSS  >16
        DATA >8010
-	   BSS  >0E
-	   DATA >0010
-	   BSS  >0E
+       BSS  >0E
+       DATA >0010
+       BSS  >0E
 TALC4B
 
        END
