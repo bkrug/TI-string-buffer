@@ -516,14 +516,14 @@ TALC5
 * Arrange
        LI   R0,TALC5A
        MOV  R0,@BUFADR
-       LI   R0,TALC5B
+       LI   R0,TALC5Z
        MOV  R0,@BUFEND
 * Act
        LI   R0,>E
        BLWP @BUFALC
 * Assert
        MOV  R0,R1
-       LI   R0,TALC5A+>32
+       LI   R0,TALC5E+2
        BLWP @AEQ
        TEXT 'R0 should have contained address '
        TEXT 'of allocated space.'
@@ -538,42 +538,43 @@ TALC5
        EVEN
 *
        LI   R0,>0004
-       MOV  @TALC5A+>08,R1
+       MOV  @TALC5B,R1
        BLWP @AEQ
        TEXT 'Space should remain unallocated.'
        BYTE 0
        EVEN
 *
        LI   R0,>8004
-       MOV  @TALC5A+>0C,R1
+       MOV  @TALC5C,R1
        BLWP @AEQ
        TEXT 'Space should remain allocated.'
        BYTE 0
        EVEN
 *
        LI   R0,>8020
-       MOV  @TALC5A+>10,R1
+       MOV  @TALC5D,R1
        BLWP @AEQ
        TEXT 'Space should remain allocated.'
        BYTE 0
        EVEN
 *
        LI   R0,>8010
-       MOV  @TALC5A+>30,R1
+       MOV  @TALC5E,R1
        BLWP @AEQ
        TEXT 'Space should now be allocated.'
        BYTE 0
        EVEN
 *
-       LI   R0,>0008
-       MOV  @TALC5A+>40,R1
+       LI   R0,>0008+>06
+       MOV  @TALC5E+>10,R1
        BLWP @AEQ
-       TEXT 'A little bit of unallocated space left over.'
+       TEXT 'Remaining unallocated space merged '
+       TEXT 'with following unallocated space.'
        BYTE 0
        EVEN
 *
        LI   R0,>8010
-       MOV  @TALC5A+>48,R1
+       MOV  @TALC5G,R1
        BLWP @AEQ
        TEXT 'Space should remain allocated.'
        BYTE 0
@@ -583,17 +584,19 @@ TALC5
 * Starting buffer
 TALC5A DATA >8008
        BSS  >06
-       DATA >0004
+TALC5B DATA >0004
        BSS  >2
-       DATA >8004
+TALC5C DATA >8004
        BSS  >2
-       DATA >8020
+TALC5D DATA >8020
        BSS  >1E
-       DATA >0018
+TALC5E DATA >0018
        BSS  >16
-       DATA >8010
+TALC5F DATA >0006
+       BSS  >4
+TALC5G DATA >8010
        BSS  >E
-TALC5B
+TALC5Z
 
 *
 * Allocate last remaining space in buffer.
@@ -681,12 +684,12 @@ TFRE1
        BLWP @BUFREE
 *
        LI   R0,>0026
-	   MOV  @TFRE1A,R1
-	   BLWP @AEQ
-	   TEXT 'Space should be deallocated '
-	   TEXT 'and merged with following free space.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE1A,R1
+       BLWP @AEQ
+       TEXT 'Space should be deallocated '
+       TEXT 'and merged with following free space.'
+       BYTE 0
+       EVEN
 *
        RT
 TFRE1A DATA >8016
@@ -709,35 +712,35 @@ TFRE2
        BLWP @BUFREE
 *
        LI   R0,>8010
-	   MOV  @TFRE2A,R1
-	   BLWP @AEQ
-	   TEXT 'Space should still be allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE2A,R1
+       BLWP @AEQ
+       TEXT 'Space should still be allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8020
-	   MOV  @TFRE2A+>10,R1
-	   BLWP @AEQ
-	   TEXT 'Space should still be allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE2A+>10,R1
+       BLWP @AEQ
+       TEXT 'Space should still be allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0028
-	   MOV  @TFRE2A+>30,R1
-	   BLWP @AEQ
-	   TEXT 'Space should no longer be allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE2A+>30,R1
+       BLWP @AEQ
+       TEXT 'Space should no longer be allocated.'
+       BYTE 0
+       EVEN
 *
        RT
 TFRE2A DATA >8010
        BSS  >0E
        DATA >8020
        BSS  >1E
-	   DATA >8008
-	   BSS  >06
-	   DATA >0020
-	   BSS  >1E
+       DATA >8008
+       BSS  >06
+       DATA >0020
+       BSS  >1E
 TFRE2B
 
 *
@@ -754,21 +757,21 @@ TFRE3
        BLWP @BUFREE
 * Assert
        LI   R0,>0014
-	   MOV  @TFRE3A,R1
-	   BLWP @AEQ
-	   TEXT 'We cant merge this. '
-	   TEXT 'We would have to start from beginning '
-	   TEXT 'of the buffer.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE3A,R1
+       BLWP @AEQ
+       TEXT 'We cant merge this. '
+       TEXT 'We would have to start from beginning '
+       TEXT 'of the buffer.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0006+>18+>10
-	   MOV  @TFRE3B,R1
-	   BLWP @AEQ
-	   TEXT 'Space should now be deallocated '
-	   TEXT 'and merged with other blocks.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE3B,R1
+       BLWP @AEQ
+       TEXT 'Space should now be deallocated '
+       TEXT 'and merged with other blocks.'
+       BYTE 0
+       EVEN
 *
        RT
 TFRE3A DATA >0014
@@ -776,9 +779,9 @@ TFRE3A DATA >0014
 TFRE3B DATA >8006
        BSS  >04
        DATA >0018
-	   BSS  >16
+       BSS  >16
        DATA >0010
-	   BSS  >0E
+       BSS  >0E
 TFRE3Z
 
 *
@@ -795,21 +798,21 @@ TFRE4
        BLWP @BUFREE
 * Assert
        LI   R0,>0014
-	   MOV  @TFRE4A,R1
-	   BLWP @AEQ
-	   TEXT 'We cant merge this. '
-	   TEXT 'We would have to start from beginning '
-	   TEXT 'of the buffer.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE4A,R1
+       BLWP @AEQ
+       TEXT 'We cant merge this. '
+       TEXT 'We would have to start from beginning '
+       TEXT 'of the buffer.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>000C+>18
-	   MOV  @TFRE4B,R1
-	   BLWP @AEQ
-	   TEXT 'Space should now be deallocated '
-	   TEXT 'and merged with other blocks.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE4B,R1
+       BLWP @AEQ
+       TEXT 'Space should now be deallocated '
+       TEXT 'and merged with other blocks.'
+       BYTE 0
+       EVEN
 *
        RT
 TFRE4A DATA >0014
@@ -817,7 +820,7 @@ TFRE4A DATA >0014
 TFRE4B DATA >800C
        BSS  >0A
        DATA >0018
-	   BSS  >16
+       BSS  >16
 TFRE4Z
 
 *
@@ -834,25 +837,25 @@ TFRE5
        BLWP @BUFREE
 * Assert
        LI   R0,>8012
-	   MOV  @TFRE5A,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE5A,R1
+       BLWP @AEQ
+       TEXT 'Block remains allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0004
-	   MOV  @TFRE5B,R1
-	   BLWP @AEQ
-	   TEXT 'Block is no longer allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE5B,R1
+       BLWP @AEQ
+       TEXT 'Block is no longer allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8010
-	   MOV  @TFRE5C,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE5C,R1
+       BLWP @AEQ
+       TEXT 'Block remains allocated.'
+       BYTE 0
+       EVEN
 *
        RT
 *
@@ -861,7 +864,7 @@ TFRE5A DATA >8012
 TFRE5B DATA >8004
        BSS  >02
 TFRE5C DATA >8010
-	   BSS  >0E
+       BSS  >0E
 TFRE5Z
 
 *
@@ -878,26 +881,26 @@ TFRE6
        BLWP @BUFREE
 * Assert
        LI   R0,>8014
-	   MOV  @TFRE6A,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE6A,R1
+       BLWP @AEQ
+       TEXT 'Block remains allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0006+>16
-	   MOV  @TFRE6B,R1
-	   BLWP @AEQ
-	   TEXT 'Block is no longer allocated '
+       MOV  @TFRE6B,R1
+       BLWP @AEQ
+       TEXT 'Block is no longer allocated '
        TEXT 'and is merged with the next.'
-	   BYTE 0
-	   EVEN
+       BYTE 0
+       EVEN
 *
        LI   R0,>8010
-	   MOV  @TFRE6C,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE6C,R1
+       BLWP @AEQ
+       TEXT 'Block remains allocated.'
+       BYTE 0
+       EVEN
 *
        RT
 *
@@ -906,7 +909,7 @@ TFRE6A DATA >8014
 TFRE6B DATA >8006
        BSS  >04
        DATA >0016
-	   BSS  >14
+       BSS  >14
 TFRE6C DATA >8010
        BSS  >0E
 TFRE6Z
@@ -924,32 +927,32 @@ TFRE7
        BLWP @BUFREE
 * Assert
        LI   R0,>8014
-	   MOV  @TFRE7A,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE7A,R1
+       BLWP @AEQ
+       TEXT 'Block remains allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0002
-	   MOV  @TFRE7B,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains unallocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE7B,R1
+       BLWP @AEQ
+       TEXT 'Block remains unallocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8026
-	   MOV  @TFRE7C,R1
-	   BLWP @AEQ
-	   TEXT 'Block remains allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE7C,R1
+       BLWP @AEQ
+       TEXT 'Block remains allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0012
-	   MOV  @TFRE7D,R1
-	   BLWP @AEQ
-	   TEXT 'Block is no longer allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TFRE7D,R1
+       BLWP @AEQ
+       TEXT 'Block is no longer allocated.'
+       BYTE 0
+       EVEN
 *
        RT
 *
