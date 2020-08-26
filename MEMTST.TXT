@@ -312,7 +312,7 @@ TALC1
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC1A
 * Header
        DATA >0040
@@ -370,7 +370,7 @@ TALC2
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC2A DATA >8008
        BSS  >06
        DATA >8018
@@ -429,7 +429,7 @@ TALC3
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC3A DATA >8008
        BSS  >06
        DATA >0018
@@ -498,7 +498,7 @@ TALC4
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC4A DATA >8008
        BSS  >06
        DATA >0018
@@ -581,7 +581,7 @@ TALC5
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC5A DATA >8008
        BSS  >06
 TALC5B DATA >0004
@@ -633,7 +633,7 @@ TALC6
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC6A DATA >8016
        BSS  >14
        DATA >001E
@@ -661,7 +661,7 @@ TALC7
        EVEN
 *
        RT
-* Starting buffer
+* Buffer prior to action
 TALC7A DATA >8016
        BSS  >14
        DATA >0010
@@ -692,6 +692,7 @@ TFRE1
        EVEN
 *
        RT
+* Buffer prior to action
 TFRE1A DATA >8016
        BSS  >14
        DATA >0010
@@ -733,6 +734,7 @@ TFRE2
        EVEN
 *
        RT
+* Buffer prior to action
 TFRE2A DATA >8010
        BSS  >0E
        DATA >8020
@@ -774,6 +776,7 @@ TFRE3
        EVEN
 *
        RT
+* Buffer prior to action
 TFRE3A DATA >0014
        BSS  >12
 TFRE3B DATA >8006
@@ -815,6 +818,7 @@ TFRE4
        EVEN
 *
        RT
+* Buffer prior to action
 TFRE4A DATA >0014
        BSS  >12
 TFRE4B DATA >800C
@@ -858,7 +862,7 @@ TFRE5
        EVEN
 *
        RT
-*
+* Buffer prior to action
 TFRE5A DATA >8012
        BSS  >10
 TFRE5B DATA >8004
@@ -903,7 +907,7 @@ TFRE6
        EVEN
 *
        RT
-*
+* Buffer prior to action
 TFRE6A DATA >8014
        BSS  >12
 TFRE6B DATA >8006
@@ -955,7 +959,7 @@ TFRE7
        EVEN
 *
        RT
-*
+* Buffer prior to action
 TFRE7A DATA >8014
        BSS  >12
 TFRE7B DATA >0002
