@@ -78,7 +78,11 @@ TSTLST DATA TSTEND-TSTLST-2/8
        TEXT 'TFRE5 '
 * Deallocate space after allocated but
 *    before deallocated space
+       DATA TFRE6
+       TEXT 'TFRE6 '
 * Deallocate space at end of buffer
+       DATA TFRE7
+       TEXT 'TFRE7 '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -851,6 +855,7 @@ TFRE5
 	   EVEN
 *
        RT
+*
 TFRE5A DATA >8012
        BSS  >10
 TFRE5B DATA >8004
@@ -858,5 +863,103 @@ TFRE5B DATA >8004
 TFRE5C DATA >8010
 	   BSS  >0E
 TFRE5Z
+
+*
+* Deallocate space after allocated but
+*    before deallocated space
+TFRE6
+* Arrange
+       LI   R0,TFRE6A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE6Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE6B+>2
+       BLWP @BUFREE
+* Assert
+       LI   R0,>8014
+	   MOV  @TFRE6A,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0006+>16
+	   MOV  @TFRE6B,R1
+	   BLWP @AEQ
+	   TEXT 'Block is no longer allocated '
+       TEXT 'and is merged with the next.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8010
+	   MOV  @TFRE6C,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains allocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+*
+TFRE6A DATA >8014
+       BSS  >12
+TFRE6B DATA >8006
+       BSS  >04
+       DATA >0016
+	   BSS  >14
+TFRE6C DATA >8010
+       BSS  >0E
+TFRE6Z
+
+*
+* Deallocate space at end of buffer
+TFRE7
+* Arrange
+       LI   R0,TFRE7A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE7Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE7D+>2
+       BLWP @BUFREE
+* Assert
+       LI   R0,>8014
+	   MOV  @TFRE7A,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0002
+	   MOV  @TFRE7B,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8026
+	   MOV  @TFRE7C,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0012
+	   MOV  @TFRE7D,R1
+	   BLWP @AEQ
+	   TEXT 'Block is no longer allocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+*
+TFRE7A DATA >8014
+       BSS  >12
+TFRE7B DATA >0002
+TFRE7C DATA >8026
+       BSS  >24
+TFRE7D DATA >8012
+       BSS  >10
+TFRE7Z
 
        END
