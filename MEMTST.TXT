@@ -90,6 +90,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA TSRK2
        TEXT 'TSRK2 '
 * Shrink without merging following block.
+       DATA TSRK3
+       TEXT 'TSRK3 '
 * Shrink and merge following free block.
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
@@ -1056,5 +1058,9 @@ TSRK2B DATA >800C
 TSRK2C DATA >0010
        DATA >0E
 TSRK2Z
+
+*
+* Shrink without merging following block.
+TSRK3
 
        END
