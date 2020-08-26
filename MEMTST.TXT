@@ -2,7 +2,7 @@
        REF  AEQ,ABLCK
 *
        REF  BUFINT,BUFCPY,BUFALC,BUFREE
-       REF  BUFLES
+       REF  BUFSRK
 *
        REF  BUFADR,BUFEND
 
@@ -83,6 +83,14 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Deallocate space at end of buffer
        DATA TFRE7
        TEXT 'TFRE7 '
+* Don't shrink. Block already smaller.
+       DATA TSRK1
+       TEXT 'TSRK1 '
+* Don't shrink. Block already same size.
+       DATA TSRK2
+       TEXT 'TSRK2 '
+* Shrink without merging following block.
+* Shrink and merge following free block.
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -968,5 +976,85 @@ TFRE7C DATA >8026
 TFRE7D DATA >8012
        BSS  >10
 TFRE7Z
+
+*
+* Don't shrink. Block already smaller.
+TSRK1
+* Arrange
+       LI   R0,TSRK1A
+       MOV  R0,@BUFADR
+       LI   R0,TSRK1Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TSRK1A+2
+       LI   R1,>30
+       BLWP @BUFSRK
+* Assert
+       LI   R0,>8024
+       MOV  @TSRK1A,R1
+       BLWP @AEQ
+       TEXT 'Allocation should not shrink. '
+       TEXT 'Small enough already.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0010
+       MOV  @TSRK1B,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer prior to action
+TSRK1A DATA >8024
+       BSS  >22
+TSRK1B DATA >0010
+       DATA >0E
+TSRK1Z
+
+*
+* Don't shrink. Block already same size.
+TSRK2
+* Arrange
+       LI   R0,TSRK2A
+       MOV  R0,@BUFADR
+       LI   R0,TSRK2Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TSRK2B+2
+       LI   R1,>0A
+       BLWP @BUFSRK
+* Assert
+       LI   R0,>8024
+       MOV  @TSRK2A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>800C
+       MOV  @TSRK2B,R1
+       BLWP @AEQ
+       TEXT 'Block allocation should not shrink.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0010
+       MOV  @TSRK2C,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer prior to action
+TSRK2A DATA >8024
+       BSS  >22
+TSRK2B DATA >800C
+       BSS  >0A
+TSRK2C DATA >0010
+       DATA >0E
+TSRK2Z
 
        END

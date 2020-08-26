@@ -1,5 +1,5 @@
        DEF  BUFINT,BUFALC,BUFCPY,BUFREE
-       DEF  BUFLES
+       DEF  BUFSRK
        DEF  BLKUSE
 *
        REF  STRWS,BUFADR,BUFEND
@@ -248,13 +248,14 @@ TMGR2  MOV  R5,R4
 TMRG3  RT
 
 *
+* Shrink allocation.
 * Reduce allocation of space
 * if necessary
 *
 * Input:
 * R0 - address inside of buffer
 * R1 - maximum acceptable size
-BUFLES DATA STRWS,BUFLES+4
+BUFSRK DATA STRWS,BUFSRK+4
 * Let R8 = address of block
 * Let R9 = max size + 2
        MOV  *R13,R8
