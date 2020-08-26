@@ -1062,5 +1062,52 @@ TSRK2Z
 *
 * Shrink without merging following block.
 TSRK3
+* Arrange
+       LI   R0,TSRK3A
+       MOV  R0,@BUFADR
+       LI   R0,TSRK3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TSRK3B+2
+       LI   R1,>08
+       BLWP @BUFSRK
+* Assert
+       LI   R0,>8024
+       MOV  @TSRK3A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>800A
+       MOV  @TSRK3B,R1
+       BLWP @AEQ
+       TEXT 'Block allocation should shrink.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0002
+       MOV  @TSRK3B+>0A,R1
+       BLWP @AEQ
+       TEXT 'A new unallocated block should appear.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8010
+       MOV  @TSRK3C,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer prior to action
+TSRK3A DATA >8024
+       BSS  >22
+TSRK3B DATA >800C
+       BSS  >0A
+TSRK3C DATA >8010
+       DATA >0E
+TSRK3Z
 
        END
