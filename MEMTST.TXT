@@ -74,6 +74,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        TEXT 'TFRE4 '
 * Deallocate space between two allocated
 *    spaces
+       DATA TFRE5
+       TEXT 'TFRE5 '
 * Deallocate space after allocated but
 *    before deallocated space
 * Deallocate space at end of buffer
@@ -813,5 +815,48 @@ TFRE4B DATA >800C
        DATA >0018
 	   BSS  >16
 TFRE4Z
+
+*
+* Deallocate space between two allocated
+*    spaces
+TFRE5
+* Arrange
+       LI   R0,TFRE5A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE5Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE5B+>2
+       BLWP @BUFREE
+* Assert
+       LI   R0,>8012
+	   MOV  @TFRE5A,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0004
+	   MOV  @TFRE5B,R1
+	   BLWP @AEQ
+	   TEXT 'Block is no longer allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8010
+	   MOV  @TFRE5C,R1
+	   BLWP @AEQ
+	   TEXT 'Block remains allocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+TFRE5A DATA >8012
+       BSS  >10
+TFRE5B DATA >8004
+       BSS  >02
+TFRE5C DATA >8010
+	   BSS  >0E
+TFRE5Z
 
        END
