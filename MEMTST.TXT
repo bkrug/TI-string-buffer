@@ -93,6 +93,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA TSRK3
        TEXT 'TSRK3 '
 * Shrink and merge following free block.
+       DATA TSRK4
+       TEXT 'TSRK4 '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1109,5 +1111,58 @@ TSRK3B DATA >800C
 TSRK3C DATA >8010
        DATA >0E
 TSRK3Z
+
+* Shrink and merge following free block.
+TSRK4
+* Arrange
+       LI   R0,TSRK4A
+       MOV  R0,@BUFADR
+       LI   R0,TSRK4Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TSRK4B+2
+       LI   R1,>10
+       BLWP @BUFSRK
+* Assert
+       LI   R0,>8014
+       MOV  @TSRK4A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8012
+       MOV  @TSRK4B,R1
+       BLWP @AEQ
+       TEXT 'Block allocation should shrink.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0016
+       MOV  @TSRK4B+>12,R1
+       BLWP @AEQ
+       TEXT 'A new unallocated block should be '
+	   TEXT 'merged with another unallocated block.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8010
+       MOV  @TSRK4D,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer prior to action
+TSRK4A DATA >8014
+       BSS  >12
+TSRK4B DATA >8018
+       BSS  >16
+TSRK4C DATA >0010
+       DATA >0E
+TSRK4D DATA >8010
+       DATA >0E
+TSRK4Z
 
        END
