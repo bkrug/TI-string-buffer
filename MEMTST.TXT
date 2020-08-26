@@ -70,6 +70,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        TEXT 'TFRE3 '
 * Deallocate space between two free
 *    spaces
+       DATA TFRE4
+       TEXT 'TFRE4 '
 * Deallocate space between two allocated
 *    spaces
 * Deallocate space after allocated but
@@ -772,5 +774,44 @@ TFRE3B DATA >8006
        DATA >0010
 	   BSS  >0E
 TFRE3Z
+
+*
+* Deallocate space between two free
+*    spaces
+TFRE4
+* Arrange
+       LI   R0,TFRE4A
+       MOV  R0,@BUFADR
+       LI   R0,TFRE4Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TFRE4B+>2
+       BLWP @BUFREE
+* Assert
+       LI   R0,>0014
+	   MOV  @TFRE4A,R1
+	   BLWP @AEQ
+	   TEXT 'We cant merge this. '
+	   TEXT 'We would have to start from beginning '
+	   TEXT 'of the buffer.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>000C+>18
+	   MOV  @TFRE4B,R1
+	   BLWP @AEQ
+	   TEXT 'Space should now be deallocated '
+	   TEXT 'and merged with other blocks.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+TFRE4A DATA >0014
+       BSS  >12
+TFRE4B DATA >800C
+       BSS  >0A
+       DATA >0018
+	   BSS  >16
+TFRE4Z
 
        END
