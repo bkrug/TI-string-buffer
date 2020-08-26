@@ -64,7 +64,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *    spaces
        DATA TFRE2
        TEXT 'TFRE2 '
-* Deallocate space following free space
+* Deallocate space and merge multiple
+*    free space
        DATA TFRE3
        TEXT 'TFRE3 '
 * Deallocate space between two free
@@ -732,7 +733,8 @@ TFRE2A DATA >8010
 TFRE2B
 
 *
-* Deallocate space following free space
+* Deallocate space and merge multiple
+*    free space
 TFRE3
 * Arrange
        LI   R0,TFRE3A
@@ -752,17 +754,11 @@ TFRE3
 	   BYTE 0
 	   EVEN
 *
-       LI   R0,>0006
+       LI   R0,>0006+>18+>10
 	   MOV  @TFRE3B,R1
 	   BLWP @AEQ
-	   TEXT 'Space should now be deallocated.'
-	   BYTE 0
-	   EVEN
-*
-       LI   R0,>8010
-	   MOV  @TFRE3C,R1
-	   BLWP @AEQ
-	   TEXT 'Space should still be allocated.'
+	   TEXT 'Space should now be deallocated '
+	   TEXT 'and merged with other blocks.'
 	   BYTE 0
 	   EVEN
 *
@@ -771,7 +767,9 @@ TFRE3A DATA >0014
        BSS  >12
 TFRE3B DATA >8006
        BSS  >04
-TFRE3C DATA >8010
+       DATA >0018
+	   BSS  >16
+       DATA >0010
 	   BSS  >0E
 TFRE3Z
 
