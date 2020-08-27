@@ -99,7 +99,11 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA TGRW1
        TEXT 'TGRW1 '
 * Don't grow a block. It is just right.
+       DATA TGRW2
+       TEXT 'TGRW2 '
 * Grow a block, without moving it.
+       DATA TGRW3
+       TEXT 'TGRW3 '
 * Grow a block, without moving it,
 *    merge some free spaces.
 * Grow and move a block.
@@ -1152,7 +1156,7 @@ TSRK4
        MOV  @TSRK4B+>12,R1
        BLWP @AEQ
        TEXT 'A new unallocated block should be '
-	   TEXT 'merged with another unallocated block.'
+       TEXT 'merged with another unallocated block.'
        BYTE 0
        EVEN
 *
@@ -1185,43 +1189,43 @@ TGRW1
        MOV  R0,@BUFEND
 * Act
        LI   R0,TGRW1C+2
-	   LI   R1,>12
-	   BLWP @BUFGRW
+       LI   R1,>12
+       BLWP @BUFGRW
 * Assert
        MOV  R0,R1
-	   LI   R0,TGRW1C+2
-	   BLWP @AEQ
-	   TEXT 'Block should not have moved.'
-	   BYTE 0
-	   EVEN
+       LI   R0,TGRW1C+2
+       BLWP @AEQ
+       TEXT 'Block should not have moved.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0004
-	   MOV  @TGRW1A,R1
-	   BLWP @AEQ
-	   TEXT 'Block should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TGRW1A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8008
-	   MOV  @TGRW1B,R1
-	   BLWP @AEQ
-	   TEXT 'Block should remain allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TGRW1B,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>8016
-	   MOV  @TGRW1C,R1
-	   BLWP @AEQ
-	   TEXT 'Block should remain allocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TGRW1C,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
 *
        LI   R0,>0006
-	   MOV  @TGRW1D,R1
-	   BLWP @AEQ
-	   TEXT 'Block should remain unallocated.'
-	   BYTE 0
-	   EVEN
+       MOV  @TGRW1D,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
 *
        RT
 * Buffer before action
@@ -1234,5 +1238,135 @@ TGRW1C DATA >8016
 TGRW1D DATA >0006
        BSS  >4
 TGRW1Z
+
+*
+* Don't grow a block. It's just right.
+TGRW2
+* Arrange
+       LI   R0,TGRW2A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW2Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW2B+2
+       LI   R1,>16
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+       LI   R0,TGRW2B+2
+       BLWP @AEQ
+       TEXT 'Block should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0010
+       MOV  @TGRW2A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8018
+       MOV  @TGRW2B,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8008
+       MOV  @TGRW2C,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0006
+       MOV  @TGRW2D,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer before action
+TGRW2A DATA >0010
+       BSS  >E
+TGRW2B DATA >8018
+       BSS  >16
+TGRW2C DATA >8008
+       BSS  >6
+TGRW2D DATA >0006
+       BSS  >4
+TGRW2Z
+
+*
+* Grow a block, without moving it.
+TGRW3
+* Arrange
+       LI   R0,TGRW3A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW3C+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+       LI   R0,TGRW3C+2
+       BLWP @AEQ
+       TEXT 'Block should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8010
+       MOV  @TGRW3A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0008
+       MOV  @TGRW3B,R1
+       BLWP @AEQ
+       TEXT 'Block should remain unallocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8042
+       MOV  @TGRW3C,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated, '
+       TEXT 'but be bigger.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0006
+       MOV  @TGRW3C+>42,R1
+       BLWP @AEQ
+       TEXT 'This is a new unallocated block.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8006
+       MOV  @TGRW3E,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer before action
+TGRW3A DATA >8010
+       BSS  >E
+TGRW3B DATA >0008
+       BSS  >6
+TGRW3C DATA >8008
+       BSS  >6
+TGRW3D DATA >0040
+       BSS  >3E
+TGRW3E DATA >8006
+       BSS  >4
+TGRW3Z
 
        END

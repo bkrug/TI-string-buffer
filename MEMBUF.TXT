@@ -259,7 +259,7 @@ BUFSRK DATA STRWS,BUFSRK+4
 * Let R8 = address of block
 * Let R9 = max size + 2
        MOV  *R13,R8
-	   DECT R8
+       DECT R8
        MOV  @2(13),R9
        INCT R9
 * Let R10 = current block size
@@ -267,16 +267,16 @@ BUFSRK DATA STRWS,BUFSRK+4
        SZC  @BLKUSE,R10
 * Check if too big
        C    R10,R9
-	   JLE  LESRT
+       JLE  LESRT
 * Mark block header with less space
 * Let R10 = spare space
        S    R9,R10
-	   SOC  @BLKUSE,R9
-	   MOV  R9,*R8
+       SOC  @BLKUSE,R9
+       MOV  R9,*R8
 * Create a new empty block header
        SZC  @BLKUSE,R9
-	   A    R9,R8
-	   MOV  R10,*R8
+       A    R9,R8
+       MOV  R10,*R8
 * Merge new free block with later free
 * blocks.
        MOV  R8,R3
@@ -284,7 +284,52 @@ BUFSRK DATA STRWS,BUFSRK+4
 *
 LESRT  RTWP
 
+*
+* Grow allocation if necessary.
+*
+* Input:
+* R0 - address of block
+* R1 - required size
 BUFGRW DATA STRWS,BUFGRW+4
-       RTWP
+* Let R8 = address of block
+* Let R9 = required size + 2
+       MOV  *R13,R8
+       DECT R8
+       MOV  @2(13),R9
+       INCT R9
+* Let R10 = current block size
+       MOV  *R8,R10
+       SZC  @BLKUSE,R10
+* Check if already big enough      
+       C    R10,R9
+	   JHE  GRWRT
+* Let R9 = twice the desired size + 2
+       SLA  R9,1
+       DECT R9
+* Let R11 = address of next block
+       MOV  R8,R11
+	   A    R10,R11
+* Confirm that next block is free
+       MOV  *R11,R12
+       COC  @BLKUSE,R12
+	   JEQ  GRWRT
+* Let R12 = total size of both blocks
+	   A    R10,R12
+* Confirm that total size is big enough
+       C    R12,R9
+	   JL   GRWRT
+* Grow the original block
+       MOV  R9,*R8
+	   SOC  @BLKUSE,*R8
+* Let R12 = new size of free block
+       S    R9,R12
+* If we used all the free space, return
+       JEQ  GRWRT
+* Let R8 = address of new free block
+       A    R9,R8
+* Create new free block
+       MOV  R12,*R8
+*
+GRWRT  RTWP
 
        END
