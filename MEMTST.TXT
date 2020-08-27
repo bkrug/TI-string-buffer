@@ -106,6 +106,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        TEXT 'TGRW3 '
 * Grow a block, without moving it,
 *    merge some free spaces.
+       DATA TGRW4
+       TEXT 'TGRW4 '
 * Grow and move a block.
 * Grow and move a block, and merge some
 *    free spaces.
@@ -1368,5 +1370,63 @@ TGRW3D DATA >0040
 TGRW3E DATA >8006
        BSS  >4
 TGRW3Z
+
+*
+* Grow a block, without moving it.
+* Merge some of the following free space.
+TGRW4
+* Arrange
+       LI   R0,TGRW4A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW4Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW4A+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+       LI   R0,TGRW4A+2
+       BLWP @AEQ
+       TEXT 'Block should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8042
+       MOV  @TGRW4A,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated, '
+       TEXT 'but be bigger.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0026
+       MOV  @TGRW4A+>42,R1
+       BLWP @AEQ
+       TEXT 'This is a new unallocated block. '
+	   TEXT 'It merges several free blocks.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8006
+       MOV  @TGRW4B,R1
+       BLWP @AEQ
+       TEXT 'Block should remain allocated.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer before action
+TGRW4A DATA >8010
+       BSS  >E
+       DATA >0040
+       BSS  >3E
+       DATA >0008
+       BSS  >6
+       DATA >0010
+       BSS  >E
+TGRW4B DATA >8006
+       BSS  >4
+TGRW4Z
 
        END

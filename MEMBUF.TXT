@@ -312,12 +312,12 @@ BUFGRW DATA STRWS,BUFGRW+4
 * Confirm that next block is free
        MOV  *R11,R12
        COC  @BLKUSE,R12
-	   JEQ  GRWRT
+	   JEQ  GRWNEW
 * Let R12 = total size of both blocks
 	   A    R10,R12
 * Confirm that total size is big enough
        C    R12,R9
-	   JL   GRWRT
+	   JL   GRWNEW
 * Grow the original block
        MOV  R9,*R8
 	   SOC  @BLKUSE,*R8
@@ -329,6 +329,12 @@ BUFGRW DATA STRWS,BUFGRW+4
        A    R9,R8
 * Create new free block
        MOV  R12,*R8
+       RTWP
+* Need to move the data
+GRWNEW
+* Allocate new block
+* Deallocate old block
+
 *
 GRWRT  RTWP
 
