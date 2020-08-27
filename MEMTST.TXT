@@ -2,7 +2,7 @@
        REF  AEQ,ABLCK
 *
        REF  BUFINT,BUFCPY,BUFALC,BUFREE
-       REF  BUFSRK
+       REF  BUFSRK,BUFGRW
 *
        REF  BUFADR,BUFEND
 
@@ -95,6 +95,16 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Shrink and merge following free block.
        DATA TSRK4
        TEXT 'TSRK4 '
+* Don't grow a block. More space is left.
+       DATA TGRW1
+       TEXT 'TGRW1 '
+* Don't grow a block. It is just right.
+* Grow a block, without moving it.
+* Grow a block, without moving it,
+*    merge some free spaces.
+* Grow and move a block.
+* Grow and move a block, and merge some
+*    free spaces.
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1164,5 +1174,65 @@ TSRK4C DATA >0010
 TSRK4D DATA >8010
        DATA >0E
 TSRK4Z
+
+*
+* Don't grow a block. More space is left.
+TGRW1
+* Arrange
+       LI   R0,TGRW1A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW1Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW1C+2
+	   LI   R1,>12
+	   BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+	   LI   R0,TGRW1C+2
+	   BLWP @AEQ
+	   TEXT 'Block should not have moved.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0004
+	   MOV  @TGRW1A,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8008
+	   MOV  @TGRW1B,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8016
+	   MOV  @TGRW1C,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0006
+	   MOV  @TGRW1D,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Buffer before action
+TGRW1A DATA >0004
+       BSS  2
+TGRW1B DATA >8008
+       BSS  6
+TGRW1C DATA >8016
+       BSS  >14
+TGRW1D DATA >0006
+       BSS  >4
+TGRW1Z
 
        END
