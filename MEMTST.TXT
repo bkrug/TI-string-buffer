@@ -109,6 +109,8 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA TGRW4
        TEXT 'TGRW4 '
 * Grow and move a block.
+       DATA TGRW5
+       TEXT 'TGRW5 '
 * Grow and move a block, and merge some
 *    free spaces.
 TSTEND
@@ -1428,5 +1430,84 @@ TGRW4A DATA >8010
 TGRW4B DATA >8006
        BSS  >4
 TGRW4Z
+
+*
+* Grow and move a block.
+* Original block was followed by an
+* allocated block.
+TGRW5
+* Arrange
+       LI   R0,TGRW5A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW5Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW5A+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+	   LI   R0,TGRW5E+2
+	   BLWP @AEQ
+	   TEXT 'Block needed to move to '
+	   TEXT 'have enough space.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0018
+	   MOV  @TGRW5A,R1
+	   BLWP @AEQ
+	   TEXT 'Original block should now be unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8004
+	   MOV  @TGRW5B,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0010
+	   MOV  @TGRW5C,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8010
+	   MOV  @TGRW5D,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8042
+	   MOV  @TGRW5E,R1
+	   BLWP @AEQ
+	   TEXT 'This should be the newly allocated space.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>001E
+	   MOV  @TGRW5E+>42,R1
+	   BLWP @AEQ
+	   TEXT 'This should be left over free space.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Buffer before action
+TGRW5A DATA >8018
+       BSS  >16
+TGRW5B DATA >8004
+	   BSS  >02
+TGRW5C DATA >0010
+	   BSS  >0E
+TGRW5D DATA >8010
+	   BSS  >0E
+TGRW5E DATA >0060
+	   BSS  >5E
+TGRW5Z
 
        END

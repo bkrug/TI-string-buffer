@@ -290,6 +290,9 @@ LESRT  RTWP
 * Input:
 * R0 - address of block
 * R1 - required size
+* Output:
+* R0 - new address of block
+*
 BUFGRW DATA STRWS,BUFGRW+4
 * Let R8 = address of block
 * Let R9 = required size + 2
