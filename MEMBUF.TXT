@@ -92,9 +92,19 @@ BUFCPY DATA STRWS,BUFCPY+4
        MOV  *R13,R0
        MOV  @2(13),R1
        MOV  @4(13),R2
+*
+       BL   @CPYRTN
+	   RTWP
+
+* R0 - source address.
+* R1 - destination address
+* R2 - size of data to copy.
+CPYRTN
 * If data length is 0, return
        MOV  R2,R2
        JEQ  CPYRT
+* Let R3 = size of data to copy
+       MOV  R2,R3	   
 * Let R2 = end of source range
        A    R0,R2
 * Check if source and destination
@@ -104,19 +114,19 @@ BUFCPY DATA STRWS,BUFCPY+4
        C    R2,R1
        JL   CPYST
 * Let R1 = end of destination range
-       A    @4(13),R1
+       A    R3,R1
 * Copy from end to start
 CPY1   DEC  R1
        DEC  R2
        MOVB *R2,*R1
        C    R2,R0
        JH   CPY1
-       RTWP
+       RT
 * Copy from start to end
 CPYST  MOVB *R0+,*R1+
        C    R0,R2
        JL   CPYST
-CPYRT  RTWP
+CPYRT  RT
 
 * 
 * **** BUFALC ****
@@ -130,6 +140,17 @@ CPYRT  RTWP
 BUFALC DATA STRWS,BUFALC+4
 * Get routine parameters
        MOV  *R13,R0
+*
+       BL   @ALCRTN
+	   MOV  R0,*R13
+	   RTWP
+
+* Input:
+* R0 - size
+* Output:
+* R0 - the new address of assigned space
+*    - >FFFF implies an error
+ALCRTN
 * Round R0 up to an even number.
        INC  R0
        SRL  R0,1
@@ -151,11 +172,13 @@ SET3   A    R4,R3
        JL   SET1
 * We passed out of the buffer.
 * Report an error in caller's R0.
-       SETO *R13
-       RTWP
+       SETO R0
+       RT
 * Chunk is free, but is it large enough?
 * First try to merge other free chunks.
-SET2   BL   @TRYMRG
+SET2   MOV  R11,R12
+       BL   @TRYMRG
+	   MOV  R12,R11
 * If required space is still larger than
 * the size of merged chunk, continue
 * loop.
@@ -186,8 +209,8 @@ SET2   BL   @TRYMRG
 SET4   INCT R1
 * R1 now contains the address of the 
 * string. Put address in caller's R0.
-       MOV  R1,*R13
-       RTWP
+       MOV  R1,R0
+       RT
  
 *
 * **** BUFREE ****
@@ -294,7 +317,7 @@ LESRT  RTWP
 * R0 - new address of block
 *
 BUFGRW DATA STRWS,BUFGRW+4
-* Let R8 = address of block
+* Let R8 = address of block header
 * Let R9 = required size + 2
        MOV  *R13,R8
        DECT R8
@@ -339,8 +362,20 @@ BUFGRW DATA STRWS,BUFGRW+4
 * Need to move the data
 GRWNEW
 * Allocate new block
+       MOV  R9,R0
+	   DECT R0
+       BL   @ALCRTN
+* Let R1 = new block address
+       MOV  R0,R1
+* Report new block address to caller
+       MOV  R0,*R13
 * Deallocate old block
-
+       SZC  @BLKUSE,*R8
+* Copy data from old block
+       MOV  R8,R0
+	   INCT R0
+	   MOV  *R8,R2
+       BL   @CPYRTN
 *
 GRWRT  RTWP
 
