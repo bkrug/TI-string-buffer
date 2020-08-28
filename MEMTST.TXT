@@ -111,8 +111,13 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Grow and move a block.
        DATA TGRW5
        TEXT 'TGRW5 '
+* Grow and move a block.
+       DATA TGRW6
+       TEXT 'TGRW6 '
 * Grow and move a block, and merge some
 *    free spaces.
+       DATA TGRW7
+       TEXT 'TGRW7 '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1509,5 +1514,151 @@ TGRW5D DATA >8010
 TGRW5E DATA >0060
 	   BSS  >5E
 TGRW5Z
+
+*
+* Grow and move a block.
+* Original block was followed by an
+* unallocated block.
+TGRW6
+* Arrange
+       LI   R0,TGRW6A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW6Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW6B+2
+       LI   R1,>1E
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+	   LI   R0,TGRW6E+2
+	   BLWP @AEQ
+	   TEXT 'Block needed to move to '
+	   TEXT 'have enough space.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8018
+	   MOV  @TGRW6A,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0026
+	   MOV  @TGRW6B,R1
+	   BLWP @AEQ
+	   TEXT 'Block should now be unallocated '
+	   TEXT 'and merged with next block.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8004
+	   MOV  @TGRW6D,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>1E*2+>2+>8000
+	   MOV  @TGRW6E,R1
+	   BLWP @AEQ
+	   TEXT 'This should be the newly allocated space.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0012
+	   MOV  @TGRW6E+>3E,R1
+	   BLWP @AEQ
+	   TEXT 'This should be a new block of unallocated space.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8008
+	   MOV  @TGRW6F,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Buffer before action
+TGRW6A DATA >8018
+       BSS  >16
+TGRW6B DATA >8016
+	   BSS  >14
+       DATA >0010
+	   BSS  >0E
+TGRW6D DATA >8004
+	   BSS  >02
+TGRW6E DATA >0050
+	   BSS  >4E
+TGRW6F DATA >8008
+       BSS  >06	   
+TGRW6Z
+
+TGRW7
+* Arrange
+       LI   R0,TGRW7A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW7Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW7A+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+	   LI   R0,TGRW7C+2
+	   BLWP @AEQ
+	   TEXT 'Block needed to move to '
+	   TEXT 'have enough space.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0010
+	   MOV  @TGRW7A,R1
+	   BLWP @AEQ
+	   TEXT 'Block should now be unallocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8008
+	   MOV  @TGRW7B,R1
+	   BLWP @AEQ
+	   TEXT 'Block should remain allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>20*2+>2+>8000
+	   MOV  @TGRW7C,R1
+	   BLWP @AEQ
+	   TEXT 'Block should be newly allocated.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>0E+>08+>08+>10
+	   MOV  @TGRW7C+>42,R1
+	   BLWP @AEQ
+	   TEXT 'This free space includes previously '
+	   TEXT 'unallocated blocks merged together.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Buffer before action
+TGRW7A DATA >8010
+       BSS  >0E
+TGRW7B DATA >8008
+	   BSS  >06
+TGRW7C DATA >0050
+       BSS  >4E
+	   DATA >0008
+	   BSS  >06
+	   DATA >0008
+	   BSS  >06
+	   DATA >0010
+	   BSS  >0E
+TGRW7Z
 
        END

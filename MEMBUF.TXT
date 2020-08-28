@@ -376,6 +376,9 @@ GRWNEW
 	   INCT R0
 	   MOV  *R8,R2
        BL   @CPYRTN
+* Merge with following free block
+       MOV  R8,R3
+       BL   @TRYMRG
 *
 GRWRT  RTWP
 
