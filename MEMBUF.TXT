@@ -94,7 +94,7 @@ BUFCPY DATA STRWS,BUFCPY+4
        MOV  @4(13),R2
 *
        BL   @CPYRTN
-	   RTWP
+       RTWP
 
 * R0 - source address.
 * R1 - destination address
@@ -104,7 +104,7 @@ CPYRTN
        MOV  R2,R2
        JEQ  CPYRT
 * Let R3 = size of data to copy
-       MOV  R2,R3	   
+       MOV  R2,R3       
 * Let R2 = end of source range
        A    R0,R2
 * Check if source and destination
@@ -142,8 +142,8 @@ BUFALC DATA STRWS,BUFALC+4
        MOV  *R13,R0
 *
        BL   @ALCRTN
-	   MOV  R0,*R13
-	   RTWP
+       MOV  R0,*R13
+       RTWP
 
 * Input:
 * R0 - size
@@ -182,7 +182,7 @@ SET3   A    R4,R3
 * First try to merge other free chunks.
 SET2   MOV  R11,R12
        BL   @TRYMRG
-	   MOV  R12,R11
+       MOV  R12,R11
 * If required space is still larger than
 * the size of merged chunk, continue
 * loop.
@@ -364,7 +364,7 @@ BUFGRW DATA STRWS,BUFGRW+4
 GRWNEW
 * Allocate new block
        MOV  R9,R0
-	   DECT R0
+       DECT R0
        BL   @ALCRTN
 * Let R1 = new block address
        MOV  R0,R1
@@ -374,8 +374,8 @@ GRWNEW
        SZC  @BLKUSE,*R8
 * Copy data from old block
        MOV  R8,R0
-	   INCT R0
-	   MOV  *R8,R2
+       INCT R0
+       MOV  *R8,R2
        BL   @CPYRTN
 * Merge with following free block
        MOV  R8,R3
