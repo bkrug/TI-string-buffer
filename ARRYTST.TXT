@@ -31,6 +31,10 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *    without moving
        DATA ADD4
        TEXT 'ADD4  '
+* Add element, mem-block grows
+*    without moving
+       DATA ADD5
+       TEXT 'ADD5  '
 * Add element, mem-block grows and moves
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
@@ -410,5 +414,76 @@ ADD4X  DATA >8000+ADD4W-ADD4X
 ADD4W  DATA >0040
        BSS  >3E
 ADD4Z
+
+*
+* Add an element. Grow the memory block.
+ADD5
+* Arrange
+       LI   R0,ADD5Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD5Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD5X+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10 
+* Assert
+       LI   R0,ADD5X+2
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD5X+2+4+10
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Location of new element should '
+       TEXT 'follow last previous element.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+ADD5W-ADD5X
+       MOV  @ADD5X,R1
+       BLWP @AL
+       TEXT 'Memory block should have grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD4A
+       LI   R1,ADD4X+2
+       LI   R2,ADD4B-ADD4A
+       BLWP @ABLCK
+       TEXT 'Array should now have four '
+       TEXT 'elements, and the first three '
+       TEXT 'elements should not change.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents after adding
+*    an element
+ADD5A
+       DATA >0006,>0001
+       DATA >1111,>2222,>3333,>4444
+       DATA >5555
+ADD5B
+* Initial buffer contents
+ADD5Y  DATA >0008
+       BSS  >06
+	   DATA >8008
+	   BSS  >06
+ADD5X  DATA >8000+ADD4W-ADD4X
+* Array header
+       DATA >0005,>0001
+* Array elements (2-bytes each)
+       DATA >1111,>2222,>3333,>4444
+       DATA >5555
+ADD5W  DATA >0020
+       BSS  >1E
+	   DATA >8010
+	   BSS  >1E
+ADD5Z
 
        END
