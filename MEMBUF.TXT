@@ -156,6 +156,7 @@ BUFALC DATA STRWS,BUFALC+4
 * R1
 * R3
 * R4
+* R10
 * R12
 ALCRTN
 * Round R0 up to an even number.
@@ -189,7 +190,7 @@ SET2   MOV  R11,R12
 * If required space is still larger than
 * the size of merged chunk, continue
 * loop.
-       C    R0,R4
+       C    R0,R9
        JH   SET3
 * This chunk at R3 is large enough.
 * Save a copy of its address.
@@ -198,18 +199,18 @@ SET2   MOV  R11,R12
        SOC  @BLKUSE,*R3
 * If the chunk is large enough to split,
 * do so.
-* Note that it is not possible for R4-R0
+* Note that it is not possible for R9-R0
 * to equal 1. If the difference is not 
 * zero, then there is enough space to add
 * a chunk header.
-       S    R0,R4
+       S    R0,R9
        JEQ  SET4
 * Decrease offset at newly filled chunk.
-       S    R4,*R3
+       S    R9,*R3
 * Record the remainder of the offset at
 * next chunk.
        A    R0,R3
-       MOV  R4,*R3
+       MOV  R9,*R3
 * R1 contains the address of the 
 * chunk. Change it to address of chunk
 * contents.
@@ -247,31 +248,31 @@ BUFREE DATA STRWS,BUFREE+4
 *
 * Output:
 * R3 - (unchanged)
-* R4 - new size of chunk
-* R5 - next full chunk
+* R9 - new size of chunk
+* R10 - next full chunk
 TRYMRG
 * Store the address of first chunk.
-       MOV  R3,R5
-* Initially add 0 to R5's contents so we
+       MOV  R3,R10
+* Initially add 0 to R10's contents so we
 * can ensure that the first chunk is
 * really free.
-       CLR  R4
+       CLR  R9
 * Each header contains an offset to the
 * next block. Find the some of the
 * offsets of consecutive free blocks.
-TMRG1  A    R4,R5
-       C    R5,@BUFEND
+TMRG1  A    R9,R10
+       C    R10,@BUFEND
        JHE  TMGR2
-       MOV  *R5,R4
-       CZC  @BLKUSE,R4
+       MOV  *R10,R9
+       CZC  @BLKUSE,R9
        JEQ  TMRG1
 * Calculate new offset
-TMGR2  MOV  R5,R4
-       S    R3,R4
+TMGR2  MOV  R10,R9
+       S    R3,R9
        JEQ  TMRG3
 * If new offset is greater than 0, put 
 * it in header of first chunk.
-       MOV  R4,*R3
+       MOV  R9,*R3
 TMRG3  RT
 
 *
@@ -369,8 +370,6 @@ GRWNEW
        MOV  R9,R0
        DECT R0
        BL   @ALCRTN
-* Let R1 = new block address
-       MOV  R0,R9
 * Report new block address to caller
        MOV  R0,*R13
 * Deallocate old block
@@ -379,6 +378,7 @@ GRWNEW
        MOV  R8,R3
        BL   @TRYMRG
 * Copy data from old block
+       MOV  R0,R9
        MOV  *R8,R10
        INCT R8
        BL   @CPYRTN
