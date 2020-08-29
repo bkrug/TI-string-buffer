@@ -17,6 +17,16 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * this array.
        DATA ALC3
        TEXT 'ALC3  '
+* Add element to empty array
+       DATA ADD1
+       TEXT 'ADD1  '
+* Add element to 2-byte elem array
+       DATA ADD2
+       TEXT 'ADD2  '
+* Add element to 4-byte elem array
+* Add element, mem-block grows
+*    without moving
+* Add element, mem-block grows and moves
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -131,7 +141,7 @@ ALC3
        BLWP @ARYALC
 * Assert
        MOV  R0,R1
-	   LI   R0,>FFFF
+       LI   R0,>FFFF
        BLWP @AEQ
        TEXT 'The array should not have been loaded.'
        BYTE 0
@@ -142,5 +152,110 @@ ALC3
 ALC3Y  DATA >8040
        BSS  >3E
 ALC3Z
+
+*
+* Add an element to an empty array
+ADD1
+* Arrange
+       LI   R0,ADD1Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD1Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD1X+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,ADD1X+2
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>0001
+       MOV  *R9,R1
+       BLWP @AEQ
+       TEXT 'Array should now have one element.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD1X+6
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'New element is first in the array. '
+       TEXT 'Its address should be right after '
+       TEXT 'the array header, which is 4-bytes long.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Initial buffer space
+ADD1Y  DATA >8008
+       BSS  >06
+ADD1X  
+* Array's block header
+       DATA >8020
+* Array header
+       DATA >0000,>0003
+       BSS  >1A
+       DATA >0010
+       BSS  >E
+ADD1Z
+
+*
+* Add an element to an array with
+* 2-byte elements.
+ADD2
+* Arrange
+       LI   R0,ADD2Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD2Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD2Y+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,ADD2Y+2
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD2Y+2+4+6
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Array should have four elements '
+	   TEXT 'but the contents of the new element '
+	   TEXT 'are non-deterministic.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents.
+* Basically only the element count
+* should change.
+* We don't care about the inital
+* contents of the new element.
+ADD2A
+       DATA >0004,>0001
+	   DATA >0101,>0202,>0303
+ADD2B
+* Initial buffer space
+ADD2Y  
+* Array's block header
+       DATA >8020
+* Array header
+       DATA >0003,>0001
+* The 3 elements in the array
+	   DATA >0101,>0202,>0303
+       BSS  >14
+       DATA >0010
+       BSS  >E
+ADD2Z
 
        END
