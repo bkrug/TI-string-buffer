@@ -181,10 +181,13 @@ SCRLPT MOV  R11,*R12+
        CI   R1,23*32
        JLE  SCROL0
        LI   R1,23*32
+* If length = 0, return
+       MOV  R1,R1
+	   JEQ  SCROL2
 *
 SCROL0 BL   @WRITEF
        BL   @SCRLP
-       DECT R12
+SCROL2 DECT R12
        MOV  *R12,R11
        RT
        
@@ -425,7 +428,7 @@ AB1    C    *R0+,*R1+
        C    R5,R2
        JL   AB1
 * Report success
-       RTWP
+       B    @ONPASS
 * Report Failure
 * Backtrack to unmatching bytes.
 ABFL   DECT R0
@@ -647,10 +650,7 @@ RF1A   MOVB *R14+,R1
 *
 * On Success
 ONPASS
-* Find location of user-defined message
-       MOV  R3,R3
-       JNE  FIND2
-* Display user-defined failure message
+* Skip past the assertion mesage
        MOV  R14,R0
 FIND1  MOVB *R14+,R1
        JNE  FIND1
@@ -658,9 +658,7 @@ FIND1  MOVB *R14+,R1
        INC  R14
        SRL  R14,1
        SLA  R14,1
-* Don't return to the test being run. No
-* need to run extra assertions
-* in the same test.
-FIND2  RTWP
+*
+       RTWP
 
        END

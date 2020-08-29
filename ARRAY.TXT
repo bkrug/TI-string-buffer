@@ -1,7 +1,7 @@
        DEF  ARYALC,ARYADD,ARYINS,ARYDEL
        DEF  ARYADR
 *
-       REF  BUFALC,BUFREE,BUFCPY,BUFLES
+       REF  BUFALC,BUFREE,BUFCPY,BUFSRK
        REF  ARRYWS,BLKUSE
 
 *
@@ -162,7 +162,7 @@ ARYDEL DATA ARRYWS,ARYDEL+4
        MOV  *R13,R0
        SLA  R1,1
 * Shrink memory allocation if needed
-       BLWP @BUFLES
+       BLWP @BUFSRK
 *
        RTWP
 

@@ -1,0 +1,451 @@
+       DEF  RUNTST
+*
+       REF  ARYALC,ARYADD,ARYINS,ARYDEL
+       REF  ARYADR
+       REF  BUFINT,BUFALC,BUFREE,BUFCPY
+       REF  MAKETX,PRINTL,OPENF,CLOSEF
+
+RUNTST BLWP @OPENF
+* Initialize the memory buffer.
+       BL   @INTBUF
+* Write notification on screen.
+       BL   @WRTST
+* Run each test
+       BL   @TST1
+       BL   @TST2
+       BL   @TST3
+* Write notification on screen.
+       BL   @WREND
+       BLWP @CLOSEF
+JMP    LIMI 2
+       LIMI 0
+       JMP  JMP
+
+* Write notification
+WRTST  LI   R0,STARTM
+       LI   R1,ENDM-STARTM
+       BLWP @PRINTL
+       RT
+ 
+* Finished testing
+WREND  LI   R0,ENDM
+       LI   R1,4
+       BLWP @PRINTL
+       RT
+
+STARTM TEXT 'Testing'
+ENDM   TEXT 'Done'
+ENDME  EVEN
+
+SPACE  BSS  >2000
+SPAEND
+
+*
+* Initialize buffer.
+*
+INTBUF LI   R0,SPACE
+       LI   R1,SPAEND-SPACE
+       BLWP @BUFINT
+       MOV  R0,R0
+       JEQ  INTBF2
+       LI   R0,INTMSG
+       LI   R1,INTMSE-INTMSG
+       BLWP @PRINTL
+       B    @JMP
+INTBF2 RT
+INTMSG TEXT 'Failed to initialize memory buffer.'
+INTMSE EVEN
+
+****************************************
+*
+* Tests
+*
+****************************************
+
+*
+* Test an array with indexes of size 2
+* bytes.
+*
+TST1   LI   R2,1
+*
+       LI   R0,1
+       BLWP @ARYALC
+*
+* Add 1
+       BLWP @ARYADD
+       MOV  R2,*R1
+*
+* Insert 2
+       CLR  R1
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+*
+* Insert 3
+       LI   R1,1
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+*
+* 2,3,1
+* Insert 4
+       CLR  R1
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+*
+* Insert 5
+       LI   R1,3
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+*
+* 4,2,3,5,1
+* Add 6
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+*
+* Delete 4
+       CLR  R1
+       BLWP @ARYDEL
+*
+* 2,3,5,1,6
+* Insert 7
+       CLR  R1
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+*
+* Add 8
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+*
+* Add 9
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+*
+* Add 10
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+*
+* Add 11
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+*
+* 7,2,3,5,1,6,8,9,10,11
+* Insert 12
+       LI   R1,8
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+*
+* Delete 1
+       LI   R1,4
+       BLWP @ARYDEL
+*
+* Check Results
+*
+* ASCII of number 1
+       LI   R8,>3100
+* Check an address
+       CLR  R1
+       BLWP @ARYADR
+       MOV  R0,R2
+       AI   R2,4
+       C    R1,R2
+       JNE  ERR1A
+* Check an address
+       LI   R1,4
+       BLWP @ARYADR
+       MOV  R0,R2
+       AI   R2,12
+       C    R1,R2
+       JNE  ERR1A
+* Check array contents
+       LI   R9,EXP1
+       MOV  R0,R10
+       B    @COMPAR
+*
+* COMPAR ends with RT
+
+ERR1A  B    @ADRERR
+
+EXP1   DATA 10,1
+       DATA 7,2,3,5,6,8,9,12,10,11
+
+*
+* Test an array with items of size 8
+* bytes.
+*
+TST2   LI   R2,1
+       MOV  R11,R12
+*
+       LI   R0,3
+       BLWP @ARYALC
+*
+* Add 1
+       BLWP @ARYADD
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* Remove item
+       CLR  R1
+       BLWP @ARYDEL
+*
+* Insert 2
+       CLR  R1
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* Insert 3
+       CLR  R1
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* 3,2
+* Add 4
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* Add 5
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* Insert 6
+       LI   R1,2
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* 3,2,6,4,5
+* Delete
+       LI   R1,1
+       BLWP @ARYDEL
+*
+* 3,6,4,5
+*
+* Add 7
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+* Add 8
+       BLWP @ARYADD
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+* Insert 9
+       LI   R1,3
+       BLWP @ARYINS
+       INC  R2
+       MOV  R2,*R1
+       BL   @ADDZRO
+*
+       MOV  R12,R11
+*
+* 3,6,4,9,5,7,8
+*
+* Check Results
+*
+* ASCII of number 2
+CHK2   LI   R8,>3200
+* Check an address
+       CLR  R1
+       BLWP @ARYADR
+       MOV  R0,R2
+       AI   R2,4
+       C    R1,R2
+       JNE  ERR2A
+* Check an address
+       LI   R1,6
+       BLWP @ARYADR
+       MOV  R0,R2
+       AI   R2,6*8+4
+       C    R1,R2
+       JNE  ERR2A
+* Check array contents
+       LI   R9,EXP2
+       MOV  R0,R10
+       B    @COMPAR
+*
+* COMPAR ends with RT
+
+ERR2A  B    @ADRERR
+
+ADDZRO MOV  R1,R3
+       INCT R3
+       MOV  *R1,*R3+
+       MOV  *R1,*R3+
+       MOV  *R1,*R3
+       RT
+
+EXP2   DATA 7,3
+       DATA 3,3,3,3
+       DATA 6,6,6,6
+       DATA 4,4,4,4
+       DATA 9,9,9,9
+       DATA 5,5,5,5
+       DATA 7,7,7,7
+       DATA 8,8,8,8
+
+
+*
+* Test an array with indexes of size 2
+* bytes.
+*
+TST3   LI   R2,100
+*
+       LI   R0,1
+       BLWP @ARYALC
+*
+* Add 100
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 101
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 102
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 103
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 104
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 105
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 106
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 107
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 108
+       BLWP @ARYADD
+       MOV  R2,*R1
+       INC  R2
+* Add 109
+       BLWP @ARYADD
+       MOV  R2,*R1
+*
+* Check Results
+*
+* ASCII of number 3
+       LI   R8,>3300
+* Check array contents
+       LI   R9,EXP3
+       MOV  R0,R10
+       B    @COMPAR
+*
+* COMPAR ends with RT
+
+ERR3A  B    @ADRERR
+
+EXP3   DATA 10,1
+       DATA 100,101,102,103,104,105,106,107,108,109
+
+
+*
+* Report address error
+*
+* R8 - byte 0 contains ascii code for
+*      test number
+* R1 - Array address
+* R2 - Expected Item Address
+* R3 - Actual Item Address
+* 
+ADRERR
+       MOVB R8,@ERR1Q
+*
+       MOV  R1,R3
+*
+       LI   R1,ERR1N-5
+       BLWP @MAKETX
+*
+       MOV  R2,R0
+       LI   R1,ERR1O-5
+       BLWP @MAKETX
+*
+       MOV  R3,R0
+       LI   R1,ERR1P-5
+       BLWP @MAKETX
+*
+       LI   R0,ERR1M
+       LI   R1,ERR1P-ERR1M
+       BLWP @PRINTL
+       RT
+
+ERR1M  TEXT 'TST : Wrong address of index. '
+       TEXT 'Array Address: .... '
+ERR1N  TEXT 'Expected Item Address: .... '
+ERR1O  TEXT 'Actual Item Address: ....'
+ERR1P  EVEN
+ERR1Q  EQU  ERR1M+3
+
+
+*
+* R8 - byte 0 contains ascii code for
+*      test number
+* R9 - address of expected contents
+* R10 - address of actual contents
+*
+COMPAR
+*
+       MOVB R8,@COMPO
+*
+       MOV  R10,R0
+       LI   R1,COMPN-15
+       BLWP @MAKETX
+* Place ending address in R2
+       MOV  R9,R0
+       INCT R0
+       MOV  *R0,R0
+       MOV  *R9,R2
+       SLA  R2,0
+       AI   R2,4
+       A    R9,R2
+*
+COMP1  C    *R9+,*R10+
+       JNE  COMP2
+       C    R9,R2
+       JL   COMP1
+*
+       RT
+*
+COMP2
+       LI   R0,COMPM
+       LI   R1,COMPN-COMPM
+       BLWP @PRINTL
+       RT
+
+COMPM  TEXT 'TST : Wrong array contents. '
+       TEXT 'Array Address: ....           '
+COMPN  EVEN
+COMPO  EQU  COMPM+3
+
+       END
