@@ -83,10 +83,10 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Deallocate space at end of buffer
        DATA TFRE7
        TEXT 'TFRE7 '
-* Don't shrink. Block already smaller.
+* Don't shrink. Small enough.
        DATA TSRK1
        TEXT 'TSRK1 '
-* Don't shrink. Block already same size.
+* Don't shrink. Exactlly twice needed.
        DATA TSRK2
        TEXT 'TSRK2 '
 * Shrink without merging following block.
@@ -1005,7 +1005,9 @@ TFRE7D DATA >8012
 TFRE7Z
 
 *
-* Don't shrink. Block already smaller.
+* Don't shrink.
+* Block needs >0C bytes and has less
+* than twice that.
 TSRK1
 * Arrange
        LI   R0,TSRK1A
@@ -1014,7 +1016,7 @@ TSRK1
        MOV  R0,@BUFEND
 * Act
        LI   R0,TSRK1A+2
-       LI   R1,>30
+       LI   R1,>16
        BLWP @BUFSRK
 * Assert
        LI   R0,>8024
@@ -1041,7 +1043,9 @@ TSRK1B DATA >0010
 TSRK1Z
 
 *
-* Don't shrink. Block already same size.
+* Don't shrink.
+* Block needs >6 bytes and has exactly
+* than twice that.
 TSRK2
 * Arrange
        LI   R0,TSRK2A
@@ -1050,7 +1054,7 @@ TSRK2
        MOV  R0,@BUFEND
 * Act
        LI   R0,TSRK2B+2
-       LI   R1,>0A
+       LI   R1,>06
        BLWP @BUFSRK
 * Assert
        LI   R0,>8024
@@ -1060,7 +1064,7 @@ TSRK2
        BYTE 0
        EVEN
 *
-       LI   R0,>800C
+       LI   R0,>800E
        MOV  @TSRK2B,R1
        BLWP @AEQ
        TEXT 'Block allocation should not shrink.'
@@ -1078,14 +1082,16 @@ TSRK2
 * Buffer prior to action
 TSRK2A DATA >8024
        BSS  >22
-TSRK2B DATA >800C
-       BSS  >0A
+TSRK2B DATA >800E
+       BSS  >0C
 TSRK2C DATA >0010
        DATA >0E
 TSRK2Z
 
 *
 * Shrink without merging following block.
+* New size is twice as big as required 
+* space.
 TSRK3
 * Arrange
        LI   R0,TSRK3A
@@ -1094,7 +1100,7 @@ TSRK3
        MOV  R0,@BUFEND
 * Act
        LI   R0,TSRK3B+2
-       LI   R1,>08
+       LI   R1,>04
        BLWP @BUFSRK
 * Assert
        LI   R0,>8024
@@ -1145,7 +1151,7 @@ TSRK4
        MOV  R0,@BUFEND
 * Act
        LI   R0,TSRK4B+2
-       LI   R1,>10
+       LI   R1,>8
        BLWP @BUFSRK
 * Assert
        LI   R0,>8014
@@ -1539,6 +1545,15 @@ TGRW6
        BYTE 0
        EVEN
 *
+       LI   R0,TGRW6Y
+       LI   R1,TGRW6E+2
+       LI   R2,>14
+       BLWP @ABLCK
+       TEXT 'Original block contents should '
+       TEXT 'have been copied to new block.'
+       BYTE 0
+       EVEN
+*
        LI   R0,>8018
        MOV  @TGRW6A,R1
        BLWP @AEQ
@@ -1584,11 +1599,17 @@ TGRW6
        EVEN
 *
        RT
+* Expected data to be copied
+TGRW6Y DATA >AABB,>CCDD,>EEFF,>0011
+       DATA >2233,>4455,>6677,>8899
+       DATA >1234,>5678
 * Buffer before action
 TGRW6A DATA >8018
        BSS  >16
 TGRW6B DATA >8016
-       BSS  >14
+       DATA >AABB,>CCDD,>EEFF,>0011
+       DATA >2233,>4455,>6677,>8899
+       DATA >1234,>5678
        DATA >0010
        BSS  >0E
 TGRW6D DATA >8004

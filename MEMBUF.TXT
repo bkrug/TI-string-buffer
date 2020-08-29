@@ -276,19 +276,20 @@ TMGR2  MOV  R10,R9
 TMRG3  RT
 
 *
-* Shrink allocation.
-* Reduce allocation of space
-* if necessary
+* Shrink allocation to twice the
+* required space if not already
+* smaller.
 *
 * Input:
 * R0 - address inside of buffer
-* R1 - maximum acceptable size
+* R1 - required space
 BUFSRK DATA STRWS,BUFSRK+4
 * Let R8 = address of block
-* Let R9 = max size + 2
+* Let R9 = required space * 2 + 2
        MOV  *R13,R8
        DECT R8
        MOV  @2(13),R9
+       SLA  R9,1
        INCT R9
 * Let R10 = current block size
        MOV  *R8,R10
