@@ -11,12 +11,12 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA ALC1
        TEXT 'ALC1  '
 * Allocate array with 8-byte elements
-*       DATA ALC2
-*       TEXT 'ALC2  '
+       DATA ALC2
+       TEXT 'ALC2  '
 * There is not enough space to allocate
 * this array.
-*       DATA ALC3
-*       TEXT 'ALC3  '
+       DATA ALC3
+       TEXT 'ALC3  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -33,6 +33,7 @@ ALC1
        MOV  R0,@BUFEND
 * Act
 * Store result address in R10
+* (2^1 = 2)
        LI   R0,1
        BLWP @ARYALC
        MOV  R0,R10
@@ -70,5 +71,76 @@ ALC1Y  DATA >8010
        DATA >8010
        BSS  >0E
 ALC1Z
+
+*
+* Allocate array with 8-byte elements
+ALC2
+* Arrange
+       LI   R0,ALC2Y
+       MOV  R0,@BUFADR
+       LI   R0,ALC2Z
+       MOV  R0,@BUFEND
+* Act
+* Store result address in R10
+* (2^3 = 8)
+       LI   R0,3
+       BLWP @ARYALC
+       MOV  R0,R10
+* Assert
+       LI   R0,ALC2Y+2
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'R0 should return the address at which '
+       TEXT 'the array was assigned to. '
+       TEXT 'This the first free address in the buffer.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ALC2A
+       MOV  R10,R1
+       LI   R2,ALC2B-ALC2A
+       BLWP @ABLCK
+       TEXT 'First word should specify 0 elements '
+       TEXT 'exist in the array. '
+       TEXT 'Second word should specify element '
+       TEXT 'length using "3" for 8 bytes. '
+       TEXT '(2^3 = 8)'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents.
+ALC2A  DATA >0000,>0003
+ALC2B
+* Initial buffer space
+ALC2Y  DATA >0040
+       BSS  >3E
+ALC2Z
+
+*
+* Fail to allocate an array.
+* No space.
+ALC3
+* Arrange
+       LI   R0,ALC3Y
+       MOV  R0,@BUFADR
+       LI   R0,ALC3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,5
+       BLWP @ARYALC
+* Assert
+       MOV  R0,R1
+	   LI   R0,>FFFF
+       BLWP @AEQ
+       TEXT 'The array should not have been loaded.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Initial buffer space
+ALC3Y  DATA >8040
+       BSS  >3E
+ALC3Z
 
        END
