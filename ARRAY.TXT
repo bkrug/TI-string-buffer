@@ -2,6 +2,7 @@
        DEF  ARYADR
 *
        REF  BUFALC,BUFREE,BUFCPY,BUFSRK
+       REF  BUFGRW
        REF  ARRYWS,BLKUSE
 
 *
@@ -210,6 +211,7 @@ ADRSIZ
 * Output:
 *  R0, R1, R2, R3
 *  R9 - exponent for item size
+*  R10 - new address of array
 REALC
 * Continue to store item size in R9
        MOV  R0,R9
@@ -217,44 +219,25 @@ REALC
 * Get potential size of array after add.
 * Put in R2
 * Calc: (array length + 1) * Item size + 4
-*
        MOV  *R10,R2
        INC  R2
        SLA  R2,0
        C    *R2+,*R2+
 *
-* Get current size of memory block - 2
-* Put in R3
-*
-       MOV  R10,R3
-       DECT R3
-       MOV  *R3,R3
-       SZC  @BLKUSE,R3
-       DECT R3
-*
-* Increase memory reserved for array if
-* necessary.
-*
-       C    R2,R3
-       JLE  REALC2
-* Allocate required space * 2
-       MOV  R2,R0
-       SLA  R0,1
-       BLWP @BUFALC
+* Grow the memory block if necessary.
+       MOV  R10,R0
+       MOV  R2,R1
+       BLWP @BUFGRW
+* Report new address to caller
+       MOV  R0,*R13
+       MOV  R0,R10
+* If error, leave workspace routine.
        CI   R0,>FFFF
        JEQ  RTERR
-* Copy to new location
-       MOV  R0,R1
-       MOV  R10,R0
-       BLWP @BUFCPY
-* Free up old space
-       BLWP @BUFREE
-* Save new address
-       MOV  R1,R10
+*
 REALC2 RT
-
-RTERR  SETO *R13
-       RTWP
+*
+RTERR  RTWP
 
 
 *

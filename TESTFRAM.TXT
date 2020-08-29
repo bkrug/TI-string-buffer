@@ -13,6 +13,8 @@
        DEF  AEQ,ANEQ
 * Assert Word Logical Low
        DEF  AL
+* Assert Word Logical High
+       DEF  AH
 
 *******
 * List of test routines
@@ -476,7 +478,7 @@ AOCME  EVEN
 AOCP
 * Copy Parameters
        BL   @COPYP
-* Output Test Name
+* Do comparison test
        COC  R0,R1
        JEQ  AOCS
 * Report failure
@@ -506,7 +508,7 @@ AZCME  EVEN
 AZCP
 * Copy Parameters
        BL   @COPYP
-* Output Test Name
+* Do comparison test
        CZC  R0,R1
        JEQ  AZCS
 * Report failure
@@ -537,7 +539,7 @@ AEQME  EVEN
 AEQP
 * Copy Parameters
        BL   @COPYP
-* Output Test Name
+* Do comparison test
        C    R0,R1
        JEQ  AEQS
 * Report failure
@@ -561,7 +563,7 @@ ANEQME EVEN
 ANEQP
 * Copy Parameters
        BL   @COPYP
-* Output Test Name
+* Do comparison test
        C    R0,R1
        JNE  ANEQS
 * Report failure
@@ -573,8 +575,8 @@ ANEQS  B    @ONPASS
 
 * Assert Words Logical Low
 * --------------------------
-* Passes assert if contents of 'actual'
-* is unsigned less than 'expected'.
+* Passes assert if contents of 'expected'
+* is unsigned less than 'actual'.
 AL     DATA WORKSP,ALP
 ALM    TEXT 'Expected '
 ALM1   BSS   >4
@@ -585,7 +587,7 @@ ALME   EVEN
 ALP
 * Copy Parameters
        BL   @COPYP
-* Output Test Name
+* Do comparison test
        C    R0,R1
        JL   ALS
 * Report failure
@@ -594,6 +596,30 @@ ALP
        DATA ALM,ALME-ALM
 * Report success
 ALS    B    @ONPASS
+
+* Assert Word Logical High
+* --------------------------
+* Passes assert if contents of 'expected'
+* is unsigned greater than 'actual'.
+AH     DATA WORKSP,AHP
+AHM    TEXT 'Expected '
+AHM1   BSS  >4
+       TEXT ' to be unsigned greater than '
+AHM2   BSS  >4
+       TEXT '.'
+AHME   EVEN
+AHP
+* Copy Parameters
+       BL   @COPYP
+* Do comparison test
+       C    R0,R1
+       JH   AHS
+* Report failure
+       BL   @ONFAIL
+       DATA AHM1,AHM2
+       DATA AHM,AHME-AHM
+* Report success
+AHS    B    @ONPASS
 
 * Routines shared by assert
 * routines.
@@ -608,6 +634,7 @@ COPYP  LI   R12,STACK
        RT
 
 * Report Failure
+* ----------------------
 * R0: Expected Value
 * R1: Actual Value
 * Memory Addresses after BL command
@@ -649,6 +676,7 @@ RF1A   MOVB *R14+,R1
 
 *
 * On Success
+* ----------------------
 ONPASS
 * Skip past the assertion mesage
        MOV  R14,R0

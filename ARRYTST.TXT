@@ -1,5 +1,6 @@
        DEF  TSTLST,RSLTFL
-       REF  AEQ,ABLCK
+*
+       REF  AEQ,ABLCK,AL
 *
        REF  ARYALC,ARYADD,ARYINS,ARYDEL
        REF  ARYADR
@@ -24,8 +25,12 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA ADD2
        TEXT 'ADD2  '
 * Add element to 4-byte elem array
+       DATA ADD3
+       TEXT 'ADD3  '
 * Add element, mem-block grows
 *    without moving
+       DATA ADD4
+       TEXT 'ADD4  '
 * Add element, mem-block grows and moves
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
@@ -181,6 +186,13 @@ ADD1
        BYTE 0
        EVEN
 *
+       LI   R0,>8028
+       MOV  @ADD1X,R1
+       BLWP @AEQ
+       TEXT 'Memory block should not grown.'
+       BYTE 0
+       EVEN
+*
        LI   R0,ADD1X+6
        MOV  R10,R1
        BLWP @AEQ
@@ -196,12 +208,12 @@ ADD1Y  DATA >8008
        BSS  >06
 ADD1X  
 * Array's block header
-       DATA >8020
+       DATA >8028
 * Array header
        DATA >0000,>0003
        BSS  >1A
        DATA >0010
-       BSS  >E
+       BSS  >16
 ADD1Z
 
 *
@@ -226,12 +238,19 @@ ADD2
        BYTE 0
        EVEN
 *
+       LI   R0,>8020
+       MOV  @ADD2Y,R1
+       BLWP @AEQ
+       TEXT 'Memory block should not grown.'
+       BYTE 0
+       EVEN
+*
        LI   R0,ADD2Y+2+4+6
        MOV  R10,R1
        BLWP @AEQ
        TEXT 'Array should have four elements '
-	   TEXT 'but the contents of the new element '
-	   TEXT 'are non-deterministic.'
+       TEXT 'but the contents of the new element '
+       TEXT 'are non-deterministic.'
        BYTE 0
        EVEN
 *
@@ -243,7 +262,7 @@ ADD2
 * contents of the new element.
 ADD2A
        DATA >0004,>0001
-	   DATA >0101,>0202,>0303
+       DATA >0101,>0202,>0303
 ADD2B
 * Initial buffer space
 ADD2Y  
@@ -252,10 +271,144 @@ ADD2Y
 * Array header
        DATA >0003,>0001
 * The 3 elements in the array
-	   DATA >0101,>0202,>0303
+       DATA >0101,>0202,>0303
        BSS  >14
        DATA >0010
        BSS  >E
 ADD2Z
+
+*
+* Add an element to an array with
+* 4-byte elements.
+ADD3
+* Arrange
+       LI   R0,ADD3Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD3X+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10       
+* Assert
+       LI   R0,ADD3X+2
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD3X+2+4+8
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Location of new element should '
+       TEXT 'follow last previous element.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8020
+       MOV  @ADD3X,R1
+       BLWP @AEQ
+       TEXT 'Memory block should not grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD3A
+       LI   R1,ADD3X+2
+       LI   R2,>0C
+       BLWP @ABLCK
+       TEXT 'Array should now have three '
+       TEXT 'elements, and the first two '
+       TEXT 'elements should not change.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents after adding
+* an element.
+ADD3A  DATA >0003,>0002
+       DATA >3003,>0330,>2002,>0220
+ADD3B
+* Initial buffer contents
+ADD3Y  DATA >0004
+       BSS  >2
+ADD3X  DATA >8020
+* Array header
+       DATA >0002,>0002
+* Array contents
+       DATA >3003,>0330,>2002,>0220
+* Unused contents of the same block
+       BSS  >12
+*
+       DATA >0010
+ADD3Z
+
+*
+* Add an element. Grow the memory block.
+ADD4
+* Arrange
+       LI   R0,ADD4Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD4Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD4X+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10 
+* Assert
+       LI   R0,ADD4X+2
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD4X+2+4+24
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Location of new element should '
+       TEXT 'follow last previous element.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+ADD4W-ADD4X
+       MOV  @ADD4X,R1
+       BLWP @AL
+       TEXT 'Memory block should have grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD4A
+       LI   R1,ADD4X+2
+       LI   R2,ADD4B-ADD4A
+       BLWP @ABLCK
+       TEXT 'Array should now have four '
+       TEXT 'elements, and the first three '
+       TEXT 'elements should not change.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents after adding
+*    an element
+ADD4A  DATA >0004,>0003
+       DATA >1111,>0101,>1001,>0110
+       DATA >2222,>0202,>2002,>0220
+       DATA >3333,>0303,>3003,>0330
+ADD4B
+* Initial buffer contents
+ADD4Y  DATA >0010
+       BSS  >0E
+ADD4X  DATA >8000+ADD4W-ADD4X
+       DATA >0003,>0003
+       DATA >1111,>0101,>1001,>0110
+       DATA >2222,>0202,>2002,>0220
+       DATA >3333,>0303,>3003,>0330
+       BSS  >4
+ADD4W  DATA >0040
+       BSS  >3E
+ADD4Z
 
        END
