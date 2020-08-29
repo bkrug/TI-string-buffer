@@ -1,6 +1,6 @@
        DEF  TSTLST,RSLTFL
 *
-       REF  AEQ,ABLCK,AL
+       REF  AEQ,ANEQ,ABLCK,AL
 *
        REF  ARYALC,ARYADD,ARYINS,ARYDEL
        REF  ARYADR
@@ -36,6 +36,11 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA ADD5
        TEXT 'ADD5  '
 * Add element, mem-block grows and moves
+       DATA ADD6
+       TEXT 'ADD6  '
+* Add element, mem-block grows and moves
+       DATA ADD7
+       TEXT 'ADD7  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -350,6 +355,7 @@ ADD3Z
 
 *
 * Add an element. Grow the memory block.
+* Block will not move.
 ADD4
 * Arrange
        LI   R0,ADD4Y
@@ -417,6 +423,7 @@ ADD4Z
 
 *
 * Add an element. Grow the memory block.
+* Block will not move.
 ADD5
 * Arrange
        LI   R0,ADD5Y
@@ -451,12 +458,12 @@ ADD5
        BYTE 0
        EVEN
 *
-       LI   R0,ADD4A
-       LI   R1,ADD4X+2
-       LI   R2,ADD4B-ADD4A
+       LI   R0,ADD5A
+       LI   R1,ADD5X+2
+       LI   R2,ADD5B-ADD5A
        BLWP @ABLCK
-       TEXT 'Array should now have four '
-       TEXT 'elements, and the first three '
+       TEXT 'Array should now have six '
+       TEXT 'elements, and the first five '
        TEXT 'elements should not change.'
        BYTE 0
        EVEN
@@ -472,9 +479,9 @@ ADD5B
 * Initial buffer contents
 ADD5Y  DATA >0008
        BSS  >06
-	   DATA >8008
-	   BSS  >06
-ADD5X  DATA >8000+ADD4W-ADD4X
+       DATA >8008
+       BSS  >06
+ADD5X  DATA >8000+ADD5W-ADD5X
 * Array header
        DATA >0005,>0001
 * Array elements (2-bytes each)
@@ -482,8 +489,168 @@ ADD5X  DATA >8000+ADD4W-ADD4X
        DATA >5555
 ADD5W  DATA >0020
        BSS  >1E
-	   DATA >8010
-	   BSS  >1E
+       DATA >8010
+       BSS  >0E
 ADD5Z
+
+*
+* Add an element. Grow the memory block.
+* Memory block will move.
+ADD6
+* Arrange
+       LI   R0,ADD6Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD6Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD6Y+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10 
+* Assert
+       LI   R0,>FFFF
+       MOV  R9,R1
+       BLWP @ANEQ
+       TEXT 'Array have been allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD6Y+2
+       MOV  R9,R1
+       BLWP @ANEQ
+       TEXT 'Array should have moved.'
+       BYTE 0
+       EVEN
+*
+       MOV  R9,R0
+       AI   R0,4+12
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Location of new element should '
+       TEXT 'follow last previous element.'
+       TEXT 'That should be 4 + 4*3 bytes '
+       TEXT 'from the array header.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+ADD6X-ADD6Y
+       MOV  R9,R1
+       DECT R1
+       MOV  *R1,R1
+       BLWP @AL
+       TEXT 'Memory block should have grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD6A
+       MOV  R9,R1
+       LI   R2,ADD6B-ADD6A
+       BLWP @ABLCK
+       TEXT 'Array should now have four '
+       TEXT 'elements, and the first three '
+       TEXT 'elements should not change.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents after adding
+*    an element
+ADD6A
+       DATA >0004,>0002
+       DATA >1111,>1000,>2222,>2000
+       DATA >3333,>3000
+ADD6B
+* Initial buffer contents
+ADD6Y  DATA >8000+ADD6X-ADD6Y
+* Array header
+       DATA >0003,>0002
+* Array elements (4-bytes each)
+       DATA >1111,>1000,>2222,>2000
+       DATA >3333,>3000
+ADD6X  DATA >8010
+       BSS  >0E
+       DATA >0050
+       BSS  >4E
+ADD6Z
+
+*
+* Add an element. Grow the memory block.
+* Memory block will move.
+ADD7
+* Arrange
+       LI   R0,ADD7Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD7Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD7Y+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10 
+* Assert
+       LI   R0,>FFFF
+       MOV  R9,R1
+       BLWP @ANEQ
+       TEXT 'Array have been allocated.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD7Y+2
+       MOV  R9,R1
+       BLWP @ANEQ
+       TEXT 'Array should have moved.'
+       BYTE 0
+       EVEN
+*
+       MOV  R9,R0
+       AI   R0,4+8
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Location of new element should '
+       TEXT 'follow last previous element.'
+       TEXT 'That should be 4 + 1*8 bytes '
+       TEXT 'from the array header.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+ADD7X-ADD7Y
+       MOV  R9,R1
+       DECT R1
+       MOV  *R1,R1
+       BLWP @AL
+       TEXT 'Memory block should have grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,ADD7A
+       MOV  R9,R1
+       LI   R2,ADD7B-ADD7A
+       BLWP @ABLCK
+       TEXT 'Array should now have four '
+       TEXT 'elements, and the first three '
+       TEXT 'elements should not change.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected array contents after adding
+*    an element
+ADD7A
+       DATA >0002,>0003
+       DATA >1111,>1000,>0001,>1001
+ADD7B
+* Initial buffer contents
+ADD7Y  DATA >8000+ADD7X-ADD7Y
+* Array header
+       DATA >0001,>0003
+* Array elements (8-bytes each)
+       DATA >1111,>1000,>0001,>1001
+ADD7X  DATA >0006
+       BSS  >04
+       DATA >8008
+       BSS  >06
+       DATA >0050
+       BSS  >4E
+ADD7Z
 
        END
