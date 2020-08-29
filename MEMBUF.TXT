@@ -150,6 +150,10 @@ BUFALC DATA STRWS,BUFALC+4
 * Output:
 * R0 - the new address of assigned space
 *    - >FFFF implies an error
+* R1
+* R3
+* R4
+* R12
 ALCRTN
 * Round R0 up to an even number.
        INC  R0
@@ -239,15 +243,12 @@ BUFREE DATA STRWS,BUFREE+4
 * R3 - Address of a free chunk
 *
 * Output:
-* R1 - address of end of buffer
 * R3 - (unchanged)
 * R4 - new size of chunk
 * R5 - next full chunk
 TRYMRG
 * Store the address of first chunk.
        MOV  R3,R5
-* Get end of buffer
-       MOV  @BUFEND,R1
 * Initially add 0 to R5's contents so we
 * can ensure that the first chunk is
 * really free.
@@ -256,7 +257,7 @@ TRYMRG
 * next block. Find the some of the
 * offsets of consecutive free blocks.
 TMRG1  A    R4,R5
-       C    R5,R1
+       C    R5,@BUFEND
        JHE  TMGR2
        MOV  *R5,R4
        CZC  @BLKUSE,R4

@@ -1135,6 +1135,7 @@ TSRK3C DATA >8010
        DATA >0E
 TSRK3Z
 
+*
 * Shrink and merge following free block.
 TSRK4
 * Arrange
@@ -1597,6 +1598,9 @@ TGRW6F DATA >8008
        BSS  >06	   
 TGRW6Z
 
+*
+* Grow and move a block, and merge some
+*    free spaces.
 TGRW7
 * Arrange
        LI   R0,TGRW7A
