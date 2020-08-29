@@ -41,6 +41,9 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Add element, mem-block grows and moves
        DATA ADD7
        TEXT 'ADD7  '
+* Receive an error when adding element
+       DATA ADD8
+       TEXT 'ADD8  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -576,6 +579,9 @@ ADD6Z
 *
 * Add an element. Grow the memory block.
 * Memory block will move.
+* In this case, there is a small free
+* block following array, but it's too
+* small.
 ADD7
 * Arrange
        LI   R0,ADD7Y
@@ -652,5 +658,47 @@ ADD7X  DATA >0006
        DATA >0050
        BSS  >4E
 ADD7Z
+
+*
+* Receive an error when attempting to
+* add an element.
+ADD8
+* Arrange
+       LI   R0,ADD8Y
+       MOV  R0,@BUFADR
+       LI   R0,ADD8Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,ADD8X+2
+       BLWP @ARYADD
+       MOV  R0,R9
+       MOV  R1,R10 
+* Assert
+       LI   R0,>FFFF
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'There should not be enough '
+	   TEXT 'memory to re-allocate the '
+	   TEXT 'array.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Initial buffer contents
+ADD8Y  DATA >8008
+       BSS  >6
+ADD8X  DATA >800E
+* Array header
+       DATA >0001,>0003
+* Array elements (8-bytes each)
+       DATA >1111,>1000,>0001,>1001
+       DATA >0006
+       BSS  >04
+       DATA >8008
+       BSS  >06
+       DATA >8020
+       BSS  >1E
+ADD8Z
+
 
        END
