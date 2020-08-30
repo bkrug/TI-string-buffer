@@ -44,6 +44,18 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Receive an error when adding element
        DATA ADD8
        TEXT 'ADD8  '
+* Insert an element at the beginning of
+*   an array
+       DATA INS1
+       TEXT 'INS1  '
+* Insert an element at the middle of
+*   an array
+       DATA INS2
+       TEXT 'INS2  '
+* Insert an element at the end of
+*   an array
+       DATA INS3
+       TEXT 'INS3  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -700,5 +712,212 @@ ADD8X  DATA >800E
        BSS  >1E
 ADD8Z
 
+*
+* Insert an element at the beginning of
+*   an array
+INS1
+* Arrange
+       LI   R0,INS1Y
+       MOV  R0,@BUFADR
+       LI   R0,INS1Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS1X+2
+       LI   R1,0
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,INS1X+2
+	   MOV  R9,R1
+	   BLWP @AEQ
+	   TEXT 'Array should not have moved.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,INS1X+2+4
+	   MOV  R10,R1
+	   BLWP @AEQ
+	   TEXT 'Element address should be '
+	   TEXT 'directly after the array header.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8000+INS1W-INS1X
+	   MOV  @INS1X,R1
+	   BLWP @AEQ
+	   TEXT 'Block size should not have '
+	   TEXT 'changed.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,INS1A
+	   LI   R1,INS1X+2
+	   LI   R2,INS1B-INS1A
+	   BLWP @ABLCK
+	   TEXT 'Array should have one more '
+	   TEXT 'element. The elements should have '
+	   TEXT 'been copied backwards to insert '
+	   TEXT 'one more 2-byte element.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Expected Array Contents
+INS1A  DATA >0003,>0001
+       DATA >0220,>0220,>0330
+INS1B
+* Initial Buffer Contents
+INS1Y  DATA >8008
+       BSS  >6
+INS1X  DATA >8000+INS1W-INS1X
+	   DATA >0002,>0001
+	   DATA >0220,>0330
+       BSS  >8
+INS1W  DATA >0040
+       BSS  >3E
+INS1Z
+
+*
+* Insert an element at the middle of
+*   an array
+INS2
+* Arrange
+       LI   R0,INS2Y
+       MOV  R0,@BUFADR
+       LI   R0,INS2Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS2X+2
+       LI   R1,2
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,INS2X+2
+	   MOV  R9,R1
+	   BLWP @AEQ
+	   TEXT 'Array should not have moved.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,INS2X+2+4+8
+	   MOV  R10,R1
+	   BLWP @AEQ
+	   TEXT 'Element address should be '
+	   TEXT 'directly after the second '
+	   TEXT 'element.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8000+INS2W-INS2X
+	   MOV  @INS2X,R1
+	   BLWP @AEQ
+	   TEXT 'Block size should not have '
+	   TEXT 'changed.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,INS2A
+	   LI   R1,INS2X+2
+	   LI   R2,INS2B-INS2A
+	   BLWP @ABLCK
+	   TEXT 'Array should have one more '
+	   TEXT 'element. The elements should have '
+	   TEXT 'been copied backwards to insert '
+	   TEXT 'one more 4-byte element.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Expected Array Contents
+INS2A
+	   DATA >0005,>0002
+	   DATA >1001,>1110,>2002,>2220
+	   DATA >4004,>4440
+	   DATA >4004,>4440,>5005,>5550
+INS2B
+* Initial Buffer Contents
+INS2Y  DATA >0008
+       BSS  >6
+	   DATA >8010
+	   BSS  >0E
+INS2X  DATA >8000+INS2W-INS2X
+	   DATA >0004,>0002
+	   DATA >1001,>1110,>2002,>2220
+	   DATA >4004,>4440,>5005,>5550
+       BSS  >8
+INS2W  DATA >0040
+       BSS  >3E
+INS2Z
+
+*
+* Insert an element at the end of
+*   an array
+INS3
+* Arrange
+       LI   R0,INS3Y
+       MOV  R0,@BUFADR
+       LI   R0,INS3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS3X+2
+       LI   R1,2
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,INS3X+2
+	   MOV  R9,R1
+	   BLWP @AEQ
+	   TEXT 'Array should not have moved.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,INS3X+2+4+16
+	   MOV  R10,R1
+	   BLWP @AEQ
+	   TEXT 'Element address should be '
+	   TEXT 'at the end of the array.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,>8000+INS3W-INS3X
+	   MOV  @INS3X,R1
+	   BLWP @AEQ
+	   TEXT 'Block size should not have '
+	   TEXT 'changed.'
+	   BYTE 0
+	   EVEN
+*
+       LI   R0,INS3A
+	   LI   R1,INS3X+2
+	   LI   R2,INS3B-INS3A
+	   BLWP @ABLCK
+	   TEXT 'Array should have one more '
+	   TEXT 'element.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Expected Array Contents
+INS3A
+	   DATA >0003,>0003
+	   DATA >1001,>1110,>0111,>0110
+	   DATA >2002,>2220,>0222,>0220
+INS3B
+* Initial Buffer Contents
+INS3Y  DATA >0008
+       BSS  >6
+INS3X  DATA >8000+INS3W-INS3X
+	   DATA >0002,>0003
+	   DATA >1001,>1110,>0111,>0110
+	   DATA >2002,>2220,>0222,>0220
+       BSS  >10
+INS3W  DATA >0040
+       BSS  >3E
+	   DATA >8010
+	   BSS  >0E
+INS3Z
 
        END
