@@ -89,6 +89,9 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Delete element and shrink block
        DATA DEL5
        TEXT 'DEL5  '
+* Out-of-range error when deleting
+       DATA DEL6
+       TEXT 'DEL6  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1553,5 +1556,40 @@ DEL5X  DATA >8000+DEL5W-DEL5X
 DEL5W  DATA 8018
        BSS  >16
 DEL5Z
+
+*
+* Out-of-range when deleting element
+DEL6
+* Arrange
+       LI   R0,DEL6Y
+       MOV  R0,@BUFADR
+       LI   R0,DEL6Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,DEL6X+2
+       LI   R1,10
+       BLWP @ARYDEL
+* Assert
+       MOV  R0,R1
+       LI   R0,>FFFE
+       BLWP @AEQ
+       TEXT 'Should have an out-of-range error.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Initial Buffer Contents
+DEL6Y  DATA >8010
+       BSS  >0E
+DEL6X  DATA >8000+DEL6W-DEL6X
+       DATA >0004,>0002
+       DATA >1011,>1001
+       DATA >2022,>2002
+       DATA >3033,>3003
+       DATA >4044,>4004
+       BSS  >20
+DEL6W  DATA 8018
+       BSS  >16
+DEL6Z
 
        END
