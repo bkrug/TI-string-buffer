@@ -92,6 +92,9 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Out-of-range error when deleting
        DATA DEL6
        TEXT 'DEL6  '
+* Get address of an array element
+	   DATA ADR1
+	   TEXT 'ADR1  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1588,8 +1591,48 @@ DEL6X  DATA >8000+DEL6W-DEL6X
        DATA >3033,>3003
        DATA >4044,>4004
        BSS  >20
-DEL6W  DATA 8018
+DEL6W  DATA >8018
        BSS  >16
 DEL6Z
+
+*
+* Get address of an array element
+ADR1
+* Arrange
+       LI   R0,ADR1Y
+	   MOV  R0,@BUFADR
+	   LI   R1,ADR1Z
+	   MOV  R1,@BUFEND
+* Act
+* Outputs element address to R1
+       LI   R0,ADR1X
+	   LI   R1,3
+	   BLWP @ARYADR
+* Assert
+* Actual value is already in R1
+	   LI   R0,ADR1W
+	   BLWP @AEQ
+	   TEXT 'Should get the address of the '
+	   TEXT 'element at index 3. It contains '
+	   TEXT 'the number 4 over and over.'
+	   BYTE 0
+	   EVEN
+*
+       RT
+* Initial buffer contents
+ADR1Y  DATA >8020
+       BSS  >1E
+	   DATA >0004
+	   BSS  >02
+       DATA >8000+ADR1W-ADR1X
+ADR1X  DATA >0004,>0003
+	   DATA >1111,>1111,>1111,>1111
+	   DATA >2222,>2222,>2222,>2222
+	   DATA >3333,>3333,>3333,>3333
+ADR1W  DATA >4444,>4444,>4444,>4444
+	   DATA >5555,>5555,>5555,>5555
+       DATA >800A
+       BSS  >08
+ADR1Z
 
        END
