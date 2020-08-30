@@ -70,6 +70,10 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * An error occurs growing array.
        DATA INS7
        TEXT 'INS7  '
+* An error occurs because index is
+*    out-of-range
+       DATA INS8
+       TEXT 'INS8  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1161,7 +1165,8 @@ INS6W  DATA >0004
 INS6Z
 
 *
-* An error occurs in insertion.
+* An error occurs due to a lack of
+*   free space.
 INS7
 * Arrange
        LI   R0,INS7Y
@@ -1197,5 +1202,43 @@ INS7W  DATA >0004
        DATA >8004
        BSS  >2
 INS7Z
+
+*
+* An error occurs because the index
+*   is out of range
+INS8
+* Arrange
+       LI   R0,INS8Y
+       MOV  R0,@BUFADR
+       LI   R0,INS8Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS8X+2
+       LI   R1,4
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,>FFFE
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'There are only three elements. '
+	   TEXT 'It is not possible to insert at '
+	   TEXT 'index 4.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Initial Buffer Contents
+INS8Y  DATA >8018
+       BSS  >16
+INS8X  DATA >8000+INS8W-INS8X
+       DATA >0003,>0002
+       DATA >1001,>1110
+       DATA >2002,>2220
+       DATA >3003,>3330
+       BSS  >20
+INS8W  
+INS8Z
 
        END

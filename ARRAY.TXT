@@ -68,7 +68,7 @@ ALC2   SETO *R13
 ARYADD DATA ARRYWS,ARYADD+4
 * Let R3 = Insert index
        MOV  *R13,R3
-	   MOV  *R3,R3
+      MOV  *R3,R3
 * Use Insert Routine except that insert
 * index does not come from the caller.
        B    @INSERT
@@ -85,24 +85,28 @@ ARYADD DATA ARRYWS,ARYADD+4
 * R1 - address of new item
 ARYINS DATA ARRYWS,ARYINS+4
        MOV  @2(13),R3
-INSERT BL   @ADRSIZ
+INSERT
+* Let R0 = element exponent size
+* Let R10 = array address
+       BL   @ADRSIZ
+* Check for out-of-range index.
+       C    R3,*R10
+       JH   INSERR
+*
        BL   @REALC
        BL   @CPYBCK
-*
-* Put address of new element in the
-* array in caller's R1
-*
+* Let caller's R1 = address of new
+*   element
 INS1   MOV  R0,@2(13)
-*
 * Increase length of array
-*
        INC  *R10
-*
-* Put array address in caller's R0
-*
+* Let caller's R0 = new address of array
        MOV  R10,*R13
        RTWP
-
+* Report out-of-range error
+INSERR LI   R8,>FFFE
+       MOV  R8,*R13
+       RTWP
 
 *
 * Remove element from the array.
