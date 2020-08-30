@@ -121,6 +121,9 @@ ARYDEL DATA ARRYWS,ARYDEL+4
 *
        BL   @ADRSIZ
        MOV  R0,R9
+* Check for out-of-range index.
+       C    @2(13),*R10
+       JH   INSERR
 * ---- Main delete function ----
 * Get address directly after array.
        MOV  *R10,R2
