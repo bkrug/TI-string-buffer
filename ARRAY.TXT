@@ -66,24 +66,12 @@ ALC2   SETO *R13
 *      >FFFF indicates error
 * R1 - address of new item
 ARYADD DATA ARRYWS,ARYADD+4
-*
-       BL   @ADRSIZ
-       BL   @REALC
-* Restore item size to R0 if necessary.
-       MOV  R9,R0
-* Put address of soon-to-be last element
-* in the array in caller's R1
-       MOV  *R10,R8
-       SLA  R8,0
-       A    R10,R8
-       C    *R8+,*R8+
-       MOV  R8,@2(13)
-* Increase length of array
-       INC  *R10
-* Put array address in caller's R0
-ADDRT  MOV  R10,*R13
-       RTWP
-
+* Let R3 = Insert index
+       MOV  *R13,R3
+	   MOV  *R3,R3
+* Use Insert Routine except that insert
+* index does not come from the caller.
+       B    @INSERT
 
 *
 * Insert element into the array.
@@ -96,7 +84,8 @@ ADDRT  MOV  R10,*R13
 *      >FFFF indicates error
 * R1 - address of new item
 ARYINS DATA ARRYWS,ARYINS+4
-       BL   @ADRSIZ
+       MOV  @2(13),R3
+INSERT BL   @ADRSIZ
        BL   @REALC
        BL   @CPYBCK
 *
@@ -245,6 +234,7 @@ RTERR  RTWP
 * The insertion algorithm needs this.
 *
 * Input:
+*  R3 - index at witch to insert
 *  R9 - exponent for item size
 *  R10 - address of array
 *  R13 - caller's workspace
@@ -264,7 +254,6 @@ CPYBCK
        SLA  R1,0
 * Let R0 = offset of insert element
 * from array start
-       MOV  @2(13),R3
        SLA  R3,0
        C    *R3+,*R3+
        MOV  R3,R0
