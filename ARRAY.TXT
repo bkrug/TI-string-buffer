@@ -152,9 +152,7 @@ ARYDEL DATA ARRYWS,ARYDEL+4
        SLA  R1,0
        C    *R1+,*R1+
 * Let R0 = address of array
-* Let R1 = array size * 2
        MOV  *R13,R0
-       SLA  R1,1
 * Shrink memory allocation if needed
        BLWP @BUFSRK
 *

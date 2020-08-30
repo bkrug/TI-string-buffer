@@ -1,6 +1,6 @@
        DEF  TSTLST,RSLTFL
 *
-       REF  AEQ,ANEQ,ABLCK,AL
+       REF  AEQ,ANEQ,ABLCK,AL,AH
 *
        REF  ARYALC,ARYADD,ARYINS,ARYDEL
        REF  ARYADR
@@ -83,6 +83,12 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Delete element from end
        DATA DEL3
        TEXT 'DEL3  '
+* Delete element and shrink block
+       DATA DEL4
+       TEXT 'DEL4  '
+* Delete element and shrink block
+       DATA DEL5
+       TEXT 'DEL5  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1408,7 +1414,7 @@ DEL3
 DEL3A
        DATA >0003,>0003
        DATA >0110,>1111,>1011,>1001
-	   DATA >0220,>2222,>2022,>2002
+       DATA >0220,>2222,>2022,>2002
        DATA >0330,>3333,>3033,>3003
 DEL3B
 * Initial Buffer Contents
@@ -1419,14 +1425,133 @@ DEL3Y  DATA >8010
 DEL3X  DATA >8000+DEL3W-DEL3X
        DATA >0004,>0003
        DATA >0110,>1111,>1011,>1001
-	   DATA >0220,>2222,>2022,>2002
+       DATA >0220,>2222,>2022,>2002
        DATA >0330,>3333,>3033,>3003
-	   DATA >0440,>4444,>4044,>4004
+       DATA >0440,>4444,>4044,>4004
        BSS  >6
 DEL3W  DATA >8010
        BSS  >0E
        DATA >0010
        BSS  >0E
 DEL3Z
+
+*
+* Delete element and shrink block.
+* It is the last block in the buffer.
+DEL4
+* Arrange
+       LI   R0,DEL4Y
+       MOV  R0,@BUFADR
+       LI   R0,DEL4Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,DEL4X+2
+       LI   R1,1
+       BLWP @ARYDEL
+* Assert
+       MOV  R0,R1
+       LI   R0,DEL4X+2
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+DEL4W-DEL4X
+       MOV  @DEL4X,R1
+       BLWP @AH
+       TEXT 'Block size should have '
+       TEXT 'shrunk.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,DEL4A
+       LI   R1,DEL4X+2
+       LI   R2,DEL4B-DEL4A
+       BLWP @ABLCK
+       TEXT 'Array should have one fewer '
+       TEXT 'elements.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+DEL4A
+       DATA >0002,>0003
+       DATA >0110,>1111,>1011,>1001
+       DATA >0330,>3333,>3033,>3003
+DEL4B
+* Initial Buffer Contents
+DEL4Y  DATA >8010
+       BSS  >0E
+       DATA >0010
+       BSS  >0E
+DEL4X  DATA >8000+DEL4W-DEL4X
+       DATA >0003,>0003
+       DATA >0110,>1111,>1011,>1001
+       DATA >0220,>2222,>2022,>2002
+       DATA >0330,>3333,>3033,>3003
+       BSS  >20
+DEL4W  
+DEL4Z
+
+*
+* Delete element and shrink block.
+* It is followed by an allocated block.
+DEL5
+* Arrange
+       LI   R0,DEL5Y
+       MOV  R0,@BUFADR
+       LI   R0,DEL5Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,DEL5X+2
+       LI   R1,3
+       BLWP @ARYDEL
+* Assert
+       MOV  R0,R1
+       LI   R0,DEL5X+2
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+DEL5W-DEL5X
+       MOV  @DEL5X,R1
+       BLWP @AH
+       TEXT 'Block size should not have '
+       TEXT 'changed.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,DEL5A
+       LI   R1,DEL5X+2
+       LI   R2,DEL5B-DEL5A
+       BLWP @ABLCK
+       TEXT 'Array should have one fewer '
+       TEXT 'elements.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+DEL5A
+       DATA >0003,>0002
+       DATA >1011,>1001
+       DATA >2022,>2002
+       DATA >3033,>3003
+DEL5B
+* Initial Buffer Contents
+DEL5Y  DATA >8010
+       BSS  >0E
+DEL5X  DATA >8000+DEL5W-DEL5X
+       DATA >0004,>0002
+       DATA >1011,>1001
+       DATA >2022,>2002
+       DATA >3033,>3003
+       DATA >4044,>4004
+       BSS  >20
+DEL5W  DATA 8018
+       BSS  >16
+DEL5Z
 
        END
