@@ -59,6 +59,10 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * Grow array without moving it
        DATA INS4
        TEXT 'INS4  '
+* Grow array and move it.
+*   No empty block follows the original.
+       DATA INS5
+       TEXT 'INS5  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -991,5 +995,81 @@ INS4W  DATA >0010
        DATA >0010
        BSS  >0E
 INS4Z
+
+*
+* Insert an element at the middle of
+*   an array
+INS5
+* Arrange
+       LI   R0,INS5Y
+       MOV  R0,@BUFADR
+       LI   R0,INS5Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS5X+2
+       LI   R1,3
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,INS5X+2
+       MOV  R9,R1
+       BLWP @ANEQ
+       TEXT 'Array should have moved.'
+       BYTE 0
+       EVEN
+*
+       MOV  R9,R0
+	   AI   R0,4+12
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Element address should be '
+       TEXT 'directly after the third '
+       TEXT 'element.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+INS5W-INS5X
+       MOV  R9,R1
+	   DECT R1
+	   MOV  *R1,R1
+       BLWP @AL
+       TEXT 'Block size should have '
+       TEXT 'grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,INS5A
+       MOV  R9,R1
+       LI   R2,INS5B-INS5A
+       BLWP @ABLCK
+       TEXT 'Array should have one more '
+       TEXT 'element. The elements should have '
+       TEXT 'been copied backwards to insert '
+       TEXT 'one more 4-byte element.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+INS5A
+       DATA >0005,>0002
+       DATA >1001,>1110,>2002,>2220
+       DATA >3003,>3330,>5005,>5550
+	   DATA >5005,>5550
+INS5B
+* Initial Buffer Contents
+INS5Y  DATA >8018
+       BSS  >16
+INS5X  DATA >8000+INS5W-INS5X
+       DATA >0004,>0002
+       DATA >1001,>1110,>2002,>2220
+       DATA >3003,>3330,>5005,>5550
+       BSS  >2
+INS5W  DATA >8004
+       BSS  >2
+       DATA >0060
+       BSS  >5E
+INS5Z
 
        END
