@@ -63,6 +63,13 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *   No empty block follows the original.
        DATA INS5
        TEXT 'INS5  '
+* Grow array and move it.
+*   An empty block follows the original.
+       DATA INS6
+       TEXT 'INS6  '
+* An error occurs growing array.
+       DATA INS7
+       TEXT 'INS7  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -998,7 +1005,9 @@ INS4Z
 
 *
 * Insert an element at the middle of
-*   an array
+*   an array.
+* Grow array and move it.
+*   No empty block follows the original.
 INS5
 * Arrange
        LI   R0,INS5Y
@@ -1020,7 +1029,7 @@ INS5
        EVEN
 *
        MOV  R9,R0
-	   AI   R0,4+12
+       AI   R0,4+12
        MOV  R10,R1
        BLWP @AEQ
        TEXT 'Element address should be '
@@ -1031,8 +1040,8 @@ INS5
 *
        LI   R0,>8000+INS5W-INS5X
        MOV  R9,R1
-	   DECT R1
-	   MOV  *R1,R1
+       DECT R1
+       MOV  *R1,R1
        BLWP @AL
        TEXT 'Block size should have '
        TEXT 'grown.'
@@ -1056,7 +1065,7 @@ INS5A
        DATA >0005,>0002
        DATA >1001,>1110,>2002,>2220
        DATA >3003,>3330,>5005,>5550
-	   DATA >5005,>5550
+       DATA >5005,>5550
 INS5B
 * Initial Buffer Contents
 INS5Y  DATA >8018
@@ -1071,5 +1080,122 @@ INS5W  DATA >8004
        DATA >0060
        BSS  >5E
 INS5Z
+
+*
+* Insert an element at the end of
+*   an array.
+* Grow array and move it.
+*   A small empty block follows the original.
+INS6
+* Arrange
+       LI   R0,INS6Y
+       MOV  R0,@BUFADR
+       LI   R0,INS6Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS6X+2
+       LI   R1,3
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,INS6X+2
+       MOV  R9,R1
+       BLWP @ANEQ
+       TEXT 'Array should have moved.'
+       BYTE 0
+       EVEN
+*
+       MOV  R9,R0
+       AI   R0,4+24
+       MOV  R10,R1
+       BLWP @AEQ
+       TEXT 'Element address should be '
+       TEXT 'directly after the third '
+       TEXT 'element.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+INS6W-INS6X
+       MOV  R9,R1
+       DECT R1
+       MOV  *R1,R1
+       BLWP @AL
+       TEXT 'Block size should have '
+       TEXT 'grown.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,INS6A
+       MOV  R9,R1
+       LI   R2,INS6B-INS6A
+       BLWP @ABLCK
+       TEXT 'Array should have one more '
+       TEXT 'element.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+INS6A
+       DATA >0004,>0003
+       DATA >1001,>1110,>0110,>0111
+       DATA >2002,>2220,>0220,>0222
+       DATA >3003,>3330,>0330,>0333
+INS6B
+* Initial Buffer Contents
+INS6Y  DATA >8018
+       BSS  >16
+INS6X  DATA >8000+INS6W-INS6X
+       DATA >0003,>0003
+       DATA >1001,>1110,>0110,>0111
+       DATA >2002,>2220,>0220,>0222
+       DATA >3003,>3330,>0330,>0333
+       BSS  >2
+INS6W  DATA >0004
+       BSS  >2
+       DATA >8004
+       BSS  >2
+       DATA >0060
+       BSS  >5E
+INS6Z
+
+*
+* An error occurs in insertion.
+INS7
+* Arrange
+       LI   R0,INS7Y
+       MOV  R0,@BUFADR
+       LI   R0,INS7Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,INS7X+2
+       LI   R1,2
+       BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
+* Assert
+       LI   R0,>FFFF
+       MOV  R9,R1
+       BLWP @AEQ
+       TEXT 'There should be an error.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Initial Buffer Contents
+INS7Y  DATA >8018
+       BSS  >16
+INS7X  DATA >8000+INS7W-INS7X
+       DATA >0003,>0003
+       DATA >1001,>1110,>0110,>0111
+       DATA >2002,>2220,>0220,>0222
+       DATA >3003,>3330,>0330,>0333
+       BSS  >2
+INS7W  DATA >0004
+       BSS  >2
+       DATA >8004
+       BSS  >2
+INS7Z
 
        END
