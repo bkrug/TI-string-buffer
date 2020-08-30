@@ -74,6 +74,15 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *    out-of-range
        DATA INS8
        TEXT 'INS8  '
+* Delete element from beggining
+       DATA DEL1
+       TEXT 'DEL1  '
+* Delete element from middle
+       DATA DEL2
+       TEXT 'DEL2  '
+* Delete element from end
+       DATA DEL3
+       TEXT 'DEL3  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1223,8 +1232,8 @@ INS8
        MOV  R9,R1
        BLWP @AEQ
        TEXT 'There are only three elements. '
-	   TEXT 'It is not possible to insert at '
-	   TEXT 'index 4.'
+       TEXT 'It is not possible to insert at '
+       TEXT 'index 4.'
        BYTE 0
        EVEN
 *
@@ -1240,5 +1249,184 @@ INS8X  DATA >8000+INS8W-INS8X
        BSS  >20
 INS8W  
 INS8Z
+
+*
+* Delete element from the beginning of
+* the array without shrinking the block
+DEL1
+* Arrange
+       LI   R0,DEL1Y
+       MOV  R0,@BUFADR
+       LI   R0,DEL1Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,DEL1X+2
+       LI   R1,0
+       BLWP @ARYDEL
+* Assert
+       MOV  R0,R1
+       LI   R0,DEL1X+2
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+DEL1W-DEL1X
+       MOV  @DEL1X,R1
+       BLWP @AEQ
+       TEXT 'Block size should not have '
+       TEXT 'changed.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,DEL1A
+       LI   R1,DEL1X+2
+       LI   R2,DEL1B-DEL1A
+       BLWP @ABLCK
+       TEXT 'Array should have one fewer '
+       TEXT 'elements.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+DEL1A
+       DATA >0003,>0001
+       DATA >0220,>0330,>0440
+DEL1B
+* Initial Buffer Contents
+DEL1Y  DATA >8008
+       BSS  >6
+DEL1X  DATA >8000+DEL1W-DEL1X
+       DATA >0004,>0001
+       DATA >0110,>0220,>0330,>0440
+       BSS  >2
+DEL1W  DATA >0010
+       BSS  >0E
+DEL1Z
+
+*
+* Delete element from the middle of
+* the array without shrinking the block
+DEL2
+* Arrange
+       LI   R0,DEL2Y
+       MOV  R0,@BUFADR
+       LI   R0,DEL2Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,DEL2X+2
+       LI   R1,2
+       BLWP @ARYDEL
+* Assert
+       MOV  R0,R1
+       LI   R0,DEL2X+2
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+DEL2W-DEL2X
+       MOV  @DEL2X,R1
+       BLWP @AEQ
+       TEXT 'Block size should not have '
+       TEXT 'changed.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,DEL2A
+       LI   R1,DEL2X+2
+       LI   R2,DEL2B-DEL2A
+       BLWP @ABLCK
+       TEXT 'Array should have one fewer '
+       TEXT 'elements.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+DEL2A
+       DATA >0004,>0002
+       DATA >0110,>1111,>0220,>2222
+       DATA >0440,>4444
+       DATA >0550,>5555
+DEL2B
+* Initial Buffer Contents
+DEL2Y  DATA >8010
+       BSS  >0E
+       DATA >0010
+       BSS  >0E
+DEL2X  DATA >8000+DEL2W-DEL2X
+       DATA >0005,>0002
+       DATA >0110,>1111,>0220,>2222
+       DATA >0330,>3333,>0440,>4444
+       DATA >0550,>5555
+       BSS  >4
+DEL2W  
+DEL2Z
+
+*
+* Delete element from the middle of
+* the array without shrinking the block
+DEL3
+* Arrange
+       LI   R0,DEL3Y
+       MOV  R0,@BUFADR
+       LI   R0,DEL3Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,DEL3X+2
+       LI   R1,3
+       BLWP @ARYDEL
+* Assert
+       MOV  R0,R1
+       LI   R0,DEL3X+2
+       BLWP @AEQ
+       TEXT 'Array should not have moved.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8000+DEL3W-DEL3X
+       MOV  @DEL3X,R1
+       BLWP @AEQ
+       TEXT 'Block size should not have '
+       TEXT 'changed.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,DEL3A
+       LI   R1,DEL3X+2
+       LI   R2,DEL3B-DEL3A
+       BLWP @ABLCK
+       TEXT 'Array should have one fewer '
+       TEXT 'elements.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Expected Array Contents
+DEL3A
+       DATA >0003,>0003
+       DATA >0110,>1111,>1011,>1001
+	   DATA >0220,>2222,>2022,>2002
+       DATA >0330,>3333,>3033,>3003
+DEL3B
+* Initial Buffer Contents
+DEL3Y  DATA >8010
+       BSS  >0E
+       DATA >0010
+       BSS  >0E
+DEL3X  DATA >8000+DEL3W-DEL3X
+       DATA >0004,>0003
+       DATA >0110,>1111,>1011,>1001
+	   DATA >0220,>2222,>2022,>2002
+       DATA >0330,>3333,>3033,>3003
+	   DATA >0440,>4444,>4044,>4004
+       BSS  >6
+DEL3W  DATA >8010
+       BSS  >0E
+       DATA >0010
+       BSS  >0E
+DEL3Z
 
        END
