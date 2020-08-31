@@ -155,6 +155,7 @@ BUFALC DATA STRWS,BUFALC+4
 *    - >FFFF implies an error
 * R1
 * R2
+* R9
 * R10
 * R12
 ALCRTN
