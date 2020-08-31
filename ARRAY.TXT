@@ -99,9 +99,8 @@ INSERT
 *   element
 INS1   MOV  R0,@2(13)
 * Increase length of array
+       MOV  *R13,R10
        INC  *R10
-* Let caller's R0 = new address of array
-       MOV  R10,*R13
        RTWP
 * Report out-of-range error
 INSERR LI   R8,>FFFE
@@ -208,7 +207,7 @@ ADRSIZ
 *  R10 - new address of array
 REALC
 * Continue to store item size in R9
-       MOV  R0,R9
+       MOV  R0,R4
 *
 * Get potential size of array after add.
 * Put in R2
@@ -222,6 +221,8 @@ REALC
        MOV  R10,R0
        MOV  R2,R1
        BLWP @BUFGRW
+*
+       MOV  R4,R9
 * Report new address to caller
        MOV  R0,*R13
        MOV  R0,R10
