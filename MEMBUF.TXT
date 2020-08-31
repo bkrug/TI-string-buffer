@@ -89,45 +89,47 @@ ONE    DATA >0001
 * The first byte in the destination
 * will be the data length.
 BUFCPY DATA STRWS,BUFCPY+4
-       MOV  *R13,R0
-       MOV  @2(13),R1
-       MOV  @4(13),R2
+       MOV  *R13,R8
+       MOV  @2(13),R9
+       MOV  @4(13),R10
 *
        BL   @CPYRTN
        RTWP
 
 * Input:
-* R0 - source address.
-* R1 - destination address
-* R2 - size of data to copy.
+* R8 - source address.
+* R9 - destination address
+* R10 - size of data to copy.
 * Output
-* R0-R3
+* R8-R10,R12
 CPYRTN
 * If data length is 0, return
-       MOV  R2,R2
+       MOV  R10,R10
        JEQ  CPYRT
 * Let R12 = size of data to copy
-       MOV  R2,R3
-* Let R2 = end of source range
-       A    R0,R2
+       MOV  R10,R12
+* Let R10 = end of source range
+       A    R8,R10
 * Check if source and destination
 * overlap.
-       C    R0,R1
+       C    R8,R9
        JH   CPYST
-       C    R2,R1
+       C    R10,R9
        JL   CPYST
 * Let R1 = end of destination range
        A    R3,R1
+* Let R9 = end of destination range
+       A    R12,R9
 * Copy from end to start
-CPY1   DEC  R1
-       DEC  R2
-       MOVB *R2,*R1
-       C    R2,R0
+CPY1   DEC  R9
+       DEC  R10
+       MOVB *R10,*R9
+       C    R10,R8
        JH   CPY1
        RT
 * Copy from start to end
-CPYST  MOVB *R0+,*R1+
-       C    R0,R2
+CPYST  MOVB *R8+,*R9+
+       C    R8,R10
        JL   CPYST
 CPYRT  RT
 
@@ -379,10 +381,10 @@ GRWNEW
        MOV  R5,R1
        BL   @TRYMRG
 * Copy data from old block
-       MOV  *R5,R2
-       MOV  R0,R1
-	   MOV  R5,R0
-       INCT R0
+	   MOV  R5,R8
+       INCT R8
+       MOV  R0,R9
+       MOV  *R5,R10
        BL   @CPYRTN
 *
 GRWRT  RTWP
