@@ -57,6 +57,9 @@ TSTLST DATA TSTEND-TSTLST-2/8
 * No unallocated space is large enough.
        DATA TALC7
        TEXT 'TALC7 '
+* Allocate odd number of bytes
+       DATA TALC8
+       TEXT 'TALC8 '
 * Deallocate only allocated space
        DATA TFRE1
        TEXT 'TFRE1 '
@@ -704,6 +707,44 @@ TALC7A DATA >8016
        DATA >801C
        BSS  >1A
 TALC7B
+
+* Allocate an odd number of bytes
+TALC8
+* Arrange
+       LI   R0,TALC8A
+       MOV  R0,@BUFADR
+       LI   R0,TALC8B
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,>5
+       BLWP @BUFALC
+* Assert
+       MOV  R0,R1
+       LI   R1,TALC8C+2
+       BLWP @AEQ
+       TEXT 'Address of allocation should '
+       TEXT 'be in R0.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,>8008
+       MOV  @TALC8C,R1
+       BLWP @AEQ
+       TEXT 'Allocated space should have been '
+       TEXT 'rounded up to an even number, '
+       TEXT 'plus 2 more bytes for header.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Buffer prior to action
+TALC8A DATA >8016
+       BSS  >14
+TALC8C DATA >0010
+       BSS  >0E
+       DATA >801C
+       BSS  >1A
+TALC8B
 
 *
 * Only one block of space is allocated.
