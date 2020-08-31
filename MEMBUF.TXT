@@ -116,8 +116,6 @@ CPYRTN
        JH   CPYST
        C    R10,R9
        JL   CPYST
-* Let R1 = end of destination range
-       A    R3,R1
 * Let R9 = end of destination range
        A    R12,R9
 * Copy from end to start
@@ -286,31 +284,31 @@ TMRG3  RT
 * R0 - address inside of buffer
 * R1 - required space
 BUFSRK DATA STRWS,BUFSRK+4
-* Let R0 = address of block
-* Let R1 = required space * 2 + 2
-       MOV  *R13,R0
-       DECT R0
-       MOV  @2(13),R1
-       SLA  R1,1
-       INCT R1
-* Let R2 = current block size
-       MOV  *R0,R2
-       SZC  @BLKUSE,R2
+* Let R8 = address of block
+* Let R9 = required space * 2 + 2
+       MOV  *R13,R8
+       DECT R8
+       MOV  @2(13),R9
+       SLA  R9,1
+       INCT R9
+* Let R10 = current block size
+       MOV  *R8,R10
+       SZC  @BLKUSE,R10
 * Check if too big
-       C    R2,R1
+       C    R10,R9
        JLE  LESRT
 * Mark block header with less space
-* Let R2 = spare space
-       S    R1,R2
-       SOC  @BLKUSE,R1
-       MOV  R1,*R0
+* Let R10 = spare space
+       S    R9,R10
+       SOC  @BLKUSE,R9
+       MOV  R9,*R8
 * Create a new empty block header
-       SZC  @BLKUSE,R1
-       A    R1,R0
-       MOV  R2,*R0
+       SZC  @BLKUSE,R9
+       A    R9,R8
+       MOV  R10,*R8
 * Merge new free block with later free
 * blocks.
-       MOV  R0,R1
+       MOV  R8,R1
        BL   @TRYMRG
 *
 LESRT  RTWP
@@ -344,8 +342,8 @@ BUFGRW DATA STRWS,BUFGRW+4
        MOV  R8,R11
        A    R10,R11
 * Confirm that next block is free
-       MOV  *R2,R1
-       COC  @BLKUSE,R1
+       MOV  *R11,R12
+       COC  @BLKUSE,R12
        JEQ  GRWNEW
 * Let R12 = total size of both blocks
        A    R10,R12
