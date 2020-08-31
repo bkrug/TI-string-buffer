@@ -46,26 +46,26 @@ BLKUSE DATA >8000
 *
 BUFINT DATA STRWS,BUFINT+4
 * Get routine parameters
-       MOV  *R13,R0
-       MOV  @2(13),R1
-       MOV  R0,@BUFADR
+       MOV  *R13,R8
+       MOV  @2(13),R9
+       MOV  R8,@BUFADR
 * Return error if buffer size is less
 * than or equal to 4
-       CI   R1,4
+       CI   R9,4
        JLE  INTEND
 * Return error if buffer size is greater
 * than or equal to >8000
-       MOV  R1,R1
+       MOV  R9,R9
        JLT  INTEND
 * Return error if buffer size is odd.
-       COC  @ONE,R1
+       COC  @ONE,R9
        JEQ  INTEND       
 * Record empty chunk covering whole
 * space.
-       MOV  R1,*R0
+       MOV  R9,*R8
 * Record address of end of buffer.
-       A    R1,R0
-       MOV  R0,@BUFEND
+       A    R9,R8
+       MOV  R8,@BUFEND
 * Report success.
        CLR  *R13
        RTWP
