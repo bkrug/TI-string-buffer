@@ -52,17 +52,17 @@ BUFINT DATA STRWS,BUFINT+4
 * Return error if buffer size is less
 * than or equal to 4
        CI   R1,4
-       JLE  ALC2
+       JLE  INTEND
 * Return error if buffer size is greater
 * than or equal to >8000
        MOV  R1,R1
-       JLT  ALC2
+       JLT  INTEND
 * Return error if buffer size is odd.
        COC  @ONE,R1
-       JEQ  ALC2       
+       JEQ  INTEND       
 * Record empty chunk covering whole
 * space.
-ALC1   MOV  R1,*R0
+       MOV  R1,*R0
 * Record address of end of buffer.
        A    R1,R0
        MOV  R0,@BUFEND
@@ -70,7 +70,7 @@ ALC1   MOV  R1,*R0
        CLR  *R13
        RTWP
 * Report error.
-ALC2   SETO *R13
+INTEND SETO *R13
        RTWP
 ONE    DATA >0001
  
@@ -101,13 +101,13 @@ BUFCPY DATA STRWS,BUFCPY+4
 * R1 - destination address
 * R2 - size of data to copy.
 * Output
-* R0-R2,R12
+* R0-R3
 CPYRTN
 * If data length is 0, return
        MOV  R2,R2
        JEQ  CPYRT
 * Let R12 = size of data to copy
-       MOV  R2,R12
+       MOV  R2,R3
 * Let R2 = end of source range
        A    R0,R2
 * Check if source and destination
@@ -117,7 +117,7 @@ CPYRTN
        C    R2,R1
        JL   CPYST
 * Let R1 = end of destination range
-       A    R12,R1
+       A    R3,R1
 * Copy from end to start
 CPY1   DEC  R1
        DEC  R2
@@ -171,27 +171,27 @@ ALCRTN
 * Find a free chunk of that size or 
 * greater.
        MOV  @BUFADR,R1
-SET1   MOV  *R1,R2
+ALC1   MOV  *R1,R2
        CZC  @BLKUSE,R2
-       JEQ  SET2
+       JEQ  ALC3
        SZC  @BLKUSE,R2
-SET3   A    R2,R1
+ALC2   A    R2,R1
        C    R1,@BUFEND
-       JL   SET1
+       JL   ALC1
 * We passed out of the buffer.
 * Report an error in caller's R0.
        SETO R0
        RT
 * Chunk is free, but is it large enough?
 * First try to merge other free chunks.
-SET2   MOV  R11,R12
+ALC3   MOV  R11,R12
        BL   @TRYMRG
        MOV  R12,R11
 * If required space is still larger than
 * the size of merged chunk, continue
 * loop.
        C    R0,R3
-       JH   SET3
+       JH   ALC2
 * This chunk at R1 is large enough.
 * Save a copy of its address.
        MOV  R1,R2
@@ -204,7 +204,7 @@ SET2   MOV  R11,R12
 * zero, then there is enough space to add
 * a chunk header.
        S    R0,R3
-       JEQ  SET4
+       JEQ  ALC4
 * Decrease offset at newly filled chunk.
        S    R3,*R1
 * Record the remainder of the offset at
@@ -214,7 +214,7 @@ SET2   MOV  R11,R12
 * R2 contains the address of the 
 * chunk. Change it to address of chunk
 * contents.
-SET4   INCT R2
+ALC4   INCT R2
 * R2 now contains the address of the 
 * string. Put address in caller's R0.
        MOV  R2,R0
@@ -284,31 +284,31 @@ TMRG3  RT
 * R0 - address inside of buffer
 * R1 - required space
 BUFSRK DATA STRWS,BUFSRK+4
-* Let R8 = address of block
-* Let R9 = required space * 2 + 2
-       MOV  *R13,R8
-       DECT R8
-       MOV  @2(13),R9
-       SLA  R9,1
-       INCT R9
-* Let R10 = current block size
-       MOV  *R8,R10
-       SZC  @BLKUSE,R10
+* Let R0 = address of block
+* Let R1 = required space * 2 + 2
+       MOV  *R13,R0
+       DECT R0
+       MOV  @2(13),R1
+       SLA  R1,1
+       INCT R1
+* Let R2 = current block size
+       MOV  *R0,R2
+       SZC  @BLKUSE,R2
 * Check if too big
-       C    R10,R9
+       C    R2,R1
        JLE  LESRT
 * Mark block header with less space
-* Let R10 = spare space
-       S    R9,R10
-       SOC  @BLKUSE,R9
-       MOV  R9,*R8
+* Let R2 = spare space
+       S    R1,R2
+       SOC  @BLKUSE,R1
+       MOV  R1,*R0
 * Create a new empty block header
-       SZC  @BLKUSE,R9
-       A    R9,R8
-       MOV  R10,*R8
+       SZC  @BLKUSE,R1
+       A    R1,R0
+       MOV  R2,*R0
 * Merge new free block with later free
 * blocks.
-       MOV  R8,R1
+       MOV  R0,R1
        BL   @TRYMRG
 *
 LESRT  RTWP
@@ -338,29 +338,29 @@ BUFGRW DATA STRWS,BUFGRW+4
 * Let R4 = twice the desired size + 2
        SLA  R4,1
        DECT R4
-* Let R11 = address of next block
-       MOV  R5,R11
-       A    R3,R11
+* Let R2 = address of next block
+       MOV  R5,R2
+       A    R3,R2
 * Confirm that next block is free
-       MOV  *R11,R12
-       COC  @BLKUSE,R12
+       MOV  *R2,R1
+       COC  @BLKUSE,R1
        JEQ  GRWNEW
-* Let R12 = total size of both blocks
-       A    R3,R12
+* Let R1 = total size of both blocks
+       A    R3,R1
 * Confirm that total size is big enough
-       C    R12,R4
+       C    R1,R4
        JL   GRWNEW
 * Grow the original block
        MOV  R4,*R5
        SOC  @BLKUSE,*R5
-* Let R12 = new size of free block
-       S    R4,R12
+* Let R1 = new size of free block
+       S    R4,R1
 * If we used all the free space, return
        JEQ  GRWRT
 * Let R5 = address of new free block
        A    R4,R5
 * Create new free block
-       MOV  R12,*R5
+       MOV  R1,*R5
 * Merge with following free block
        MOV  R5,R1
        BL   @TRYMRG
