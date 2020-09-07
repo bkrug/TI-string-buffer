@@ -1,5 +1,8 @@
 *.L
 *.O
+*.lst
+*.obj
 PRINTOUT
 TESTRESULT
 TESTRESULT.*
+work.dsk
