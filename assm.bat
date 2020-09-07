@@ -1,3 +1,8 @@
+REM Run this script with XAS99 to assemble all files
+REM and add them to work.dsk
+REM
+REM See https://endlos99.github.io/xdt99/
+
 xas99.py -C -R MEMBUF.asm -L MEMBUF.lst
 xas99.py -C -R MEMLOAD.asm -L MEMLOAD.lst
 xas99.py -C -R MEMTST.asm -L MEMTST.lst
