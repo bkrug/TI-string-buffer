@@ -168,6 +168,81 @@ It is alright for the size to be an odd number.
 
 It is alright for the source and destination blocks to overlap, for example, when deleting or inserting a character in a string.
 
+### ARRAY Routines
+
+#### ARYALC
+```
+Input:
+R0 - Exponent for the size of each element
+Output:
+R0 - address of array
+     >FFFF if insufficient space 
+```
+
+Allocates space for an array.
+The allocated space will be in the buffer reserved by BUFINT.
+
+Each element in the array will have a length that is equal to a power of two.
+If R0 contains "1", each element will be 2 bytes long.
+If R0 contains "2", each element will be 4 bytes long.
+If R0 contains "3", each element will be 8 bytes long.
+If R0 contains "4", each element will be 16 bytes long.
+etc.
+
+#### ARYADD
+```
+Input:
+R0 - array address
+Output:
+R0 - new address of array
+     >FFFF if insufficient space 
+R1 - address of new item
+```
+
+Increases the array size by one element.
+Reports the address of the new element in R1.
+The array may have moved as a result of growing.
+The new address is reported in R0.
+
+#### ARYINS
+```
+Input:
+R0 - array address
+R1 - index to insert at
+Output:
+R0 - new address of array
+     >FFFF if insufficient space 
+     >FFFE if index is out of range
+R1 - address of new item
+```
+
+Inserts a new element in the array.
+The array size increases by one element, and the contents of part of the array are moved.
+Reports the address of the new element in R1.
+The array may have moved as a result of growing.
+The new address is reported in R0.
+
+#### ARYDEL
+```
+Input:
+R0 - array address
+R1 - index of element to delete
+```
+
+Deletes an element in the array.
+The array size decreases by one element, and the contents of part of the array are moved.
+
+#### ARYADR
+```
+Input:
+R0 - array address
+R1 - index of desired element
+Output:
+R1 - address of element
+```
+
+Gets the address of a particular element within an array.
+
 ## Running Unit Tests
 
 To run unit tests in this project:
