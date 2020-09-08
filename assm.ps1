@@ -31,7 +31,7 @@ xdm99.py $diskName -a 'MEMBUF.obj' -f DIS/FIX80
 xdm99.py $diskName -a 'ARRAY.obj' -f DIS/FIX80
 xdm99.py $diskName -a 'VAR.obj' -f DIS/FIX80
 
-# Add TIFILES header to all files
+# Add TIFILES header to all object files
 $objectFiles = Get-ChildItem ".\" -Filter *.obj
 ForEach($objectFile in $objectFiles) {
     xdm99.py -T $objectFile.Name -f DIS/FIX80 -o $objectFile.Name
