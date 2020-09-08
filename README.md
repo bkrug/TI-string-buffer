@@ -154,15 +154,18 @@ The old block will be marked as free.
 #### BUFCPY
 ```
 Input:
-* R0 - source address.
-* R1 - destination address
-* R2 - size of data to copy.
+R0 - source address.
+R1 - destination address
+R2 - size of data to copy.
 ```
 
 Copies several bytes of memory from the source address to the destination address.
 The routine copies bytes, not words of memory.
+
 It is alright for memory addresses to be odd numbers.
+
 It is alright for the size to be an odd number.
+
 It is alright for the source and destination blocks to overlap, for example, when deleting or inserting a character in a string.
 
 ## Running Unit Tests
