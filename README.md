@@ -77,38 +77,48 @@ Your program is expected to not write anything between addresses >E000 and >EFFF
 
 ## Routines
 
-Below is a list of the routines that are defined in this library.
-They can be called using BLWP.
-See MEMBUF.TXT and ARRAY.TXT to see which registers are used for input and output in the routine.
-
-The buffer code allows the caller to allocate a given amount of space in the addressable RAM. The memory allocated to the buffer cannot be changed in size, but any stream of data within the buffer can be deleted or moved if space requirements change.
+### MEMBUF Routines
 
 BUFINT
-Allocates a certain amount of memory in the range of 4 to >8000 bytes (must be an even number).
+```
+Input:
+R0 - buffer memory address
+R1 - buffer size (>4 to >7FFE valid)
+Output:
+R0 - >0000 if successful
+     >FFFF if error
+```
+
+Reserves an exact amount of space as a memory buffer.
+Call BUFINT once at the beginning of your program.
+It is distinct from BUFALC which may be called multiple times.
+
+The buffer size in R1 must be an even number from >4 to >7FFE.
+If the output value is >FFFF, then the calling code placed an invalid value in R1.
 
 BUFALC
-Allocates copies a chunk of data from some source location (usually outside the buffer) into the buffer, reserving the specified amount of space
+```
+Input:
+R0 - number of bytes required for a memory block
+Output:
+R0 - address of the allocated memory.
+     >FFFF if error
+```
 
-BUFCPY
-Copies a chunk of memory from one location inside of the bugger to a location (likely outside of the buffer).
+Finds a location in the memory buffer large enough for the requested block size.
+The address returned in R0 will always be inside the area reserved by BUFINT.
+
+If you attempt to allocate an odd number of bytes, BUFALC will round up to the next even number.
 
 BUFREE
-Marks a used chunk of memory as free.
+```
+Input:
+R0 - address of previously allocated block
+```
 
-ARYALC
-Allocates space for an array.
-
-ARYADD
-Adds elements to the end of the array
-
-ARYINS
-Inserts elements into the array
-
-ARYDEL
-Removes an element from the array
-
-ARYADR
-Reports the address of an array element with a given index
+Marks a previously allocated block of memory as free.
+A future call to BUFALC or BUFGRW may reserve this space for a different memory block.
+After calling BUFREE, your program should not attempt to write to that allocation any more.
 
 ## Running Unit Tests
 
