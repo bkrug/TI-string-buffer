@@ -22,7 +22,7 @@
 * the first bit is set if the chunk is
 * used, otherwise reset. The other 15
 * are the offset to the next chunk. 
-* The next chunk can be at most >7FFF
+* The next chunk can be at most >7FFE
 * bytes further away. Chunks are 
 * expected to be sequentially located. 
 * Note that if the block size is >20, 
@@ -38,7 +38,7 @@ BLKUSE DATA >8000
 * Reserve Space for a memory buffer
 *
 * R0 - buffer memory address
-* R1 - buffer size (>4 to >7FFF valid)
+* R1 - buffer size (>4 to >7FFE valid)
 *
 * Output:
 * R0 - >0000 if successful
@@ -85,9 +85,6 @@ ONE    DATA >0001
 * The calling code is responsile for
 * ensuring that there is sufficient
 * space for the copy.
-*
-* The first byte in the destination
-* will be the data length.
 BUFCPY DATA STRWS,BUFCPY+4
        MOV  *R13,R8
        MOV  @2(13),R9

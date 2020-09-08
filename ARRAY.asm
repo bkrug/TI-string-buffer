@@ -19,8 +19,6 @@
 
 *
 * Allocate space for an array.
-* Initially there will be space for
-* 8 items.
 *
 * Input:
 * R0 - Size of each item
@@ -81,7 +79,8 @@ ARYADD DATA ARRYWS,ARYADD+4
 * R1 - index to insert at
 * Output:
 * R0 - address of array
-*      >FFFF indicates error
+*      >FFFF indicates insufficient memory
+*      >FFFE indicates index out-of-range
 * R1 - address of new item
 ARYINS DATA ARRYWS,ARYINS+4
        MOV  @2(13),R3
@@ -114,8 +113,7 @@ INSERR LI   R8,>FFFE
 * R0 - array address
 * R1 - index to delete at
 * Output:
-* R0 - address of array
-*      >FFFF indicates error
+* R0 - >FFFE indicates index out-of-range
 ARYDEL DATA ARRYWS,ARYDEL+4
 *
        BL   @ADRSIZ
