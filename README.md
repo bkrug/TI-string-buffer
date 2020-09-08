@@ -1,18 +1,21 @@
 # Editor/Assembler Memory Management
 
-This repository contains utility routines to help you manage memory within an Editor/Assembler program developed for a TI-99/4A computer or a TMS9900 microprocessor. This was written with the idea that a program might create, delete, or change several different strings of data, and that they might all be of different lengths. I wrote this code after learning how malloc is implemented in C, but it is not identical to malloc.
+This repository contains utility routines to help you manage memory within an Editor/Assembler program developed for a TI-99/4A computer or a TMS9900 microprocessor.
+The routines allow the calling code to allocate memory areas of various length, and mark these memory areas as free or change their size.
+There are also routines that allow calling code to manage arrays.
+I wrote this code after learning how malloc is implemented in C, but it is not identical to malloc.
 
 ## Including this library in your own program
 
-Download the object files listed in a particular release (https://github.com/bkrug/TI-string-buffer/releases) and copy them to the disk that contains your own program.
-Object files in the release have the .O extension.
+The assembled object files of a given relase are at this link (https://github.com/bkrug/TI-string-buffer/releases).
+They are available on a Disk Image or in FIAD (File in a disk) format with TIFILES headers.
 
-ARRAY.O and MEMBUF.O only contain executable object code. 
-VAR.O contains only memory locations for variables, including space for workspace registers.
-You may wish to re-assemble VAR.TXT instead of using the included VAR.O.
-That way you can place workspace registers in a part of the TI's scratch pad RAM that you do not use.
+Object files:
+* MEMBUF.O contain only static executable object code.
+* ARRAY.O contains only static executable object code. It is dependent on MEMBUF.O
+* VAR.O contains only memory locations for variables, including space for workspace registers.
 
-Note that ARRAY.O is dependent on MEMBUF.O.
+Static and volatile object code are kept separate in case the larger project requires code to be located in ROM.
 
 ## Tutorial
 
@@ -140,9 +143,9 @@ Object files in each release contain a comment specifying the version number.
 
 MEMBUF.TXT contains the source code for the module.
 
-BUFTST.TXT contains the source code for some unit tests.
+MEMTST.TXT contains the source code for some unit tests.
 
-BUFLOAD.TXT loads object code to run unit tests on MEMBUF
+MEMLOAD.TXT loads object code to run unit tests on MEMBUF
 
 ### ARRAY
 
@@ -159,6 +162,6 @@ ARRYLOAD.TXT - Loads and runs array tests and their dependencies.
 
 VAR.TXT - Contains memory addresses that are to contain values that could change.
 
-TESTUTIL.TXT is utility code that the unit tests need.
+TESTFRAM.TXT is utility code that the unit tests need.
 
 LOADTSTS.TXT contains a script to load an run an aribtraty list of object code files.
