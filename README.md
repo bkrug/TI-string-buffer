@@ -227,6 +227,9 @@ The new address is reported in R0.
 Input:
 R0 - array address
 R1 - index of element to delete
+Output:
+R0 - >FFFE if index is out of range
+     unchanged otherwise
 ```
 
 Deletes an element in the array.
