@@ -290,6 +290,6 @@ VAR.TXT - Contains memory addresses that are to contain values that could change
 
 TESTFRAM.TXT is utility code that the unit tests need.
 
-LOADTSTS.TXT contains a script to load an run an aribtraty list of object code files.
+LOADTSTS.TXT contains a script to load an run an arbitraty list of object code files.
 
 assm.ps1 - A powershell script to reassemble all of the source code. Requires Python and xdt99.
