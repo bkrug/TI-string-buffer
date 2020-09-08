@@ -79,7 +79,7 @@ Your program is expected to not write anything between addresses >E000 and >EFFF
 
 ### MEMBUF Routines
 
-BUFINT
+#### BUFINT
 ```
 Input:
 R0 - buffer memory address
@@ -96,7 +96,7 @@ It is distinct from BUFALC which may be called multiple times.
 The buffer size in R1 must be an even number from >4 to >7FFE.
 If the output value is >FFFF, then the calling code placed an invalid value in R1.
 
-BUFALC
+#### BUFALC
 ```
 Input:
 R0 - number of bytes required for a memory block
@@ -110,7 +110,7 @@ The address returned in R0 will always be inside the area reserved by BUFINT.
 
 If you attempt to allocate an odd number of bytes, BUFALC will round up to the next even number.
 
-BUFREE
+#### BUFREE
 ```
 Input:
 R0 - address of previously allocated block
