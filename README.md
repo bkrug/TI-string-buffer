@@ -17,19 +17,17 @@ Object files:
 
 Static and volatile object code are kept separate in case the larger project requires code to be located in ROM.
 
-## Tutorial
+## Example Code
 
 See the unit tests for more complete documentation, but here is the general idea.
 
-BUFINT initializes initializes a chunk buffer.
-The buffer is able to contain many different areas of memory allocated at different sizes.
-The below code initilizes a buffer with 4KB of space and allocates two chunks of different sizes.
-The addresses are then stored at STRING1 and STRING2 so that a different part of the program can then populate the chunk with an appropriate amount of data.
-If there is an error, such as insufficient memory, BUFINT or BUFALC would place >FFFF in R0.
-
-           DEF  BUFINT,BUFALC
+           DEF  BUFINT,BUFALC,BUFFREE
+           DEF  BUFSRK,BUFGRW
            .
            .
+    STRNG1 BSS  2
+    STRNG2 BSS  2
+    STRNG3 BSS  2
     SPACE  EQU  >E000
            .
            .
@@ -37,53 +35,45 @@ If there is an error, such as insufficient memory, BUFINT or BUFALC would place 
            LI   R1,>1000
            BLWP @BUFINT
            
-           LI   R0,219
+           LI   R0,>220
            BLWP @BUFALC
            MOV  R0,@STRNG1
            
-           LI   R0,18
+           LI   R0,>2E
            BLWP @BUFALC
            MOV  R0,@STRNG2
-
-In the below example, a string of text was originally allocated with space for 18 characters.
-The program later gives the user the chance to type a longer string.
-Assume that there is an area of memory which holds a string as the user is typing.
-This area can be at address TYPESP.
-This area gets used for user input over and over again, and is not meant to store text for the entire program runtime.
-The following code will:
-* copy the original string from the chunk buffer to the user-input address of TYPESP.
-* free up the original memory location
-* allocate space for the longer string
-* copy the new string into the chunk buffer at the allocated location.
-
-           *R0 holds a copy-from address.
-           *R1 holds a copy-to address.
-           *R2 holds the number of bytes to copy. 
-           *Here we assume that R4 somehow contains the length of the original string.
-           *In a real program, perhaps the first byte or word of the memory chunk would store the string length.
-           MOV  @STRNG2,R0
-           LI   R1,TYPESP
-           MOV  R4,R2
-           BLWP @BUFCPY
-           .
-           .
            
-           *Later some logic determines that the new user input is longer
+           LI   R0,>80
+           BLWP @BUFALC
+           MOV  R0,@STRNG3
+           
            MOV  @STRNG2,R0
            BLWP @BUFREE
            
-           *The new string length is in R7 somehow.
-           MOV  R7,R0
-           BLWP @BUFALC
-           MOV  R0,@STRNG2
+           MOV  @STRNG3,R0
+           LI   R1,>2C
+           BLWP @BUFSRK
            
-           * Note that BUFCPY is just copying between memory addresses.
-           * It doesn't really care if either address is part of the chunk buffer or not.
-           LI   R0,TYPESP
-           MOV  @STRNG2,R1
-           MOV  R7,R2
-           BLWP @BUFCPY
+           MOV  @STRNG3,R0
+           LI   R1,>F8
+           BLWP @BUFGRW
+           MOV  R0,@STRNG3
 
+In the above example, BUFINT marked 4 KB at address SPACE (>E000) as an area where memory blocks can be allocated an deallocated.
+
+The code snippet allocated >220 bytes of memory.
+The BUFALC routine reported the address of the allocated memory in R0.
+The code snipped stored this allocated address at address STRING1.
+
+It allocated >2E bytes of memory, but later deallocated that memory block using the BUFREE routine.
+
+At one point, the code allocated >80 bytes of memory and stored the address at STRNG3.
+Later the code used BUFSRK and BUFGRW to change the reserved memory block size.
+BUFGRW may have needed to move the memory block when it grew, so the address was re-saved in STRNG3.
+BUFGRW will copy block contents to the new location when it needs to move a block.
+
+Note that the BUF routines don't do anything magical to prevent a different routine from overwriting data.
+Your program is expected to not write anything between addresses >E000 and >EFFF unless it is using a memory address acquired from BUFALC or BUFGRW.
 
 ## Routines
 
