@@ -11,9 +11,9 @@ The assembled object files of a given relase are at this link (https://github.co
 They are available on a Disk Image or in FIAD (File in a disk) format with TIFILES headers.
 
 Object files:
-* MEMBUF.O contain only static executable object code.
-* ARRAY.O contains only static executable object code. It is dependent on MEMBUF.O
-* VAR.O contains only memory locations for variables, including space for workspace registers.
+* MEMBUF.obj contain only static executable object code.
+* ARRAY.obj contains only static executable object code. It is dependent on MEMBUF.O
+* VAR.obj contains only memory locations for variables, including space for workspace registers.
 
 Static and volatile object code are kept separate in case the larger project requires code to be located in ROM.
 
@@ -253,7 +253,7 @@ To run unit tests in this project:
 2. Read the list of files inside of the source file.
 3. Assemble "~LOAD.asm" and all of the files mentioned in the list.
 (a) If your object code is not going to be located in DSK2, edit the file list in ~LOAD.asm to reflect the correct location.
-(b) Assemble the code such that the object code has an extension of .O but is otherwise named the same as the source.
+(b) Assemble the code such that the object code has an extension of .obj but is otherwise named the same as the source.
 4. Select E/A menu option #3
 5. Enter ~LOAD.obj as the file to load.
 6. Enter LTEST as the program to run.
