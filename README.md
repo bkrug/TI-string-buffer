@@ -102,7 +102,7 @@ Input:
 R0 - number of bytes required for a memory block
 Output:
 R0 - address of the allocated memory.
-     >FFFF if error
+     >FFFF if insufficient space
 ```
 
 Finds a location in the memory buffer large enough for the requested block size.
@@ -119,6 +119,51 @@ R0 - address of previously allocated block
 Marks a previously allocated block of memory as free.
 A future call to BUFALC or BUFGRW may reserve this space for a different memory block.
 After calling BUFREE, your program should not attempt to write to that allocation any more.
+
+#### BUFSRK
+```
+Input:
+R0 - address of previously allocated block
+R1 - required space
+```
+
+Conditionally shrinks the size of a previously allocated memory block.
+If the required space less than half as big as the current allocation, the memory block is shrunk.
+Otherwise the routine does nothing.
+This routine number moves an allocated block.
+
+#### BUFGRW
+```
+Input:
+R0 - address of previously allocated block
+R1 - required size
+Output:
+R0 - new address of block
+     >FFFF if insufficient space
+```
+
+Conditionally grows the size of a previously allocated memory block.
+If the current block size is already equal to or larger than the requested size, then the routine does nothing.
+Otherwise, the routine reserves twice as much space as the requested amount.
+
+The block address may need to move as a result of the grow opperation.
+If that happens, the new address will be output to R0.
+The contents from the old block will be copied to the new block.
+The old block will be marked as free.
+
+#### BUFCPY
+```
+Input:
+* R0 - source address.
+* R1 - destination address
+* R2 - size of data to copy.
+```
+
+Copies several bytes of memory from the source address to the destination address.
+The routine copies bytes, not words of memory.
+It is alright for memory addresses to be odd numbers.
+It is alright for the size to be an odd number.
+It is alright for the source and destination blocks to overlap, for example, when deleting or inserting a character in a string.
 
 ## Running Unit Tests
 
