@@ -130,7 +130,7 @@ R1 - required space
 Conditionally shrinks the size of a previously allocated memory block.
 If the required space less than half as big as the current allocation, the memory block is shrunk.
 Otherwise the routine does nothing.
-This routine number moves an allocated block.
+This routine never moves an allocated block.
 
 #### BUFGRW
 ```
