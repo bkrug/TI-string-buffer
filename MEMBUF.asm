@@ -370,6 +370,9 @@ GRWNEW
        BL   @ALCRTN
 * Report new block address to caller
        MOV  R0,*R13
+* If allocation failed, return to caller
+       CI   R0,>FFFF
+       JEQ  GRWRT
 * Deallocate old block
        SZC  @BLKUSE,*R8
 * Merge with following free block
