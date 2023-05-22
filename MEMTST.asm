@@ -121,6 +121,10 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *    free spaces.
        DATA TGRW7
        TEXT 'TGRW7 '
+* Fail to grow a block, do not
+*    deallocate original location
+       DATA TGRW8
+       TEXT 'TGRW8 '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1740,5 +1744,54 @@ TGRW7C DATA >0050
        DATA >0010
        BSS  >0E
 TGRW7Z
+
+*
+* Fail to grow and move a block,
+*    and the old block should not be deallocated.
+*
+TGRW8
+* Arrange
+       LI   R0,TGRW8A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW8Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW8A+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert
+       MOV  R0,R1
+       LI   R0,>FFFF
+       BLWP @AEQ
+       TEXT 'Expecting an out-of-space '
+       TEXT 'error.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,TGRW8Y
+       LI   R1,TGRW8A
+       LI   R2,>10
+       BLWP @ABLCK
+       TEXT 'Original block contents should '
+       TEXT 'be undesturbed.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Original Data (including header)
+TGRW8Y DATA >8010
+       DATA >0123,>4567,>89AB,>CDEF
+       DATA >1122,>3344,>5566
+* Buffer before action
+TGRW8A DATA >8010
+       DATA >0123,>4567,>89AB,>CDEF
+       DATA >1122,>3344,>5566
+TGRW8B DATA >0008
+       BSS  >06
+       DATA >8050
+       BSS  >4E
+       DATA >0008
+       BSS  >06
+TGRW8Z
 
        END

@@ -15,11 +15,11 @@ ForEach($file in $files) {
 
 # Add version information to some files
 Add-Content -Path .\MEMBUF.obj -NoNewline -Value `
-': Memory Management - Chunk Buffer                                              : Version 1.1.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
+': Memory Management - Chunk Buffer                                              : Version 1.2.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
 Add-Content -Path .\ARRAY.obj -NoNewline -Value `
-': Memory Management - Arrays                                                    : Version 1.1.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
+': Memory Management - Arrays                                                    : Version 1.2.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
 Add-Content -Path .\VAR.obj -NoNewline -Value `
-': Memory Management - library non-static memory                                 : Version 1.1.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
+': Memory Management - library non-static memory                                 : Version 1.2.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
 
 # Add some files to a Disk image
 $diskName = 'BufferAndArray.dsk'
