@@ -23,6 +23,7 @@ Add-Content -Path .\VAR.obj -NoNewline -Value `
 
 # Add some files to a Disk image
 $diskName = 'BufferAndArray.dsk'
+Write-Host 'Creating disk image' $diskName
 if (Test-Path $diskName) {
     Remove-Item $diskName
 }
@@ -32,11 +33,13 @@ xdm99.py $diskName -a 'ARRAY.obj' -f DIS/FIX80
 xdm99.py $diskName -a 'VAR.obj' -f DIS/FIX80
 
 # Create a version of the object files that can be used by XDT99
+Write-Host 'Creating headerless object files'
 Copy-Item 'MEMBUF.obj' 'MEMBUF.noheader.obj'
 Copy-Item 'ARRAY.obj' 'ARRAY.noheader.obj'
 Copy-Item 'VAR.obj' 'VAR.noheader.obj'
 
 # Add TIFILES header to most object files
+Write-Host 'Adding TIFILES header to other object files'
 $objectFiles = Get-ChildItem ".\" -Filter *.obj |
                Where-Object { $_.Name.EndsWith('.noheader.obj') -ne 1 }
 ForEach($objectFile in $objectFiles) {
