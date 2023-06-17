@@ -20,7 +20,7 @@ ForEach($fileToEdit in $filesToEdit) {
     $fileContent = (Get-Content $fileToEdit)
     $lastLineNo = $fileContent.Substring($fileContent.Length - 4)
     $newContent = $fileContent.Substring(0, $fileContent.Length - 80) + $comment + $lastLineNo
-    Set-Content $fileToEdit $newContent
+    Set-Content $fileToEdit $newContent -NoNewline
 }
 
 # Add some files to a Disk image
