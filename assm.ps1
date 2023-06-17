@@ -14,12 +14,14 @@ ForEach($file in $files) {
 }
 
 # Add version information to some files
-Add-Content -Path .\MEMBUF.obj -NoNewline -Value `
-': Memory Management - Chunk Buffer                                              : Version 1.3.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
-Add-Content -Path .\ARRAY.obj -NoNewline -Value `
-': Memory Management - Arrays                                                    : Version 1.3.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
-Add-Content -Path .\VAR.obj -NoNewline -Value `
-': Memory Management - library non-static memory                                 : Version 1.3.0                                                                 : https://github.com/bkrug/TI-string-buffer                                     '
+$comment = ': Memory Management - 1.3.0 - https://github.com/bkrug/TI-string-buffer     '  # This line is intentionally 76 char long
+$filesToEdit = 'MEMBUF.obj', 'ARRAY.obj', 'VAR.obj'
+ForEach($fileToEdit in $filesToEdit) {
+    $fileContent = (Get-Content $fileToEdit)
+    $lastLineNo = $fileContent.Substring($fileContent.Length - 4)
+    $newContent = $fileContent.Substring(0, $fileContent.Length - 80) + $comment + $lastLineNo
+    Set-Content $fileToEdit $newContent
+}
 
 # Add some files to a Disk image
 $diskName = 'BufferAndArray.dsk'
