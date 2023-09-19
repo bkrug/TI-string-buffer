@@ -1,5 +1,6 @@
        DEF  TSTLST,RSLTFL
        REF  AEQ,ABLCK
+       REF  ASEQ,ASNEQ
 *
        REF  BUFINT,BUFCPY,BUFALC,BUFREE
        REF  BUFSRK,BUFGRW
@@ -141,6 +142,14 @@ TCPY1
        LI   R1,TCPY1C
        LI   R2,TCPY1B-TCPY1A
        BLWP @BUFCPY
+*       S    R5,R5
+*       BLWP @ASEQ
+*       LI   R5,4
+*       BLWP @ASEQ
+       S    R5,R5
+       BLWP @ASNEQ
+*       LI   R5,4
+*       BLWP @ASNEQ
 * Assert the data was copied correctly.
        LI   R0,TCPY1A
        LI   R1,TCPY1C

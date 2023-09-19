@@ -15,6 +15,8 @@
        DEF  AL
 * Assert Word Logical High
        DEF  AH
+* Assert Status Bit Equal or Not Equal
+       DEF  ASEQ,ASNEQ
 
 *******
 * List of test routines
@@ -185,7 +187,7 @@ SCRLPT MOV  R11,*R12+
        LI   R1,23*32
 * If length = 0, return
        MOV  R1,R1
-	   JEQ  SCROL2
+	JEQ  SCROL2
 *
 SCROL0 BL   @WRITEF
        BL   @SCRLP
@@ -620,6 +622,48 @@ AHP
        DATA AHM,AHME-AHM
 * Report success
 AHS    B    @ONPASS
+
+* Assert Status Bit True
+* --------------------------
+* Return true if status bit true.
+ASEQ   DATA WORKSP,ASEQP
+ASEQM  TEXT 'Expected equal status bit to be true.'
+ASEQME EVEN
+ASEQP
+* Look at equal bit of caller status byte
+       LI   R1,>2000
+       COC  R1,R15
+* Is Equal bit true?
+       JEQ  ASEQS
+* No
+       LI   R0,ASEQM
+       LI   R1,ASEQME-ASEQM
+       BL   @SCRLPT
+*
+       B    @TSTL20
+* Yes
+ASEQS  B    @ONPASS
+
+* Assert Status Bit false
+* --------------------------
+* Return true if status bit true.
+ASNEQ  DATA WORKSP,ASNEQP
+ASNEQM TEXT 'Expected equal status bit to be false.'
+ASNEQE EVEN
+ASNEQP
+* Look at equal bit of caller status byte
+       LI   R1,>2000
+       COC  R1,R15
+* Is Equal bit true?
+       JNE  ASNEQS
+* Yes
+       LI   R0,ASNEQM
+       LI   R1,ASNEQE-ASNEQM
+       BL   @SCRLPT
+*
+       B    @TSTL20
+* No
+ASNEQS B    @ONPASS
 
 * Routines shared by assert
 * routines.
