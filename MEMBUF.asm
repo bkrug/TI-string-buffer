@@ -70,9 +70,11 @@ BUFINT DATA STRWS,BUFINT+4
        MOV  R8,@BUFEND
 * Report success.
        CLR  *R13
+       SZC  @EQUSTS,R15
        RTWP
 * Report error.
 INTEND SETO *R13
+       SOC  @EQUSTS,R15
        RTWP
 ONE    DATA >0001
  
