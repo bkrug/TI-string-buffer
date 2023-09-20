@@ -150,8 +150,7 @@ BUFALC DATA STRWS,BUFALC+4
 * Input:
 * R0 - size
 * Output:
-* R0 - the new address of assigned space
-*    - >FFFF implies an error
+* R0
 * R1
 * R2
 * R9
@@ -376,8 +375,7 @@ GRWNEW
        DECT R0
        BL   @ALCRTN
 * If allocation failed, return to caller
-       MOV  *R13,R0
-       CI   R0,>FFFF
+       COC  @EQUSTS,R15
        JEQ  GRWRT
 * Deallocate old block
        SZC  @BLKUSE,*R8
@@ -385,7 +383,7 @@ GRWNEW
        MOV  R8,R1
        BL   @TRYMRG
 * Copy data from old block
-       MOV  R0,R9
+       MOV  *R13,R9
        MOV  *R8,R10
        INCT R8
        BL   @CPYRTN
