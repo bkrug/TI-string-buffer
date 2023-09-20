@@ -341,6 +341,10 @@ TALC1
 * Act
        LI   R0,>E
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TALC1A+>02
@@ -386,6 +390,10 @@ TALC2
 * Act
        LI   R0,>C
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TALC2A+>22
@@ -445,6 +453,10 @@ TALC3
 * Act
        LI   R0,>16
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TALC3A+>0A
@@ -507,6 +519,10 @@ TALC4
 * Act
        LI   R0,>14
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TALC4A+>0A
@@ -576,6 +592,10 @@ TALC5
 * Act
        LI   R0,>E
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TALC5E+2
@@ -664,6 +684,10 @@ TALC6
 * Act
        LI   R0,>1C
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TALC6A+>18
@@ -706,6 +730,10 @@ TALC7
 * Act
        LI   R0,>12
        BLWP @BUFALC
+* Assert an error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error due to lack of memory'
+       BYTE 0
 * Assert
        MOV  R0,R1
        SETO R0
@@ -735,6 +763,10 @@ TALC8
 * Act
        LI   R0,>5
        BLWP @BUFALC
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R1,TALC8C+2
