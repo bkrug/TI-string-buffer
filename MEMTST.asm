@@ -253,6 +253,10 @@ TINT1
        LI   R0,SPACE
        LI   R1,>200
        BLWP @BUFINT
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error to occur initializing buffer'
+       BYTE 0
 * Assert R0 = zero (no error)
        MOV  R0,R1
        CLR  R0
@@ -279,6 +283,10 @@ TINT2
        LI   R0,SPACE
        LI   R1,>8000
        BLWP @BUFINT
+* Assert some error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error initializing buffer'
+       BYTE 0
 * Assert R0 = >FFFF (error)
        MOV  R0,R1
        SETO R0
@@ -299,6 +307,10 @@ TINT3
        LI   R0,SPACE
        LI   R1,>2
        BLWP @BUFINT
+* Assert some error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error initializing buffer'
+       BYTE 0
 * Assert R0 = >FFFF (error)
        MOV  R0,R1
        SETO R0
@@ -319,6 +331,10 @@ TINT4
        LI   R0,SPACE
        LI   R1,>13
        BLWP @BUFINT
+* Assert some error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error initializing buffer'
+       BYTE 0
 * Assert R0 = >FFFF (error)
        MOV  R0,R1
        SETO R0
