@@ -144,7 +144,7 @@ BUFALC DATA STRWS,BUFALC+4
        MOV  *R13,R0
 *
        BL   @ALCRTN
-       MOV  R0,*R13
+*
        RTWP
 
 * Input:
