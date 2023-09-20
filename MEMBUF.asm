@@ -182,7 +182,6 @@ ALC2   A    R2,R1
        JL   ALC1
 * We passed out of the buffer.
 * Report an error in caller's R0.
-       SETO R0
        SETO *R13
        SOC  @EQUSTS,R15
        RT
@@ -221,7 +220,6 @@ ALC3   MOV  R11,R12
 ALC4   INCT R2
 * R2 now contains the address of the 
 * string. Put address in caller's R0.
-       MOV  R2,R0
        MOV  R2,*R13
        SZC  @EQUSTS,R15
        RT
@@ -378,6 +376,7 @@ GRWNEW
        DECT R0
        BL   @ALCRTN
 * If allocation failed, return to caller
+       MOV  *R13,R0
        CI   R0,>FFFF
        JEQ  GRWRT
 * Deallocate old block
