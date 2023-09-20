@@ -32,6 +32,8 @@
 
 * Mask to set or reset the "used" bit.
 BLKUSE DATA >8000
+* Mask to set or reset the EQU status bit.
+EQUSTS DATA >2000
 
 * 
 * **** BUFINT ****
@@ -155,6 +157,9 @@ BUFALC DATA STRWS,BUFALC+4
 * R9
 * R10
 * R12
+* *R13 - the new address of assigned space
+*      - >FFFF implies an error
+* R15 - EQU status bit set iff error occurred
 ALCRTN
 * Round R0 up to an even number.
        INC  R0
@@ -178,6 +183,8 @@ ALC2   A    R2,R1
 * We passed out of the buffer.
 * Report an error in caller's R0.
        SETO R0
+       SETO *R13
+       SOC  @EQUSTS,R15
        RT
 * Chunk is free, but is it large enough?
 * First try to merge other free chunks.
@@ -215,6 +222,8 @@ ALC4   INCT R2
 * R2 now contains the address of the 
 * string. Put address in caller's R0.
        MOV  R2,R0
+       MOV  R2,*R13
+       SZC  @EQUSTS,R15
        RT
  
 *
@@ -368,8 +377,6 @@ GRWNEW
        MOV  R9,R0
        DECT R0
        BL   @ALCRTN
-* Report new block address to caller
-       MOV  R0,*R13
 * If allocation failed, return to caller
        CI   R0,>FFFF
        JEQ  GRWRT
