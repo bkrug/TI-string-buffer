@@ -142,12 +142,16 @@ TCPY1
        LI   R1,TCPY1C
        LI   R2,TCPY1B-TCPY1A
        BLWP @BUFCPY
+* Assert no error was detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error to be detected'
+       BYTE 0
 *       S    R5,R5
 *       BLWP @ASEQ
 *       LI   R5,4
 *       BLWP @ASEQ
-       S    R5,R5
-       BLWP @ASNEQ
+*       S    R5,R5
+*       BLWP @ASNEQ
 *       LI   R5,4
 *       BLWP @ASNEQ
 * Assert the data was copied correctly.
@@ -1261,6 +1265,10 @@ TGRW1
        LI   R0,TGRW1C+2
        LI   R1,>12
        BLWP @BUFGRW
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW1C+2
@@ -1321,6 +1329,10 @@ TGRW2
        LI   R0,TGRW2B+2
        LI   R1,>16
        BLWP @BUFGRW
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW2B+2
@@ -1381,6 +1393,10 @@ TGRW3
        LI   R0,TGRW3C+2
        LI   R1,>20
        BLWP @BUFGRW
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW3C+2
@@ -1452,6 +1468,10 @@ TGRW4
        LI   R0,TGRW4A+2
        LI   R1,>20
        BLWP @BUFGRW
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW4A+2
@@ -1511,6 +1531,10 @@ TGRW5
        LI   R0,TGRW5A+2
        LI   R1,>20
        BLWP @BUFGRW
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW5E+2
@@ -1590,6 +1614,10 @@ TGRW6
        LI   R0,TGRW6B+2
        LI   R1,>1E
        BLWP @BUFGRW
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW6E+2
@@ -1687,6 +1715,10 @@ TGRW7
        LI   R0,TGRW7A+2
        LI   R1,>20
        BLWP @BUFGRW
+* Assert an error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error looking for memory space'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,TGRW7C+2
@@ -1768,6 +1800,10 @@ TGRW8
        LI   R0,TGRW8A+2
        LI   R1,>20
        BLWP @BUFGRW
+* Assert an error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error due to lack of memory'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,>FFFF

@@ -639,8 +639,8 @@ ASEQP
        LI   R0,ASEQM
        LI   R1,ASEQME-ASEQM
        BL   @SCRLPT
-*
-       B    @TSTL20
+* Display user-defined failure message
+       B    @RF1
 * Yes
 ASEQS  B    @ONPASS
 
@@ -660,8 +660,8 @@ ASNEQP
        LI   R0,ASNEQM
        LI   R1,ASNEQE-ASNEQM
        BL   @SCRLPT
-*
-       B    @TSTL20
+* Display user-defined failure message
+       B    @RF1
 * No
 ASNEQS B    @ONPASS
 
