@@ -145,6 +145,7 @@ INS1   MOV  R0,@2(13)
 * Report out-of-range error
 INSERR LI   R8,>FFFE
        MOV  R8,*R13
+       SOC  @EQUSTS,R15
        RTWP
 
 *
@@ -196,6 +197,8 @@ ARYDEL DATA ARRYWS,ARYDEL+4
        MOV  *R13,R0
 * Shrink memory allocation if needed
        BLWP @BUFSRK
+* No error occurred
+       SZC  @EQUSTS,R15
 *
        RTWP
 
