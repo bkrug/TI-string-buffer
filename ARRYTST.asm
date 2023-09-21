@@ -1282,6 +1282,11 @@ DEL1
        LI   R0,DEL1X+2
        LI   R1,0
        BLWP @ARYDEL
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,DEL1X+2
@@ -1337,6 +1342,11 @@ DEL2
        LI   R0,DEL2X+2
        LI   R1,2
        BLWP @ARYDEL
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,DEL2X+2
@@ -1397,6 +1407,11 @@ DEL3
        LI   R0,DEL3X+2
        LI   R1,3
        BLWP @ARYDEL
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,DEL3X+2
@@ -1461,6 +1476,11 @@ DEL4
        LI   R0,DEL4X+2
        LI   R1,1
        BLWP @ARYDEL
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,DEL4X+2
@@ -1520,6 +1540,11 @@ DEL5
        LI   R0,DEL5X+2
        LI   R1,3
        BLWP @ARYDEL
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,DEL5X+2
@@ -1579,6 +1604,11 @@ DEL6
        LI   R0,DEL6X+2
        LI   R1,10
        BLWP @ARYDEL
+* Assert an error to be detected
+       BLWP @ASEQ
+       TEXT 'Expected status bit to reflect '
+       TEXT 'out-of-range error.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,>FFFE
@@ -1662,7 +1692,7 @@ ADR2
        LI   R0,ADR1X
 	LI   R1,5
 	BLWP @ARYADR
-* Assert no error has been detected
+* Assert an error has been detected
        BLWP @ASEQ
        TEXT 'Expected an error because highest '
        TEXT 'index in array is 4, not 5.'
