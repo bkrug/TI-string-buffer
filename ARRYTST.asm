@@ -1,6 +1,7 @@
        DEF  TSTLST,RSLTFL
 *
        REF  AEQ,ANEQ,ABLCK,AL,AH
+       REF  ASEQ,ASNEQ
 *
        REF  ARYALC,ARYADD,ARYINS,ARYDEL
        REF  ARYADR
@@ -93,13 +94,19 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA DEL6
        TEXT 'DEL6  '
 * Get address of an array element
-	   DATA ADR1
-	   TEXT 'ADR1  '
+	DATA ADR1
+	TEXT 'ADR1  '
+* Request address of out-of-range element
+	DATA ADR2
+	TEXT 'ADR2  '
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
 RSLTFE
        EVEN
+
+OUTMEM EQU  -1              Out of memory
+OUTRNG EQU  -2              Index Out of Range
 
 *
 * Allocate array with 2-byte elements
@@ -1597,42 +1604,79 @@ DEL6Z
 
 *
 * Get address of an array element
+*
 ADR1
 * Arrange
        LI   R0,ADR1Y
-	   MOV  R0,@BUFADR
-	   LI   R1,ADR1Z
-	   MOV  R1,@BUFEND
+	MOV  R0,@BUFADR
+	LI   R1,ADR1Z
+	MOV  R1,@BUFEND
 * Act
 * Outputs element address to R1
        LI   R0,ADR1X
-	   LI   R1,3
-	   BLWP @ARYADR
+	LI   R1,3
+	BLWP @ARYADR
+* Assert no error has been detected
+       BLWP @ASNEQ
+       TEXT 'Expected no error because element is in array'
+       BYTE 0
 * Assert
-* Actual value is already in R1
-	   LI   R0,ADR1W
-	   BLWP @AEQ
-	   TEXT 'Should get the address of the '
-	   TEXT 'element at index 3. It contains '
-	   TEXT 'the number 4 over and over.'
-	   BYTE 0
-	   EVEN
+	LI   R0,ADR1W
+       MOV  R1,R1
+	BLWP @AEQ
+	TEXT 'Should get the address of the '
+	TEXT 'element at index 3. It contains '
+	TEXT 'the number 4 over and over.'
+	BYTE 0
+	EVEN
 *
        RT
 * Initial buffer contents
 ADR1Y  DATA >8020
        BSS  >1E
-	   DATA >0004
-	   BSS  >02
+	DATA >0004
+	BSS  >02
        DATA >8000+ADR1W-ADR1X
 ADR1X  DATA >0004,>0003
-	   DATA >1111,>1111,>1111,>1111
-	   DATA >2222,>2222,>2222,>2222
-	   DATA >3333,>3333,>3333,>3333
+	DATA >1111,>1111,>1111,>1111
+	DATA >2222,>2222,>2222,>2222
+	DATA >3333,>3333,>3333,>3333
 ADR1W  DATA >4444,>4444,>4444,>4444
-	   DATA >5555,>5555,>5555,>5555
+	DATA >5555,>5555,>5555,>5555
        DATA >800A
        BSS  >08
 ADR1Z
+
+*
+* Ask for address of an array element,
+* but get an error because element is out of range.
+*
+ADR2
+* Arrange
+       LI   R0,ADR1Y
+	MOV  R0,@BUFADR
+	LI   R1,ADR1Z
+	MOV  R1,@BUFEND
+* Act
+* Outputs element address to R1
+       LI   R0,ADR1X
+	LI   R1,5
+	BLWP @ARYADR
+* Assert no error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error because highest '
+       TEXT 'index in array is 4, not 5.'
+       BYTE 0
+* Assert
+	LI   R0,OUTRNG
+       MOV  R1,R1
+	BLWP @AEQ
+	TEXT 'Should get out-of-range error '
+       TEXT 'because there are not 5 elements '
+       TEXT 'in the array.'
+	BYTE 0
+	EVEN
+*
+       RT
 
        END
