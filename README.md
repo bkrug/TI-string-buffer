@@ -11,9 +11,9 @@ The assembled object files of a given relase are at this link (https://github.co
 They are available on a Disk Image or in FIAD (File in a disk) format with TIFILES headers.
 
 Object files:
-* MEMBUF.obj contain only static executable object code.
-* ARRAY.obj contains only static executable object code. It is dependent on MEMBUF.O
 * VAR.obj contains only memory locations for variables, including space for workspace registers.
+* MEMBUF.obj contain only static executable object code. It is dependent on VAR.obj
+* ARRAY.obj contains only static executable object code. It is dependent on VAR.obj and MEMBUF.obj
 
 Static and volatile object code are kept separate in case the larger project requires code to be located in ROM.
 
