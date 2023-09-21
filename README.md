@@ -242,6 +242,7 @@ R0 - array address
 R1 - index of desired element
 Output:
 R1 - address of element
+     >FFFE if index is out of range
 ```
 
 Gets the address of a particular element within an array.
