@@ -1,6 +1,6 @@
        DEF  BUFINT,BUFALC,BUFCPY,BUFREE
        DEF  BUFSRK,BUFGRW
-       DEF  BLKUSE
+       DEF  BLKUSE,EQUSTS
 *
        REF  STRWS,BUFADR,BUFEND
 * This library of routines stores

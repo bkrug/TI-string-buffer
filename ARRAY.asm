@@ -3,7 +3,7 @@
 *
        REF  BUFALC,BUFREE,BUFCPY,BUFSRK
        REF  BUFGRW
-       REF  ARRYWS,BLKUSE
+       REF  ARRYWS,BLKUSE,EQUSTS
 
 *
 * Array format:
@@ -16,6 +16,8 @@
 *   Rest of the memory is a list of
 *   items in the array.
 *
+
+OUTRNG EQU  -2              Index Out of Range
 
 *
 * Copy part of memory backwards.
@@ -209,10 +211,22 @@ ARYDEL DATA ARRYWS,ARYDEL+4
 ARYADR DATA ARRYWS,ARYADR+4
        BL   @ADRSIZ
        MOV  @2(13),R8
+* Index in range?
+       C    R8,*R10
+       JL   ADR1
+* No
+       SOC  @EQUSTS,R15
+       LI   R8,OUTRNG
+       JMP  ADR2
+* Yes
+ADR1
+       SZC  @EQUSTS,R15
+*
        SLA  R8,0
        A    R10,R8
        C    *R8+,*R8+
-       MOV  R8,@2(13)
+ADR2   MOV  R8,@2(13)
+*
        RTWP
 
 *
