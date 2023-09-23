@@ -80,8 +80,8 @@ ARYALC DATA ARRYWS,ARYALC+4
 * Allocate space
        MOV  R2,R0
        BLWP @BUFALC
+       STST R15
 * Handle memory error
-       CI   R0,>FFFF
        JEQ  ALC2
 * Notify caller of array address
        MOV  R0,*R13
@@ -91,7 +91,7 @@ ARYALC DATA ARRYWS,ARYALC+4
        MOV  R3,*R0
        RTWP
 * Notify caller of error
-ALC2   SETO *R13
+ALC2   MOV  R0,*R13
        RTWP
 
 
