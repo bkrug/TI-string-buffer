@@ -121,6 +121,12 @@ ALC1
 * (2^1 = 2)
        LI   R0,1
        BLWP @ARYALC
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYALC
        MOV  R0,R10
 * Assert
        LI   R0,ALC1Y+>12
@@ -170,6 +176,12 @@ ALC2
 * (2^3 = 8)
        LI   R0,3
        BLWP @ARYALC
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYALC
        MOV  R0,R10
 * Assert
        LI   R0,ALC2Y+2
@@ -214,6 +226,11 @@ ALC3
 * Act
        LI   R0,5
        BLWP @ARYALC
+* Assert an error through EQU status bit
+       BLWP @ASEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'that error occurred.'
+       BYTE 0
 * Assert
        MOV  R0,R1
        LI   R0,>FFFF
