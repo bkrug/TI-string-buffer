@@ -287,7 +287,6 @@ REALC
 * No error
 REALC2 RT
 * Yes, error detected
-RTERR  SOC  @EQUSTS,R15
-       RTWP
+RTERR  RTWP
 
        END
