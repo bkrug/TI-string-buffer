@@ -685,10 +685,10 @@ ADD7
 * Act
        LI   R0,ADD7Y+2
        BLWP @ARYADD
-* Assert an error through status bit
-       BLWP @ASEQ
-       TEXT 'Expected equal status bit to '
-       TEXT 'be set.'
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
        BYTE 0
 * Move output of BLWP @ARYADD
        MOV  R0,R9

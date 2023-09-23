@@ -107,7 +107,7 @@ ALC2   SETO *R13
 ARYADD DATA ARRYWS,ARYADD+4
 * Let R3 = Insert index
        MOV  *R13,R3
-      MOV  *R3,R3
+       MOV  *R3,R3
 * Use Insert Routine except that insert
 * index does not come from the caller.
        B    @INSERT
