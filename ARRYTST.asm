@@ -771,13 +771,14 @@ INS1
        LI   R0,INS1X+2
        LI   R1,0
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert no error through status bit
        BLWP @ASNEQ
        TEXT 'Expected status bit to claim '
        TEXT 'no error.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,INS1X+2
        MOV  R9,R1
@@ -842,13 +843,14 @@ INS2
        LI   R0,INS2X+2
        LI   R1,2
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert no error through status bit
        BLWP @ASNEQ
        TEXT 'Expected status bit to claim '
        TEXT 'no error.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,INS2X+2
        MOV  R9,R1
@@ -920,13 +922,14 @@ INS3
        LI   R0,INS3X+2
        LI   R1,2
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert no error through status bit
        BLWP @ASNEQ
        TEXT 'Expected status bit to claim '
        TEXT 'no error.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,INS3X+2
        MOV  R9,R1
@@ -995,13 +998,14 @@ INS4
        LI   R0,INS4X+2
        LI   R1,1
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert no error through status bit
        BLWP @ASNEQ
        TEXT 'Expected status bit to claim '
        TEXT 'no error.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,INS4X+2
        MOV  R9,R1
@@ -1070,13 +1074,14 @@ INS5
        LI   R0,INS5X+2
        LI   R1,3
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert no error through status bit
        BLWP @ASNEQ
        TEXT 'Expected status bit to claim '
        TEXT 'no error.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,INS5X+2
        MOV  R9,R1
@@ -1153,13 +1158,14 @@ INS6
        LI   R0,INS6X+2
        LI   R1,3
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert no error through status bit
        BLWP @ASNEQ
        TEXT 'Expected status bit to claim '
        TEXT 'no error.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,INS6X+2
        MOV  R9,R1
@@ -1235,13 +1241,14 @@ INS7
        LI   R0,INS7X+2
        LI   R1,2
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert an error through status bit
        BLWP @ASEQ
        TEXT 'Expected equal status bit to '
        TEXT 'be set.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,>FFFF
        MOV  R9,R1
@@ -1279,13 +1286,14 @@ INS8
        LI   R0,INS8X+2
        LI   R1,4
        BLWP @ARYINS
-       MOV  R0,R9
-       MOV  R1,R10
 * Assert an error through status bit
        BLWP @ASEQ
        TEXT 'Expected equal status bit to '
        TEXT 'be set.'
        BYTE 0
+* Move output of BLWP @ARYINS
+       MOV  R0,R9
+       MOV  R1,R10
 * Assert
        LI   R0,>FFFE
        MOV  R9,R1

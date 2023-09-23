@@ -275,6 +275,7 @@ REALC
        MOV  R10,R0
        MOV  R2,R1
        BLWP @BUFGRW
+       STST R15
 *
        MOV  R4,R9
 * Report new address to caller
@@ -283,9 +284,10 @@ REALC
 * If error, leave workspace routine.
        CI   R0,>FFFF
        JEQ  RTERR
-*
+* No error
 REALC2 RT
-*
-RTERR  RTWP
+* Yes, error detected
+RTERR  SOC  @EQUSTS,R15
+       RTWP
 
        END
