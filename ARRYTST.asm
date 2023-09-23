@@ -239,6 +239,12 @@ ADD1
 * Act
        LI   R0,ADD1X+2
        BLWP @ARYADD
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
        MOV  R1,R10
 * Assert
@@ -298,6 +304,12 @@ ADD2
 * Act
        LI   R0,ADD2Y+2
        BLWP @ARYADD
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
        MOV  R1,R10
 * Assert
@@ -359,8 +371,14 @@ ADD3
 * Act
        LI   R0,ADD3X+2
        BLWP @ARYADD
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
-       MOV  R1,R10       
+       MOV  R1,R10   
 * Assert
        LI   R0,ADD3X+2
        MOV  R9,R1
@@ -426,8 +444,14 @@ ADD4
 * Act
        LI   R0,ADD4X+2
        BLWP @ARYADD
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
-       MOV  R1,R10 
+       MOV  R1,R10
 * Assert
        LI   R0,ADD4X+2
        MOV  R9,R1
@@ -494,8 +518,14 @@ ADD5
 * Act
        LI   R0,ADD5X+2
        BLWP @ARYADD
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
-       MOV  R1,R10 
+       MOV  R1,R10
 * Assert
        LI   R0,ADD5X+2
        MOV  R9,R1
@@ -566,8 +596,14 @@ ADD6
 * Act
        LI   R0,ADD6Y+2
        BLWP @ARYADD
+* Assert no error through status bit
+       BLWP @ASNEQ
+       TEXT 'Expected status bit to claim '
+       TEXT 'no error.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
-       MOV  R1,R10 
+       MOV  R1,R10
 * Assert
        LI   R0,>FFFF
        MOV  R9,R1
@@ -649,8 +685,14 @@ ADD7
 * Act
        LI   R0,ADD7Y+2
        BLWP @ARYADD
+* Assert an error through status bit
+       BLWP @ASEQ
+       TEXT 'Expected equal status bit to '
+       TEXT 'be set.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
-       MOV  R1,R10 
+       MOV  R1,R10
 * Assert
        LI   R0,>FFFF
        MOV  R9,R1
@@ -729,6 +771,12 @@ ADD8
 * Act
        LI   R0,ADD8X+2
        BLWP @ARYADD
+* Assert an error through status bit
+       BLWP @ASEQ
+       TEXT 'Expected equal status bit to '
+       TEXT 'be set.'
+       BYTE 0
+* Move output of BLWP @ARYADD
        MOV  R0,R9
        MOV  R1,R10 
 * Assert
