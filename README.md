@@ -8,7 +8,11 @@ I wrote this code after learning how malloc is implemented in C, but it is not i
 ## Including this library in your own program
 
 The assembled object files of a given relase are at this link (https://github.com/bkrug/TI-string-buffer/releases).
-They are available on a Disk Image or in FIAD (File in a disk) format with TIFILES headers.
+They are available on a Disk Image, in FIAD (File in a disk) format with TIFILES headers, or in files without a TIFILES header.
+
+Use the *.NOHEADER.obj files if you plan to assemble your program from Windows or Linux with something like XDT99.
+
+Use the *.obj files with the TIFILE headers or the disk image, if you plan to assemble your program from a TI-99 emulator.
 
 Object files:
 * VAR.obj contains only memory locations for variables, including space for workspace registers.
