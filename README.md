@@ -35,49 +35,80 @@ See the unit tests for more complete documentation, but here is the general idea
     SPACE  EQU  >E000
            .
            .
+    * Mark 4 KB at address SPACE (>E000) as an area where memory blocks can be allocated an deallocated.
+    * A buffer must be initialized before any memory is dynamically allocated.
            LI   R0,SPACE
            LI   R1,>1000
            BLWP @BUFINT
-           
+
+    * Allocate >220 bytes of memory, and store the address at STRNG1
            LI   R0,>220
            BLWP @BUFALC
            MOV  R0,@STRNG1
-           
+
+    * Allocate >2E bytes of memory, and store the address at STRNG2
            LI   R0,>2E
            BLWP @BUFALC
            MOV  R0,@STRNG2
-           
+
+    * Allocate >80 bytes of memory, and store the address at STRNG3
            LI   R0,>80
            BLWP @BUFALC
            MOV  R0,@STRNG3
-           
+
+    * The data stored at the address stored in STRNG2 is no longer needed.
+    * Deallocate the space so that it may be used for other data.
            MOV  @STRNG2,R0
            BLWP @BUFREE
-           
+
+    * There is less data stored at the address in STRNG3 now.
+    * Reduce the reserved size in case some other part of the program can use it.
            MOV  @STRNG3,R0
            LI   R1,>2C
            BLWP @BUFSRK
-           
+
+    * More space is required for the data at the address in STRNG3.
+    * Reserve more space.
+    * The BUFGRW routine may need to move the data in order to find enough space.
+    * So re-store the address in R0 in STRNG3, regardless of whether the address changed or not.
            MOV  @STRNG3,R0
            LI   R1,>F8
            BLWP @BUFGRW
            MOV  R0,@STRNG3
 
-In the above example, BUFINT marked 4 KB at address SPACE (>E000) as an area where memory blocks can be allocated an deallocated.
-
-The code snippet allocated >220 bytes of memory.
-The BUFALC routine reported the address of the allocated memory in R0.
-The code snipped stored this allocated address at address STRING1.
-
-It allocated >2E bytes of memory, but later deallocated that memory block using the BUFREE routine.
-
-At one point, the code allocated >80 bytes of memory and stored the address at STRNG3.
-Later the code used BUFSRK and BUFGRW to change the reserved memory block size.
-BUFGRW may have needed to move the memory block when it grew, so the address was re-saved in STRNG3.
-BUFGRW will copy block contents to the new location when it needs to move a block.
-
 Note that the BUF routines don't do anything magical to prevent a different routine from overwriting data.
 Your program is expected to not write anything between addresses >E000 and >EFFF unless it is using a memory address acquired from BUFALC or BUFGRW.
+
+Errors can be handled as follows.
+
+    * If there is not enough space to allocate another kilobyte,
+    * The value >FFFF will be stored in R0
+           LI   R0,>400
+           BLWP @BUFALC
+           CI   R0,>FFFF
+           JEQ  GOTERR
+
+    * But checking the contents of R0 is optional.
+    * The BUF and ARY routines will also set the EQ bit when they detect an error.
+    * This code has the same result.
+           LI   R0,>400
+           BLWP @BUFALC
+           JEQ  GOTERR
+
+    * ARYINS has two possible errors.
+    * A program has the option of handling them differently.
+    *
+    * This code tries to insert an element at index 37 of some array.
+    * >FFFF indicates insufficient memory.
+    * >FFFE indicates that the array is not large enough to have such an index
+           MOV  @MYARRY,R0
+           LI   R1,37
+           BLWP @BUFALC
+           CI   R0,>FFFF
+           JEQ  MEMERR
+           CI   R1,>FFFE
+           JEQ  IDXERR
+
 
 ## Routines
 
