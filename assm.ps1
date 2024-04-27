@@ -14,7 +14,7 @@ ForEach($file in $files) {
 }
 
 # Add version information to some files
-$comment = ': Memory Management - 1.3.0 - https://github.com/bkrug/TI-string-buffer     '  # This line is intentionally 76 char long
+$comment = ': Memory Management - 1.4.0 - https://github.com/bkrug/TI-string-buffer     '  # This line is intentionally 76 char long
 $filesToEdit = 'MEMBUF.obj', 'ARRAY.obj', 'VAR.obj'
 ForEach($fileToEdit in $filesToEdit) {
     $fileContent = (Get-Content $fileToEdit)

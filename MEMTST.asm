@@ -113,9 +113,13 @@ TSTLST DATA TSTEND-TSTLST-2/8
        DATA TGRW4
        TEXT 'TGRW4 '
 * Grow and move a block.
+* Original block was followed by an
+* allocated block.
        DATA TGRW5
        TEXT 'TGRW5 '
 * Grow and move a block.
+* Original block was followed by an
+* unallocated block.
        DATA TGRW6
        TEXT 'TGRW6 '
 * Grow and move a block, and merge some
@@ -1431,6 +1435,7 @@ TGRW2Z
 
 *
 * Grow a block, without moving it.
+GRWAM3 EQU  >20                  * Growth amount
 TGRW3
 * Arrange
        LI   R0,TGRW3A
@@ -1439,7 +1444,7 @@ TGRW3
        MOV  R0,@BUFEND
 * Act
        LI   R0,TGRW3C+2
-       LI   R1,>20
+       LI   R1,GRWAM3
        BLWP @BUFGRW
 * Assert no error has been detected
        BLWP @ASNEQ
@@ -1467,7 +1472,7 @@ TGRW3
        BYTE 0
        EVEN
 *
-       LI   R0,>8042
+       LI   R0,>8002+GRWAM3
        MOV  @TGRW3C,R1
        BLWP @AEQ
        TEXT 'Block should remain allocated, '
@@ -1475,8 +1480,8 @@ TGRW3
        BYTE 0
        EVEN
 *
-       LI   R0,>0006
-       MOV  @TGRW3C+>42,R1
+       LI   R0,>0026
+       MOV  @TGRW3C+>02+GRWAM3,R1
        BLWP @AEQ
        TEXT 'This is a new unallocated block.'
        BYTE 0
@@ -1506,6 +1511,7 @@ TGRW3Z
 *
 * Grow a block, without moving it.
 * Merge some of the following free space.
+GRWAM4 EQU  >20            Amount of space requested for allocation
 TGRW4
 * Arrange
        LI   R0,TGRW4A
@@ -1514,7 +1520,7 @@ TGRW4
        MOV  R0,@BUFEND
 * Act
        LI   R0,TGRW4A+2
-       LI   R1,>20
+       LI   R1,GRWAM4
        BLWP @BUFGRW
 * Assert no error has been detected
        BLWP @ASNEQ
@@ -1528,7 +1534,7 @@ TGRW4
        BYTE 0
        EVEN
 *
-       LI   R0,>8042
+       LI   R0,>8002+GRWAM4
        MOV  @TGRW4A,R1
        BLWP @AEQ
        TEXT 'Block should remain allocated, '
@@ -1536,8 +1542,8 @@ TGRW4
        BYTE 0
        EVEN
 *
-       LI   R0,>0026
-       MOV  @TGRW4A+>42,R1
+       LI   R0,>0046
+       MOV  @TGRW4A+>2+GRWAM4,R1
        BLWP @AEQ
        TEXT 'This is a new unallocated block. '
        TEXT 'It merges several free blocks.'
@@ -1569,6 +1575,7 @@ TGRW4Z
 * Grow and move a block.
 * Original block was followed by an
 * allocated block.
+GRWAM5 EQU  >20            Amount of space requested for allocation
 TGRW5
 * Arrange
        LI   R0,TGRW5A
@@ -1577,7 +1584,7 @@ TGRW5
        MOV  R0,@BUFEND
 * Act
        LI   R0,TGRW5A+2
-       LI   R1,>20
+       LI   R1,GRWAM5
        BLWP @BUFGRW
 * Assert no error has been detected
        BLWP @ASNEQ
@@ -1620,15 +1627,15 @@ TGRW5
        BYTE 0
        EVEN
 *
-       LI   R0,>8042
+       LI   R0,>8002+GRWAM5
        MOV  @TGRW5E,R1
        BLWP @AEQ
        TEXT 'This should be the newly allocated space.'
        BYTE 0
        EVEN
 *
-       LI   R0,>001E
-       MOV  @TGRW5E+>42,R1
+       LI   R0,>003E
+       MOV  @TGRW5E+>2+GRWAM5,R1
        BLWP @AEQ
        TEXT 'This should be left over free space.'
        BYTE 0
@@ -1652,6 +1659,7 @@ TGRW5Z
 * Grow and move a block.
 * Original block was followed by an
 * unallocated block.
+GRWAM6 EQU  >26            Amount of space requested for allocation
 TGRW6
 * Arrange
        LI   R0,TGRW6A
@@ -1660,7 +1668,7 @@ TGRW6
        MOV  R0,@BUFEND
 * Act
        LI   R0,TGRW6B+2
-       LI   R1,>1E
+       LI   R1,GRWAM6
        BLWP @BUFGRW
 * Assert no error has been detected
        BLWP @ASNEQ
@@ -1706,15 +1714,15 @@ TGRW6
        BYTE 0
        EVEN
 *
-       LI   R0,>1E*2+>2+>8000
+       LI   R0,GRWAM6+>2+>8000
        MOV  @TGRW6E,R1
        BLWP @AEQ
        TEXT 'This should be the newly allocated space.'
        BYTE 0
        EVEN
 *
-       LI   R0,>0012
-       MOV  @TGRW6E+>3E,R1
+       LI   R0,>50-GRWAM6->2
+       MOV  @TGRW6E+GRWAM6+>2,R1
        BLWP @AEQ
        TEXT 'This should be a new block of '
        TEXT 'unallocated space.'
@@ -1753,6 +1761,7 @@ TGRW6Z
 *
 * Grow and move a block, and merge some
 *    free spaces.
+GRWAM7 EQU  >20            Amount of space requested for allocation
 TGRW7
 * Arrange
        LI   R0,TGRW7A
@@ -1761,7 +1770,7 @@ TGRW7
        MOV  R0,@BUFEND
 * Act
        LI   R0,TGRW7A+2
-       LI   R1,>20
+       LI   R1,GRWAM7
        BLWP @BUFGRW
 * Assert an error has been detected
        BLWP @ASNEQ
@@ -1799,15 +1808,15 @@ TGRW7
        BYTE 0
        EVEN
 *
-       LI   R0,>20*2+>2+>8000
+       LI   R0,GRWAM7+>2+>8000
        MOV  @TGRW7C,R1
        BLWP @AEQ
        TEXT 'Block should be newly allocated.'
        BYTE 0
        EVEN
 *
-       LI   R0,>0E+>08+>08+>10
-       MOV  @TGRW7C+>42,R1
+       LI   R0,>50+>08+>08+>10-GRWAM7->2
+       MOV  @TGRW7C+GRWAM7+>2,R1
        BLWP @AEQ
        TEXT 'This free space includes previously '
        TEXT 'unallocated blocks merged together.'

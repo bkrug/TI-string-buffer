@@ -340,9 +340,6 @@ BUFGRW DATA STRWS,BUFGRW+4
 * Check if already big enough      
        C    R10,R9
        JHE  GRWRT
-* Let R9 = twice the desired size + 2
-       SLA  R9,1
-       DECT R9
 * Let R11 = address of next block
        MOV  R8,R11
        A    R10,R11
