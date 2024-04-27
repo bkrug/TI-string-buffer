@@ -1761,7 +1761,8 @@ TGRW6Z
 *
 * Grow and move a block, and merge some
 *    free spaces.
-GRWAM7 EQU  >20            Amount of space requested for allocation
+GRWAM7 EQU  >1F            Amount of space requested for allocation
+GRWRD7 EQU  >20            Same as GRWAM7 rounded to an even number
 TGRW7
 * Arrange
        LI   R0,TGRW7A
@@ -1808,15 +1809,15 @@ TGRW7
        BYTE 0
        EVEN
 *
-       LI   R0,GRWAM7+>2+>8000
+       LI   R0,GRWRD7+>2+>8000
        MOV  @TGRW7C,R1
        BLWP @AEQ
        TEXT 'Block should be newly allocated.'
        BYTE 0
        EVEN
 *
-       LI   R0,>50+>08+>08+>10-GRWAM7->2
-       MOV  @TGRW7C+GRWAM7+>2,R1
+       LI   R0,>50+>08+>08+>10-GRWRD7->2
+       MOV  @TGRW7C+GRWRD7+>2,R1
        BLWP @AEQ
        TEXT 'This free space includes previously '
        TEXT 'unallocated blocks merged together.'
