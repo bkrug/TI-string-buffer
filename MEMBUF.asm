@@ -334,6 +334,10 @@ BUFGRW DATA STRWS,BUFGRW+4
        DECT R8
        MOV  @2(13),R9
        INCT R9
+* Round R9 up to an even number.
+       INC  R9
+       SRL  R9,1
+       SLA  R9,1
 * Let R10 = current block size
        MOV  *R8,R10
        SZC  @BLKUSE,R10

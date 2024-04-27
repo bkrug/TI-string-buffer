@@ -1511,7 +1511,8 @@ TGRW3Z
 *
 * Grow a block, without moving it.
 * Merge some of the following free space.
-GRWAM4 EQU  >20            Amount of space requested for allocation
+GRWAM4 EQU  >1F            Amount of space requested for allocation
+GRWRD4 EQU  >20            Same as GRWAM4 rounded to an even number
 TGRW4
 * Arrange
        LI   R0,TGRW4A
@@ -1534,7 +1535,7 @@ TGRW4
        BYTE 0
        EVEN
 *
-       LI   R0,>8002+GRWAM4
+       LI   R0,>8002+GRWRD4
        MOV  @TGRW4A,R1
        BLWP @AEQ
        TEXT 'Block should remain allocated, '
@@ -1542,8 +1543,8 @@ TGRW4
        BYTE 0
        EVEN
 *
-       LI   R0,>0046
-       MOV  @TGRW4A+>2+GRWAM4,R1
+       LI   R0,>40+>08+>10->12      * Subtract >12 because we need to allocate >22 bytes, but already had >10
+       MOV  @TGRW4A+>2+GRWRD4,R1
        BLWP @AEQ
        TEXT 'This is a new unallocated block. '
        TEXT 'It merges several free blocks.'
