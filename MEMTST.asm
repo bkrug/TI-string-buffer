@@ -130,6 +130,17 @@ TSTLST DATA TSTEND-TSTLST-2/8
 *    deallocate original location
        DATA TGRW8
        TEXT 'TGRW8 '
+* Fail to grow and move a block,
+*    the current block is at the end of the buffer,
+*    the first word outside the buffer looks like free space,
+*    but we can't grow outside the buffer.
+       DATA TGRW9
+       TEXT 'TGRW9 '
+* Fail to grow and move a block,
+*    the current block would need to grow outside the buffer,
+*    even though there is a little empty space following it.
+       DATA TGRW10
+       TEXT 'TGRW10'
 TSTEND
 RSLTFL BYTE RSLTFE-RSLTFL-1
        TEXT 'DSK2.TESTRESULT.TXT'
@@ -1877,7 +1888,7 @@ TGRW8
        LI   R2,>10
        BLWP @ABLCK
        TEXT 'Original block contents should '
-       TEXT 'be undesturbed.'
+       TEXT 'be unchanged.'
        BYTE 0
        EVEN
 *
@@ -1897,5 +1908,115 @@ TGRW8B DATA >0008
        DATA >0008
        BSS  >06
 TGRW8Z
+
+
+*
+* Fail to grow and move a block,
+*    the current block is at the end of the buffer,
+*    the first word outside the buffer looks like free space,
+*    but we can't grow outside the buffer.
+*
+TGRW9
+* Arrange
+       LI   R0,TGRW9A
+       MOV  R0,@BUFADR
+       LI   R0,TGRW9Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGRW9B+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert an error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error due to lack of memory'
+       BYTE 0
+* Assert
+       MOV  R0,R1
+       LI   R0,>FFFF
+       BLWP @AEQ
+       TEXT 'Expecting an out-of-space '
+       TEXT 'error.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,TGRW9Y
+       LI   R1,TGRW9B
+       LI   R2,>10
+       BLWP @ABLCK
+       TEXT 'Original block contents should '
+       TEXT 'be unchanged.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Original Data (including header)
+TGRW9Y DATA >8010
+       DATA >ABBA,>BCCB,>CDDC,>DEED
+       DATA >EFFE,>F00F,>0110
+* Buffer before action
+TGRW9A DATA >0010
+       BSS  >0E
+TGRW9B DATA >8010
+       DATA >ABBA,>BCCB,>CDDC,>DEED
+       DATA >EFFE,>F00F,>0110
+TGRW9Z
+* Space outside the buffer
+       DATA >0020
+       BSS  >18
+
+*
+* Fail to grow and move a block,
+*    the current block would need to grow outside the buffer,
+*    even though there is a little empty space following it.
+*
+TGRW10
+* Arrange
+       LI   R0,TGR10A
+       MOV  R0,@BUFADR
+       LI   R0,TGR10Z
+       MOV  R0,@BUFEND
+* Act
+       LI   R0,TGR10B+2
+       LI   R1,>20
+       BLWP @BUFGRW
+* Assert an error has been detected
+       BLWP @ASEQ
+       TEXT 'Expected an error due to lack of memory'
+       BYTE 0
+* Assert
+       MOV  R0,R1
+       LI   R0,>FFFF
+       BLWP @AEQ
+       TEXT 'Expecting an out-of-space '
+       TEXT 'error.'
+       BYTE 0
+       EVEN
+*
+       LI   R0,TGR10Y
+       LI   R1,TGR10B
+       LI   R2,>10
+       BLWP @ABLCK
+       TEXT 'Original block contents should '
+       TEXT 'be unchanged.'
+       BYTE 0
+       EVEN
+*
+       RT
+* Original Data (including header)
+TGR10Y DATA >8010
+       DATA >0011,>2233,>FFEE,>DDCC
+       DATA >4455,>6677,>BBAA
+* Buffer before action
+TGR10A DATA >0010
+       BSS  >0E
+TGR10B DATA >8010
+       DATA >0011,>2233,>FFEE,>DDCC
+       DATA >4455,>6677,>BBAA
+TGR10C DATA >0004
+       BSS  >02
+TGR10Z
+* Space outside the buffer
+       DATA >0020
+       BSS  >18
 
        END
