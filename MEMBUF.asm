@@ -341,22 +341,25 @@ BUFGRW DATA STRWS,BUFGRW+4
 * Let R10 = current block size
        MOV  *R8,R10
        SZC  @BLKUSE,R10
-* Check if already big enough      
+* Is the current block already big enough?
        C    R10,R9
        JHE  GRWRT
-* Let R11 = address of next block
+* No, let R11 = address of next block
        MOV  R8,R11
        A    R10,R11
-* Confirm that next block is free
+* Does R11 point to an address outside the buffer?
+       C    R11,@BUFEND
+       JHE  GRWNEW
+* No, is the next block free?
        MOV  *R11,R12
        COC  @BLKUSE,R12
        JEQ  GRWNEW
-* Let R12 = total size of both blocks
+* Yes, let R12 = total size of both blocks
        A    R10,R12
-* Confirm that total size is big enough
+* Is the combined size big enough?
        C    R12,R9
        JL   GRWNEW
-* Grow the original block
+* Yes, grow the original block
        MOV  R9,*R8
        SOC  @BLKUSE,*R8
 * Let R12 = new size of free block
