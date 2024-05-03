@@ -305,8 +305,6 @@ MEMBUF.TXT contains the source code for the module.
 
 MEMTST.TXT contains the source code for some unit tests.
 
-MEMLOAD.TXT loads object code to run unit tests on MEMBUF
-
 ### ARRAY
 
 ARRAY.TXT - a set of routines for managing arrays in Assembly.
@@ -316,14 +314,10 @@ You can also get the address of an item with a given index.
 
 ARRYTST.TXT - Array tests
 
-ARRYLOAD.TXT - Loads and runs array tests and their dependencies.
-
 ### MISC
 
 VAR.TXT - Contains memory addresses that are to contain values that could change.
 
 TESTFRAM.TXT is utility code that the unit tests need.
-
-LOADTSTS.TXT contains a script to load an run an arbitraty list of object code files.
 
 assm.ps1 - A powershell script to reassemble all of the source code. Requires Python and xdt99.
