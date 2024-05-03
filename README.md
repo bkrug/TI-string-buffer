@@ -285,15 +285,13 @@ Gets the address of a particular element within an array.
 ## Running Unit Tests
 
 To run unit tests in this project:
-1. Choose a source file whose name ends "LOAD.asm"
-2. Read the list of files inside of the source file.
-3. Assemble "~LOAD.asm" and all of the files mentioned in the list.
-(a) If your object code is not going to be located in DSK2, edit the file list in ~LOAD.asm to reflect the correct location.
-(b) Assemble the code such that the object code has an extension of .obj but is otherwise named the same as the source.
+1. Run assm.py
+2. Pick a file from the "Fiad" folder.
+3. Load the Editor/Assembler cartridge
 4. Select E/A menu option #3
-5. Enter ~LOAD.obj as the file to load.
-6. Enter LTEST as the program to run.
-7. As list of files will be displayed on the screen as they are loaded. Then the tests will run. You sould see the messages 'Testing' and 'Done' if all tests pass. Otherwise you should see a message for the first failing test.
+5. Enter the file you picked.
+6. Enter RUNTST as the program to run.
+7. Several tests and their results will appear on the screen.
 
 ## Release versioning.
 
