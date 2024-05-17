@@ -320,4 +320,4 @@ VAR.TXT - Contains memory addresses that are to contain values that could change
 
 TESTFRAM.TXT is utility code that the unit tests need.
 
-assm.ps1 - A powershell script to reassemble all of the source code. Requires Python and xdt99.
+assm.py - A python script to reassemble all of the source code. Requires xdt99.
